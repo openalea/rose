@@ -25,7 +25,7 @@ for key,value in metadata.iteritems():
 pkg_name = name.lower()
 src_rep = 'rose'
 packages =[pkg_name]
-package_dir = {pkg_name : src_rep},
+package_dir = {pkg_name : src_rep}
 # List of top level wralea packages (directories with __wralea__.py) 
 #wralea_entry_points = ['%s = %s'%(pkg,namespace + '.' + pkg) for pkg in top_pkgs]
 
@@ -69,9 +69,7 @@ setup(
     package_data = {'' : ['*.mtg', '*.drf', '*.txt'],},
 
     # Declare scripts and wralea as entry_points (extensions) of your package 
-    entry_points = { 
-        'wralea' : ['rose = alinea.rose'],
-        },
+    entry_points = {'wralea' : ['rose = alinea.rose',],},
     )
 
 
