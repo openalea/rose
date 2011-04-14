@@ -31,6 +31,10 @@ package_dir = {pkg_name : src_rep}
 
 # dependencies to other eggs
 setup_requires = ['openalea.deploy']
+if("win32" in sys.platform):
+    install_requires = []
+else:
+    install_requires = []
 
 # web sites where to find eggs
 dependency_links = ['http://openalea.gforge.inria.fr/pi']
@@ -57,6 +61,7 @@ setup(
 
     # Dependencies
     setup_requires = setup_requires,
+    install_requires = install_requires,
     dependency_links = dependency_links,
 
 

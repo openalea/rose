@@ -2,5 +2,5 @@ This package will help simulating the interception of light by a canopy of roseb
 
 *Foreseable steps:*
 
- * Build a the whole population of a growth chamber (about 80 plants). 
- * wrap the SEC2 light model (Simulateur d'Eclairage pour les Chambres de Culture) within OA. 
+ * Build a the whole population of a growth chamber (about 80 plants).
+ * wrap the SEC2 light model (Simulateur d'Eclairage pour les Chambres de Culture) within OA.

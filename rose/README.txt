@@ -2,9 +2,9 @@
 
 **Authors** : XXX
 
-**Institutes** : INRIA / CIRAD 
+**Institutes** : INRIA / CIRAD
 
-**Status** : Python package 
+**Status** : Python package
 
 **License** : Cecill-C
 
@@ -14,11 +14,12 @@
 
 === Description ===
 
-Alinea.Rose is a package for building virtual 3D rosebush trees. It is intended to study the relationship between structure and functionnalities.
+<<<<<<< HEAD
+Alinea.Rose is a package for building virtual 3D rosebush trees. It is intended to study the relationship between structure and function.
 
 === Content ===
 
-The Alinea.Rose package contains tools for building virtual populations of rosebush from individual MTG files : 
+The Alinea.Rose package contains tools for building virtual populations of rosebush from individual MTG files :
  * DigitReconstruction: a tool for building the population into a 3dscene,
  * DigitReconstructionWthTurtle : a tool for building the population into a global MTG object.
 
