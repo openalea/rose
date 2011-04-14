@@ -1,0 +1,33 @@
+CODE:	FORM-A			
+CLASSES:				
+SYMBOL	SCALE	DECOMPOSITION	INDEXATION	DEFINITION
+$	0	FREE	FREE	IMPLICIT
+P	1	CONNECTED	FREE	EXPLICIT
+E	2	CONNECTED	FREE	EXPLICIT
+R	2	CONNECTED	FREE	EXPLICIT
+F	2	CONNECTED	FREE	EXPLICIT
+B	2	CONNECTED	FREE	EXPLICIT
+S	2	CONNECTED	FREE	EXPLICIT
+DESCRIPTION:				
+LEFT	RIGHT	RELTYPE	MAX	
+P	P	+	?	
+P	P	<	?	
+E	E,R,S	+	?	
+E	E,B	<	?	
+R	E,F	+	?										
+R	R	<	?										
+S	E	+	?										
+FEATURES:													
+NAME	TYPE												
+XX	REAL												
+YY	REAL												
+ZZ	REAL												
+AA	REAL												
+BB	REAL												
+CC	REAL												
+Length	REAL												
+Ouverture	REAL
+FolID	REAL
+Rotation	REAL												
+MTG:													
+ENTITY-CODE				XX	YY	ZZ	AA	BB	CC	Length	Ouverture	FolID	Rotation
