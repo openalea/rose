@@ -10,7 +10,7 @@ def transformation1(geometry, pt_base, pt_top, diameter):
     Using two points and a diameter
     """
     length = norm(pt_top-pt_base)
-    scale = (diameter, diameter, length)
+    scale = Vector3(diameter, diameter, length)
 
     translation = pt_base
     X, Y = ortho_transfo(pt_top-pt_base)
