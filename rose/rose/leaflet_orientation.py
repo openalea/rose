@@ -15,7 +15,7 @@ def Opening(note):
     if note==1.0:
         op=180
     elif note==0.9:
-        op=40
+        op=140
     elif note==0.8:
         op=90
     elif note==0.7:
