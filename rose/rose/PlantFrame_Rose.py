@@ -69,8 +69,8 @@ def PlantFrame_Rose(mtg_file, drf_p):
             # Bottom and top coordinates of vid
 
             # Calculated so as to have the base of the plant at x=0, y=0 
-            bot = Vector3(x[pid]., y[pid]., z[pid].)-Vector3(x[1].,y[1].,0.)
-            top = Vector3(x[vid]., y[vid]., z[vid].)-Vector3(x[1].,y[1].,0.)
+            bot = Vector3(x[pid], y[pid], z[pid])-Vector3(x[1],y[1],0.)
+            top = Vector3(x[vid], y[vid], z[vid])-Vector3(x[1],y[1],0.)
             #d = diam.get(vid,20)
             d=2.5 if klass=="E" else 1.0
 
