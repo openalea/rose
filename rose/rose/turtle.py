@@ -15,8 +15,8 @@ def visitor(g, v, turtle, leaf_factory=compute_leaf):
 
     symbol = n.label[0]
     if symbol in ['E', 'R']:
-        if n.edge_type() == '+' :
-            turtle.startGC()
+        #if n.edge_type() == '+' :
+        #    turtle.startGC()
         turtle.setId(v)
         turtle.lineTo(pt)
     if n.label =='F1':
@@ -40,6 +40,34 @@ def visitor(g, v, turtle, leaf_factory=compute_leaf):
 def position(n):
     return pgl.Vector3(n.XX, n.YY, n.ZZ)
 
+#############################
+#### Copy from mtg.turtle ###
+def traverse_with_turtle(g, vid, visitor, turtle=None):
+    if turtle is None:
+        turtle = PglTurtle()
+
+    def push_turtle(v):
+        if g.edge_type(v) == '+':
+            turtle.push()
+            turtle.startGC()
+            turtle.setId(v)
+        return True
+
+    def pop_turtle(v):
+        if g.edge_type(v) == '+':
+            turtle.stopGC()
+            turtle.pop()
+
+    turtle.push()
+    turtle.startGC()
+    visitor(g,vid,turtle)
+    for v in pre_order2_with_filter(g, vid, None, push_turtle, pop_turtle):
+        if v == vid: continue
+        visitor(g,v,turtle)
+    turtle.stopGC()
+    return turtle.getScene()
+
+######################################################
 def TurtleFrame(g, visitor=visitor):
     n = g.max_scale()
     turtle = pgl.PglTurtle()
