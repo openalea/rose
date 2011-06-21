@@ -1,5 +1,5 @@
 import openalea.plantgl.all as pgl
-from openalea.mtg.turtle import traverse_with_turtle
+from openalea.mtg.turtle import pre_order2_with_filter
 from openalea.mtg.traversal import pre_order2_with_filter
 
 radius =1.2 
@@ -9,7 +9,7 @@ def compute_leaf(points):
     distance = barycenter-points[0]
     radius = pgl.norm(distance)/10.
     return pgl.Translated(distance, pgl.Sphere(radius))
-    
+
 def visitor(g, v, turtle, leaf_factory=compute_leaf):
     n = g.node(v)
     pt = position(n)
@@ -33,10 +33,8 @@ def visitor(g, v, turtle, leaf_factory=compute_leaf):
         turtle.lineTo(points[0])
         turtle.stopPolygon()
         # set the shape to the turtle
-        #geom = leaf_factory(points)
-        #turtle.customGeometry(geom, 1)
-        
-
+        geom = leaf_factory(points)
+        turtle.customGeometry(geom, 1)
 
 def position(n):
     return pgl.Vector3(n.XX, n.YY, n.ZZ)
@@ -83,3 +81,14 @@ def TurtleFrame(g, visitor=visitor):
     return turtle.getScene()
 
 
+def test():
+    from openalea.mtg.aml import MTG
+    from vplants.plantgl.all import Viewer
+    import time
+    g=MTG('test2011OK.mtg')
+    TurtleFrame(g)
+    Viewer.display(TurtleFrame(g))
+    time.sleep(10)
+
+if __name__ == "__main__":
+    test()
