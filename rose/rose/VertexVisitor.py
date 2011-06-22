@@ -33,15 +33,6 @@ def VertexVisitor(leaf_factory):
                 n = list(n.children())[0]
                 points.append(position(n))
             leaf_computer(points,turtle)
-            #turtle.startPolygon()
-            #for pt in points[1:]:
-            #    turtle.lineTo(pt)
-            #turtle.lineTo(points[0])
-            #turtle.stopPolygon()
-            # set the shape to the turtle
-            #geom = leaf_factory(points)
-            #turtle.customGeometry(geom, 1)
-
 
     # return outputs
     return visitor,
