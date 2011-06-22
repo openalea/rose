@@ -14,7 +14,9 @@ def VertexVisitor(leaf_factory):
             turtle.lineTo(pt)
         turtle.lineTo(points[0])
         turtle.stopPolygon()
-    def visitor(g, v, turtle, leaf_factory=compute_leaflet):
+    if leaf_factory is None:
+        leaf_factory=compute_leaflet
+    def visitor(g, v, turtle, leaf_computer=leaf_factory):
         n = g.node(v)
         pt = position(n)
         symbol = n.label[0]
@@ -30,7 +32,7 @@ def VertexVisitor(leaf_factory):
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
-            leaf_factory(points,turtle)
+            leaf_computer(points,turtle)
             #turtle.startPolygon()
             #for pt in points[1:]:
             #    turtle.lineTo(pt)
