@@ -5,6 +5,10 @@ from openalea.misc.sphinx_configuration import *
 from openalea.misc.sphinx_tools import sphinx_check_version
 from openalea.deploy.metainfo import read_metainfo
 
+# The encoding of source files.
+source_encoding = 'iso-8859-1'
+#source_encoding = 'utf-8'
+
 sphinx_check_version()                      # check that sphinx version is recent
 metadata = read_metainfo('../metainfo.ini') # read metainfo from common file with setup.py
 for key in ['version','project','release', 'name']:

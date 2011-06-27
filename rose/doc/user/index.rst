@@ -1,6 +1,6 @@
 .. _rose_user:
 
-£PROJECT_NAME.Rose User Guide
+User Guide
 #######################################
 
 :Version: |version|

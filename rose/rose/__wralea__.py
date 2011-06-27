@@ -1,5 +1,5 @@
 
-# This file has been generated at Wed Jun 22 09:34:35 2011
+# This file has been generated at Mon Jun 27 17:25:54 2011
 
 from openalea.core import *
 
@@ -17,7 +17,7 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['computeLeaflet4pts_computeLeaflet4pts', 'tortue_tortue', 'mesh_roseLeaflet_mesh_roseLeaflet', '_63390672', 'DigitReconstruction', 'CropGeneration_CropGeneration', '_63391120', '_63390928', '_63390288', 'leaflet_orientation_leaflet_orientation', 'RoseLpy', 'CanopyReconstruction', 'VertexVisitor_VertexVisitor', 'PlantPositionning_PlantPositionning', 'GetMTG_GetMTG', 'PlantFrame_Rose_PlantFrame_Rose', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', 'PlantReconstruction', 'SceneRotation_SceneRotation', 'DigitReconstructionWithTurtle_DigitReconstructionWithTurtle']
+__all__ = ['computeLeaflet4pts_computeLeaflet4pts', '_62791632', '_62790480', 'mesh_roseLeaflet_mesh_roseLeaflet', 'PlantPositionning_PlantPositionning', 'DigitReconstruction', 'CropGeneration_CropGeneration', 'tortue_tortue', 'RoseLpy', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', 'VertexVisitor_VertexVisitor', 'NoLeaflet_NoLeaflet', '_62790608', 'GetMTG_GetMTG', 'PlantFrame_Rose_PlantFrame_Rose', 'SceneRotation_SceneRotation', 'PlantReconstruction', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', 'DigitReconstructionWithTurtle_DigitReconstructionWithTurtle', '_62790800']
 
 
 
@@ -35,19 +35,18 @@ computeLeaflet4pts_computeLeaflet4pts = Factory(name='computeLeaflet4pts',
 
 
 
+_62791632 = DataFactory(name='rose.drf',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
 
-tortue_tortue = Factory(name='tortue',
-                authors=' (wralea authors)',
-                description='builds 3D canopies',
-                category='data processing',
-                nodemodule='tortue',
-                nodeclass='tortue',
-                inputs=(),
-                outputs=(),
-                widgetmodule=None,
-                widgetclass=None,
-               )
 
+_62790480 = DataFactory(name='21052010_BFV.txt',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
 
 
 
@@ -65,11 +64,19 @@ mesh_roseLeaflet_mesh_roseLeaflet = Factory(name='mesh_roseLeaflet',
 
 
 
-_63390672 = DataFactory(name='test2011OK.mtg',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
+
+PlantPositionning_PlantPositionning = Factory(name='PlantPositionning',
+                authors=' (wralea authors)',
+                description='',
+                category='data processing',
+                nodemodule='PlantPositionning',
+                nodeclass='PlantPositionning',
+                inputs=[{'interface': None, 'name': 'scene', 'value': None, 'desc': ''}, {'interface': IStr, 'name': 'IDplant', 'value': None, 'desc': ''}, {'interface': IDict, 'name': 'plant_pos', 'value': None, 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
 
 
 
@@ -465,36 +472,15 @@ CropGeneration_CropGeneration = Factory(name='CropGeneration',
 
 
 
-_63391120 = DataFactory(name='simpleRoseField.lpy',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
 
-
-_63390928 = DataFactory(name='21052010_BFV.txt',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_63390288 = DataFactory(name='rose.drf',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-
-leaflet_orientation_leaflet_orientation = Factory(name='leaflet_orientation',
+tortue_tortue = Factory(name='tortue',
                 authors=' (wralea authors)',
-                description='',
-                category='scene design',
-                nodemodule='leaflet_orientation',
-                nodeclass='leaflet_orientation',
-                inputs=[{'interface': None, 'name': 'mtg', 'value': None, 'desc': ''}, {'interface': IFileStr, 'name': 'geom_file', 'value': None, 'desc': ''}, {'interface': None, 'name': 'mesh', 'value': None, 'desc': ''}],
-                outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
+                description='builds 3D canopies',
+                category='data processing',
+                nodemodule='tortue',
+                nodeclass='tortue',
+                inputs=(),
+                outputs=(),
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -707,6 +693,21 @@ RoseLpy = CompositeNodeFactory(name='RoseLpy',
 
 
 
+leaflet_orientation_leaflet_orientation = Factory(name='leaflet_orientation',
+                authors=' (wralea authors)',
+                description='',
+                category='scene design',
+                nodemodule='leaflet_orientation',
+                nodeclass='leaflet_orientation',
+                inputs=[{'interface': None, 'name': 'mtg', 'value': None, 'desc': ''}, {'interface': IFileStr, 'name': 'geom_file', 'value': None, 'desc': ''}, {'interface': None, 'name': 'mesh', 'value': None, 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
 CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
                              description='Builds a 3d canopy from digitization data',
                              category='scene design',
@@ -719,15 +720,19 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
    5: ('openalea.data structure.string', 'string'),
    6: ('Rose', 'computeLeaflet4pts'),
    7: ('Rose', 'VertexVisitor'),
-   8: ('vplants.plantgl.visualization', 'plot3D')},
-                             elt_connections={  6402944: (2, 0, 8, 0),
-   6402968: (7, 0, 2, 1),
-   6403016: (3, 0, 2, 0),
-   6403040: (4, 0, 3, 1)},
+   8: ('vplants.plantgl.visualization', 'plot3D'),
+   9: ('Rose', 'NoLeaf'),
+   10: ('Rose', 'NoLeaflet')},
+                             elt_connections={  6402920: (3, 0, 2, 0),
+   6402944: (10, 0, 7, 0),
+   6402968: (5, 0, 3, 0),
+   6402992: (2, 0, 8, 0),
+   6403016: (4, 0, 3, 1),
+   6403040: (7, 0, 2, 1)},
                              elt_data={  2: {  'block': False,
          'caption': 'DigitReconstructionWithTurtle',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x3c74650> : "DigitReconstructionWithTurtle"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x3bf1050> : "DigitReconstructionWithTurtle"',
          'hide': True,
          'id': 2,
          'lazy': True,
@@ -741,7 +746,7 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
    3: {  'block': False,
          'caption': 'GetMTG',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x3c74390> : "GetMTG"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x3be1d10> : "GetMTG"',
          'hide': True,
          'id': 3,
          'lazy': True,
@@ -753,29 +758,29 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
          'user_application': None,
          'user_color': None},
    4: {  'block': False,
-         'caption': "'test2011OK'",
+         'caption': "'8'",
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x386fe50> : "string"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x3815b50> : "string"',
          'hide': True,
          'id': 4,
          'lazy': True,
          'port_hide_changed': set(),
-         'posx': 45.0,
-         'posy': -103.0,
+         'posx': 103.91238819075808,
+         'posy': -145.20589004711027,
          'priority': 0,
          'use_user_color': False,
          'user_application': None,
          'user_color': None},
    5: {  'block': False,
-         'caption': "'./'",
+         'caption': "'/home/hautret/tmp/txt/A'",
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x386fe50> : "string"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x3815b50> : "string"',
          'hide': True,
          'id': 5,
          'lazy': True,
          'port_hide_changed': set(),
-         'posx': -0.094631117278353605,
-         'posy': -104.35242951061772,
+         'posx': -83.206803928010771,
+         'posy': -143.04116205380217,
          'priority': 0,
          'use_user_color': False,
          'user_application': None,
@@ -783,7 +788,7 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
    6: {  'block': False,
          'caption': 'computeLeaflet4pts',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x3c741d0> : "computeLeaflet4pts"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x3bc25d0> : "computeLeaflet4pts"',
          'hide': True,
          'id': 6,
          'lazy': True,
@@ -797,13 +802,13 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
    7: {  'block': False,
          'caption': 'VertexVisitor',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x3c74450> : "VertexVisitor"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x3be1b90> : "VertexVisitor"',
          'hide': True,
          'id': 7,
          'lazy': True,
          'port_hide_changed': set(),
-         'posx': -136.36195752539246,
-         'posy': -47.857802400738684,
+         'posx': -130.91893866394662,
+         'posy': -34.250255247124137,
          'priority': 0,
          'use_user_color': False,
          'user_application': None,
@@ -811,7 +816,7 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
    8: {  'block': False,
          'caption': 'plot3D',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x4668f50> : "plot3D"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x46d4dd0> : "plot3D"',
          'hide': True,
          'id': 8,
          'lazy': True,
@@ -822,6 +827,34 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
          'use_user_color': False,
          'user_application': None,
          'user_color': None},
+   9: {  'block': False,
+         'caption': 'NoLeaf',
+         'delay': 0,
+         'factory': '<openalea.core.node.NodeFactory object at 0x3be1e10> : "NoLeaf"',
+         'hide': True,
+         'id': 9,
+         'lazy': True,
+         'port_hide_changed': set(),
+         'posx': -174.12170462955845,
+         'posy': -77.387424279803753,
+         'priority': 0,
+         'use_user_color': False,
+         'user_application': None,
+         'user_color': None},
+   10: {  'block': False,
+          'caption': 'NoLeaflet',
+          'delay': 0,
+          'factory': '<openalea.core.node.NodeFactory object at 0x539c950> : "NoLeaflet"',
+          'hide': True,
+          'id': 10,
+          'lazy': True,
+          'port_hide_changed': set(),
+          'posx': -65.120829380723791,
+          'posy': -81.401036725904731,
+          'priority': 0,
+          'use_user_color': False,
+          'user_application': None,
+          'user_color': None},
    '__in__': {  'block': False,
                 'caption': 'In',
                 'delay': 0,
@@ -849,24 +882,28 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
                  'user_application': None,
                  'user_color': None}},
                              elt_value={  2: [],
-   3: [(0, 'None')],
-   4: [(0, "'test2011OK'")],
-   5: [(0, "'./'")],
+   3: [],
+   4: [(0, "'8'")],
+   5: [(0, "'/home/hautret/tmp/txt/A'")],
    6: [],
-   7: [(0, 'None')],
+   7: [],
    8: [],
+   9: [],
+   10: [],
    '__in__': [],
    '__out__': []},
                              elt_ad_hoc={  2: {'useUserColor': False, 'position': [-143.19761082930773, 32.683023197496304], 'userColor': None},
    3: {'useUserColor': False, 'position': [45.197610829307756, -51.702917526362285], 'userColor': None},
-   4: {'useUserColor': False, 'position': [45.0, -103.0], 'userColor': None},
-   5: {'useUserColor': False, 'position': [-0.094631117278353605, -104.35242951061772], 'userColor': None},
+   4: {'useUserColor': False, 'position': [103.91238819075808, -145.20589004711027], 'userColor': None},
+   5: {'useUserColor': False, 'position': [-83.206803928010771, -143.04116205380217], 'userColor': None},
    6: {'useUserColor': False, 'position': [-172.84787961219348, -103.60326923360991], 'userColor': None},
-   7: {'useUserColor': False, 'position': [-136.36195752539246, -47.857802400738684], 'userColor': None},
+   7: {'useUserColor': False, 'position': [-130.91893866394662, -34.250255247124137], 'userColor': None},
    8: {'useUserColor': False, 'position': [-91.575265492280977, 87.702173999850515], 'userColor': None},
-   9: {'useUserColor': False, 'position': [84.081255771006468, 78.83656509695291], 'userColor': None},
-   10: {'useUserColor': False, 'position': [49.900528355670048, 9.9801056711340124], 'userColor': None},
-   11: {'useUserColor': False, 'position': [166.81033764609703, -54.177716500441768], 'userColor': None},
+   9: {'useUserColor': False, 'position': [-174.12170462955845, -77.387424279803753], 'userColor': None},
+   10: {'useUserColor': False, 'position': [-65.120829380723791, -81.401036725904731], 'userColor': None},
+   11: {  'position': [166.81033764609703, -54.177716500441768],
+          'useUserColor': False,
+          'userColor': None},
    12: {  'position': [215.07536891890308, -163.1756773234255],
           'useUserColor': True,
           'userColor': [255, 170, 0]},
@@ -903,18 +940,25 @@ VertexVisitor_VertexVisitor = Factory(name='VertexVisitor',
 
 
 
-PlantPositionning_PlantPositionning = Factory(name='PlantPositionning',
+NoLeaflet_NoLeaflet = Factory(name='NoLeaflet',
                 authors=' (wralea authors)',
-                description='',
+                description='make no leaflet, if we want to see the plantframe  ',
                 category='data processing',
-                nodemodule='PlantPositionning',
-                nodeclass='PlantPositionning',
-                inputs=[{'interface': None, 'name': 'scene', 'value': None, 'desc': ''}, {'interface': IStr, 'name': 'IDplant', 'value': None, 'desc': ''}, {'interface': IDict, 'name': 'plant_pos', 'value': None, 'desc': ''}],
-                outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
+                nodemodule='NoLeaflet',
+                nodeclass='NoLeaflet',
+                inputs=[],
+                outputs=[{'interface': IFunction, 'name': 'computeNoLeaflet', 'desc': 'dummy function'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
 
+
+
+_62790608 = DataFactory(name='simpleRoseField.lpy',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
 
 
 
@@ -948,13 +992,13 @@ PlantFrame_Rose_PlantFrame_Rose = Factory(name='PlantFrame_Rose',
 
 
 
-Leaflet_Orientation_4points_Leaflet_Orientation_4points = Factory(name='Leaflet Orientation 4points',
+SceneRotation_SceneRotation = Factory(name='SceneRotation',
                 authors=' (wralea authors)',
                 description='',
-                category='Unclassified',
-                nodemodule='Leaflet_Orientation_4points',
-                nodeclass='Leaflet_Orientation_4points',
-                inputs=[{'interface': IData, 'name': 'mtg', 'value': None, 'desc': ''}, {'interface': None, 'name': 'mesh', 'value': None, 'desc': ''}],
+                category='scene design',
+                nodemodule='SceneRotation',
+                nodeclass='SceneRotation',
+                inputs=[{'interface': None, 'name': 'scene', 'value': None, 'desc': ''}],
                 outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
@@ -1116,13 +1160,13 @@ PlantReconstruction = CompositeNodeFactory(name='PlantReconstruction',
 
 
 
-SceneRotation_SceneRotation = Factory(name='SceneRotation',
+Leaflet_Orientation_4points_Leaflet_Orientation_4points = Factory(name='Leaflet Orientation 4points',
                 authors=' (wralea authors)',
                 description='',
-                category='scene design',
-                nodemodule='SceneRotation',
-                nodeclass='SceneRotation',
-                inputs=[{'interface': None, 'name': 'scene', 'value': None, 'desc': ''}],
+                category='Unclassified',
+                nodemodule='Leaflet_Orientation_4points',
+                nodeclass='Leaflet_Orientation_4points',
+                inputs=[{'interface': IData, 'name': 'mtg', 'value': None, 'desc': ''}, {'interface': None, 'name': 'mesh', 'value': None, 'desc': ''}],
                 outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
@@ -1143,6 +1187,13 @@ DigitReconstructionWithTurtle_DigitReconstructionWithTurtle = Factory(name='Digi
                 widgetclass=None,
                )
 
+
+
+_62790800 = DataFactory(name='test2011OK.mtg',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
 
 
 

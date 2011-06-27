@@ -13,7 +13,7 @@ def GetMTG(dirname, IDplant):
     # so GetMTG(dirname='.', IDplant) is uncorrect
     # and there is no satisfying default IDplant """
     if dirname is None:
-	    dirname = "."
+        dirname = "."
     IDplantsplit=IDplant.partition('-')
     plant=IDplantsplit[0]
     mtg_file="%s/%s.mtg" % (dirname,plant)

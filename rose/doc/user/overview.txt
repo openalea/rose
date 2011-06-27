@@ -1,3 +1,6 @@
-The text in this box is a short overview of your package
-that is written in ./doc/user/overview.txt and should be 
-compatible with restructured format
+This package will help simulating the interception of light by a canopy of rosebush.
+
+*Foreseable steps:*
+
+ * Build a the whole population of a growth chamber (about 80 plants). 
+ * wrap the SEC2 light model (Simulateur d'Eclairage pour les Chambres de Culture) within OA. 
