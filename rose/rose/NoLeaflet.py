@@ -1,5 +1,5 @@
 def NoLeaflet():
-    '''    make no leaflet, if we want to see the plantframe  
+    '''    make no leaflets, so we can watch the plantframe  
     '''
     computeNoLeaflet  = None; 
     # write the node code here.

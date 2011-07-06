@@ -1,4 +1,6 @@
 import openalea
+import openalea.plantgl.all as pgl
+#import sphere
 def position(n):
     """ returns the position of the node in a Vector3 data """
     return openalea.plantgl.all.Vector3(n.XX, n.YY, n.ZZ)
@@ -20,12 +22,19 @@ def VertexVisitor(leaf_factory):
         n = g.node(v)
         pt = position(n)
         symbol = n.label[0]
+        turtle.setWidth(2.5)
         if symbol in ['E', 'R']:
             #if n.edge_type() == '+' :
             #    turtle.startGC()
+
             turtle.setId(v)
-            turtle.lineTo(pt)
-        if n.label =='F1':
+	    if symbol == "E":
+                turtle.setWidth(2.5)
+	    elif symbol == "R":                
+                turtle.setWidth(0.75)
+	    turtle.lineTo(pt)
+
+        elif n.label =='F1':
             turtle.setId(v)
             turtle.incColor()
             points = [position(n.parent()), pt]
@@ -33,6 +42,31 @@ def VertexVisitor(leaf_factory):
                 n = list(n.children())[0]
                 points.append(position(n))
             leaf_computer(points,turtle)
+	    
+	elif n.label == "B1" :
+	    # 4 testing
+            turtle.incColor()
+ 	    oldPt=turtle.getPosition()
+	    rayOfBud=(pt-oldPt)/1.414
+            radius = pgl.norm(rayOfBud)
+            geometry= pgl.Translated(rayOfBud, pgl.Sphere(radius))
+            #return pgl.Translated(distance, pgl.Sphere(radius))
+            #geom = leaf_factory(points)
+            turtle.customGeometry(geometry, 1)
+            turtle.decColor()
+
+        elif symbol == "T":
+	    if n.label == "T1":
+                turtle.lineTo(pt)
+                turtle.stopGC()
+		turtle.incColor()
+                turtle.startGC()
+                turtle.setWidth(2.5)
+
+	    if n.label == "T2":
+                turtle.lineTo(pt)
+                turtle.setWidth(0.01)	    
+
 
     # return outputs
     return visitor,

@@ -10,13 +10,11 @@ def computeLeaflet4pts():
         '''
         geometry = None; 
 	
-        # write the node code here.
+        # example node code here : displays spheres
         barycenter = sum(points, pgl.Vector3())/len(points)
         distance = barycenter-points[0]
         radius = pgl.norm(distance)/10.
         geometry= pgl.Translated(distance, pgl.Sphere(radius))
-        #return pgl.Translated(distance, pgl.Sphere(radius))
-            #geom = leaf_factory(points)
         turtle.customGeometry(geometry, 1)
 
     # return outputs
