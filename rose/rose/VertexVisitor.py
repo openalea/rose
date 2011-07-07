@@ -11,11 +11,18 @@ def VertexVisitor(leaf_factory):
     # write the node code here.   
     visitor = None; 
     def compute_leaflet(points, turtle):
+	""" default function to draw up a leaflet 
+             NOTE : without the turtle.push() and turtle.pop(),
+	     it hangs the viewer up with a message to the father shell :
+	     *** glibc detected *** /usr/bin/python: double free or corruption (out): 0x0000000004bfebd0 ***
+	     """
+	turtle.push()
         turtle.startPolygon()
         for pt in points[1:]:
             turtle.lineTo(pt)
         turtle.lineTo(points[0])
         turtle.stopPolygon()
+	turtle.pop()
     if leaf_factory is None:
         leaf_factory=compute_leaflet
     def visitor(g, v, turtle, leaf_computer=leaf_factory):
@@ -45,15 +52,16 @@ def VertexVisitor(leaf_factory):
 	    
 	elif n.label == "B1" :
 	    # 4 testing
+	    turtle.push()
             turtle.incColor()
  	    oldPt=turtle.getPosition()
-	    rayOfBud=(pt-oldPt)/1.414
-            radius = pgl.norm(rayOfBud)
+	    rayOfBud=(pt-oldPt)
+            radius = pgl.norm(rayOfBud)*0.707
             geometry= pgl.Translated(rayOfBud, pgl.Sphere(radius))
             #return pgl.Translated(distance, pgl.Sphere(radius))
             #geom = leaf_factory(points)
             turtle.customGeometry(geometry, 1)
-            turtle.decColor()
+            turtle.pop()
 
         elif symbol == "T":
 	    if n.label == "T1":
