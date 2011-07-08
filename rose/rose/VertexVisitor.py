@@ -52,15 +52,24 @@ def VertexVisitor(leaf_factory):
 	    
 	elif n.label == "B1" :
 	    # 4 testing
-	    turtle.push()
-            turtle.incColor()
- 	    oldPt=turtle.getPosition()
-	    rayOfBud=(pt-oldPt)
-            radius = pgl.norm(rayOfBud)*0.707
+            turtle.push()
+            #turtle.incColor()
+            turtle.setColor(4) # apple green
+            oldPt=turtle.getPosition()
+            rayOfBud=(pt-oldPt)*0.5
+            radius = pgl.norm(rayOfBud)*1.1
             geometry= pgl.Translated(rayOfBud, pgl.Sphere(radius))
             #return pgl.Translated(distance, pgl.Sphere(radius))
             #geom = leaf_factory(points)
             turtle.customGeometry(geometry, 1)
+            turtle.pop()
+	elif n.label == "O1" :
+            turtle.push()
+            turtle.stopGC()
+            turtle.startGC()	    
+            turtle.setColor(3) # red
+	    turtle.lineTo(pt)
+            turtle.setWidth(n.Diameter*.5)   
             turtle.pop()
 
         elif symbol == "T":
