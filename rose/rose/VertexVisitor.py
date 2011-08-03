@@ -11,18 +11,18 @@ def VertexVisitor(leaf_factory):
     # write the node code here.   
     visitor = None; 
     def compute_leaflet(points, turtle):
-	""" default function to draw up a leaflet 
-             NOTE : without the turtle.push() and turtle.pop(),
-	     it hangs the viewer up with a message to the father shell :
-	     *** glibc detected *** /usr/bin/python: double free or corruption (out): 0x0000000004bfebd0 ***
-	     """
-	turtle.push()
+        """ default function to draw up a leaflet 
+        NOTE : without the turtle.push() and turtle.pop(),
+        it hangs the viewer up with a message to the father shell :
+        *** glibc detected *** /usr/bin/python: double free or corruption (out): 0x0000000004bfebd0 ***
+        """
+        turtle.push()
         turtle.startPolygon()
         for pt in points[1:]:
             turtle.lineTo(pt)
         turtle.lineTo(points[0])
         turtle.stopPolygon()
-	turtle.pop()
+        turtle.pop()
     if leaf_factory is None:
         leaf_factory=compute_leaflet
     def visitor(g, v, turtle, leaf_computer=leaf_factory):
@@ -35,11 +35,11 @@ def VertexVisitor(leaf_factory):
             #    turtle.startGC()
 
             turtle.setId(v)
-	    if symbol == "E":
+            if symbol == "E":
                 turtle.setWidth(2.5)
-	    elif symbol == "R":                
+            elif symbol == "R":                
                 turtle.setWidth(0.75)
-	    turtle.lineTo(pt)
+            turtle.lineTo(pt)
 
         elif n.label =='F1':
             turtle.setId(v)
@@ -50,8 +50,8 @@ def VertexVisitor(leaf_factory):
                 points.append(position(n))
             leaf_computer(points,turtle)
 	    
-	elif n.label == "B1" :
-	    # 4 testing
+        elif n.label == "B1" :
+            # 4 testing
             turtle.push()
             #turtle.incColor()
             turtle.setColor(4) # apple green
@@ -63,24 +63,24 @@ def VertexVisitor(leaf_factory):
             #geom = leaf_factory(points)
             turtle.customGeometry(geometry, 1)
             turtle.pop()
-	elif n.label == "O1" :
+        elif n.label == "O1" :
             turtle.push()
             turtle.stopGC()
             turtle.startGC()	    
             turtle.setColor(3) # red
-	    turtle.lineTo(pt)
+            turtle.lineTo(pt)
             turtle.setWidth(n.Diameter*.5)   
             turtle.pop()
 
         elif symbol == "T":
-	    if n.label == "T1":
+            if n.label == "T1":
                 turtle.lineTo(pt)
                 turtle.stopGC()
-		turtle.incColor()
+                turtle.incColor()
                 turtle.startGC()
                 turtle.setWidth(2.5)
 
-	    if n.label == "T2":
+            if n.label == "T2":
                 turtle.lineTo(pt)
                 turtle.setWidth(0.01)	    
 
