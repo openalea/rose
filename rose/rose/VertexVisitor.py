@@ -41,9 +41,13 @@ def VertexVisitor(leaf_factory):
                 turtle.setWidth(0.75)
             turtle.lineTo(pt)
 
-        elif n.label =='F1':
+        elif n.label in [ 'F1', 'S1' ]:
             turtle.setId(v)
-            turtle.incColor()
+            if symbol == 'F':
+                turtle.incColor()
+            else :
+                turtle.setColor(4)
+            
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -74,7 +78,8 @@ def VertexVisitor(leaf_factory):
 
         elif symbol == "T":
             if n.label == "T1":
-                turtle.lineTo(pt)
+                oldPt=turtle.getPosition()
+                turtle.lineTo(oldPt)
                 turtle.stopGC()
                 turtle.incColor()
                 turtle.startGC()
