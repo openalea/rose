@@ -79,7 +79,8 @@ def VertexVisitor(leaf_factory):
         elif symbol == "T":
             if n.label == "T1":
                 oldPt=turtle.getPosition()
-                turtle.lineTo(oldPt)
+                rayOfBud=(pt-oldPt)*0.5
+                turtle.lineTo(oldPt+rayOfBud)
                 turtle.stopGC()
                 turtle.incColor()
                 turtle.startGC()
