@@ -89,6 +89,7 @@ def VertexVisitor(leaf_factory):
             if n.label == "T2":
                 turtle.lineTo(pt)
                 turtle.setWidth(0.01)	    
+                turtle.decColor()
 
 
     # return outputs
