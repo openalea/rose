@@ -41,11 +41,9 @@ def CropGeneration(txtfile, Plt_Not_Use=[], filling=True, crop_width=90.0, crop_
             if len(Plt_Not_Use) > 0:            # 
                 for Not_Use in Plt_Not_Use:     #
                     myKeys.remove(Not_Use)      #
-                    print "Wouldn't use %s" % Not_Use
         else : # Plt_Not_Use may be no list     # 
             if not Plt_Not_Use == None:         #
                 myKeys.remove(Plt_Not_Use)      #
-                print "Wouldn't use %s" % Plt_Not_Use
 
         for p in pos_list:
             if p not in dico_copy.values():
