@@ -59,6 +59,7 @@ def PlantFrame_Rose(mtg_file, drf_p):
 
             # Class name of the vertex
             klass = mtg_file.class_name(vid)
+            #print "klass= %s" % klass
 
             # Vertex of the parent
             pid = mtg_file.parent(vid) if mtg_file.parent(vid) is not None else mtg_file.complex(vid)
@@ -82,7 +83,8 @@ def PlantFrame_Rose(mtg_file, drf_p):
 
             geom = transformation1(symbol, bot, top, d)
 
-            color = (0,255,0) if klass == 'R' else (44,195,48)
+            #color = (0,255,0) if klass == 'R' else (44,195,48)
+            color = (195,128,48) if klass == 'E' else (0,195,0)
 
             return Shape(geom, Material(color),vid)
 

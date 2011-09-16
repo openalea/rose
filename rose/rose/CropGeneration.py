@@ -1,10 +1,10 @@
 import os
 import random
 
-def CropGeneration(txtfile, Plt_Not_Use, filling=True, crop_width=90.0, crop_length=200.0, spacing=15.0):
+def CropGeneration(txtfile, Plt_Not_Use=[], filling=True, crop_width=90.0, crop_length=200.0, spacing=15.0):
     '''    
+    Create a dictionnary whose keys are plants ID and values are lists of plant positions
     '''
-    # Create a dictionnary whose keys are plants ID and values are lists of plant positions
     coords_file = open(txtfile, 'r')
     dico={}
     for line in coords_file:
@@ -34,11 +34,22 @@ def CropGeneration(txtfile, Plt_Not_Use, filling=True, crop_width=90.0, crop_len
                 y=py*spacing-spacing/2
                 pos_list.append([x,y,z])
         # identification of the missing plants, attribution of a plant ID, and dictionnary filling with the random plants
-        keys=dico_copy.keys()
-        keys.remove(Plt_Not_Use)
+        myKeys=dico_copy.keys()
+        # we may want not to use several plants, so Plt_Not_Use might be a list
+        #print "Plt_Not_Use= %s" % Plt_Not_Use  #
+        if isinstance(Plt_Not_Use, list):       # modif HA 09/2011
+            if len(Plt_Not_Use) > 0:            # 
+                for Not_Use in Plt_Not_Use:     #
+                    myKeys.remove(Not_Use)      #
+                    print "Wouldn't use %s" % Not_Use
+        else : # Plt_Not_Use may be no list     # 
+            if not Plt_Not_Use == None:         #
+                myKeys.remove(Plt_Not_Use)      #
+                print "Wouldn't use %s" % Plt_Not_Use
+
         for p in pos_list:
             if p not in dico_copy.values():
-                pltID=random.sample(keys,1)
+                pltID=random.sample(myKeys,1)
                 pltID=''.join(pltID)
                 dico[pltID].append(p)
         
