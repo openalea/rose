@@ -5,7 +5,7 @@
 from openalea.mtg.aml import MTG
 import random
 
-def CropGeneration_2011(plantlist={}, existingmtglist=[], excludelist=[], n_x=13, n_y=6, s_x=150, s_y=150, origin=(0, 0, 800), DoFill=True):
+def CropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13, n_y=6, s_x=150, s_y=150, origin=(0, 0, 800), DoFill=True):
     '''    Generates a dictionnary of filenames associated with one or more position and orientation.
     '''
     plant_mtgs = []; 
@@ -35,41 +35,41 @@ def CropGeneration_2011(plantlist={}, existingmtglist=[], excludelist=[], n_x=13
 
     # We extract plant numbers from filenames
     # and we build the mtgFiles dict as pairs of {plantNum:fileName}
-    for plantFile in existingmtglist:
-        plantNum=plantFile.rsplit("/",1)[1]
-        mtgFiles[plantNum.rsplit(".",1)[0]]=plantFile
-
-    inv_plantFile=dict((v,k) for k, v in mtgFiles.iteritems())
+    for plantFile in existingmtglist.keys():
+        mtgFiles[int(plantFile.rsplit(".",1)[0])]=existingmtglist[plantFile]
 
     #  list of initial positions.
     # It HAS to be completed before we can add up ancillary positions
     for plante in plantlist.keys():
-        if plante in mtgFiles.keys() :
-            #dictofindices.setdefault(plt,[]).append([int(x),int(y)])
+        if int(plante) in mtgFiles.keys() :
             # we make a dict with file:[3D position, angle]
-            dictOfPositions[mtgFiles[plante]] = [[index2coord(plantlist[plante][0]),0.]]
+            dictOfPositions[mtgFiles[int(plante)]] = [[index2coord(plantlist[plante][0]),0.]]
 
-    # DEBUG : return output NOW return dictOfPositions,
+    # if we want to fill up empty places with a random plant num
     if DoFill :
-    # the length of the list of existing MTG files, for further random choice
-        randRange=len(existingmtglist)-1
-        # list of ancillary positions
+        listOfNums=[]
+        # The list of plants whe have data about.
+        for clef in  mtgFiles.keys() :
+            listOfNums += [clef]
+        # there may be plants we do not want to use for filling.
+        if len(excludelist) > 0:
+            for noClef in excludelist if len(excludelist) > 0:
+                listOfNums.remove(noClef)
+
+        # the length of the list of existing MTG files, for further random choice
+        randRange=len(listOfNums)-1
+        # list of positions
         for plante in plantlist.keys():
+            # if we have no data for this plant
             if not plante in mtgFiles.keys() :
-                if len(excludelist)>0:
-                    randPlantNum=excludelist[0]
-                    while randPlantNum in excludelist:
-                        randPlantNum = random.randint(0,randRange)
-                        randPlant = existingmtglist[randPlantNum]
-                        # BEWARE of the type returned by the rev. dict inv_plantFile
-                        randPlantNum = int(inv_plantFile[randPlant])
-                else :
-                    randPlant = existingmtglist[random.randint(0,randRange)]
-                #randPlant=existingmtglist[randPlantNum]
-                #print "randPlant = %s" % randPlant
-                # angle aleatoire  parmi -1/4,0, 1/4, 1/2 tour
+                # get a random index number
+                randPlantNum = random.randint(0,randRange)
+                # get a plant from this index
+                randPlant = listOfNums[randPlantNum]
+                # we give a random rotation by 1/4 of tour 
+                # say : -1/4, 0, 1/4, 1/2 tour
                 randAngle = random.randint(-1, 2) * 0.5 * 3.14159
-                dictOfPositions[randPlant] += [[index2coord(plantlist[plante][0]),randAngle]]
+                dictOfPositions[mtgFiles[randPlant]] += [[index2coord(plantlist[plante][0]),randAngle]]
 
     # returns output
     return dictOfPositions,
