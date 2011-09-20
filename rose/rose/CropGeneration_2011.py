@@ -56,7 +56,7 @@ def CropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13
             for noClef in excludelist if len(excludelist) > 0:
                 listOfNums.remove(noClef)
 
-        # the length of the list of existing MTG files, for further random choice
+        # the length of the list of existing MTG files, for random choice
         randRange=len(listOfNums)-1
         # list of positions
         for plante in plantlist.keys():
