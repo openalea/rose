@@ -5,13 +5,12 @@ import re
 import urllib
 
 def httpDir2DictOfFiles(url, listoffilenames=[]):
-    # downloads files from a web server in temp. files, then return the dictionnary that associates temp files and filenames.
-
-    dictoffiles = {}
+    # downloads files from a web server in temp. files, then return the dictionnary that associates temp files and filenames.
+    dictoffiles = {}
     htmlfile=""
-    # write the node code here.
-    (htmlfile, h) = urllib.urlretrieve ( url +"/", None, urllib.reporthook)
-    htmlfile. = htmlfile.split("\n")
+    # write the node code here.
+    (htmlfile, h) = urllib.urlretrieve ( url +"/", None, urllib.reporthook)
+    htmlfile. = htmlfile.split("\n")
     for ligne in htmlfile:
     #print "ligne= %s" % ligne
     if re.search (filtre, ligne):
