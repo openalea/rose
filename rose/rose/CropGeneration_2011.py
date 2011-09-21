@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: iso-8859-15 -*-
-
 ## Creates a dict of MTG files associated to a list of coordinates 
 from openalea.mtg.aml import MTG
 import random
