@@ -1,5 +1,5 @@
 
-# This file has been generated at Wed Sep 21 18:07:53 2011
+# This file has been generated at Wed Sep 21 18:11:31 2011
 
 from openalea.core import *
 
@@ -1152,7 +1152,7 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
    6402944: (14, 0, 15, 0),
    6402968: (22, 0, 26, 0),
    6402992: (16, 0, 15, 7),
-   6403016: (6, 0, 15, 1),
+   6403016: (7, 0, 15, 1),
    6403040: (11, 0, 10, 1)},
                              elt_data={  2: {  'block': False,
          'caption': 'VertexVisitor',
@@ -1365,7 +1365,7 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
           'user_application': None,
           'user_color': None},
    17: {  'block': False,
-          'caption': "'sagah-043'",
+          'caption': "'sagah-043/MTG'",
           'delay': 0,
           'factory': '<openalea.core.node.NodeFactory object at 0x374ec10> : "string"',
           'hide': True,
@@ -1601,7 +1601,7 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
    14: [],
    15: [(3, '13'), (4, '6'), (5, '150'), (6, '150')],
    16: [(0, '(61, 21, 800)')],
-   17: [(0, "'sagah-043'")],
+   17: [(0, "'sagah-043/MTG'")],
    18: [],
    19: [(0, 'True')],
    20: [(0, '[]')],
