@@ -2,7 +2,7 @@
 from openalea.mtg.aml import MTG
 import random
 
-def CropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13, n_y=6, s_x=150, s_y=150, origin=(0, 0, 800), DoFill=True):
+def CropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13, n_y=6, s_x=150, s_y=150, origin=(0, 0, 800), DoFill=True, DoRotate=True):
     '''    Generates a dictionnary of filenames associated with one or more position and orientation.
     '''
     plant_mtgs = []; 
@@ -33,6 +33,7 @@ def CropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13
     # We extract plant numbers from filenames
     # and we build the mtgFiles dict as pairs of {plantNum:fileName}
     for plantFile in existingmtglist.keys():
+        #print "plantFileNum= %s " % (plantFile.rsplit(".",1)[0])
         mtgFiles[int(plantFile.rsplit(".",1)[0])]=existingmtglist[plantFile]
 
     #  list of initial positions.
@@ -65,7 +66,10 @@ def CropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13
                 randPlant = listOfNums[randPlantNum]
                 # we give a random rotation by 1/4 of tour 
                 # say : -1/4, 0, 1/4, 1/2 tour
-                randAngle = random.randint(-1, 2) * 0.5 * 3.14159
+                if DoRotate :
+                    randAngle = random.randint(-1, 2) * 0.5 * 3.14159
+                else :
+                    randAngle = 0
                 dictOfPositions[mtgFiles[randPlant]] += [[index2coord(plantlist[plante][0]),randAngle]]
 
     # returns output

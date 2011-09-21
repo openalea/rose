@@ -5,7 +5,7 @@
 from openalea.mtg.aml import MTG
 import math
 
-def Files2MTGs(cropdict, ToRotate=True):
+def Files2MTGs(cropdict):
     '''    reads MTG files, then 
     - places them both onto their coordinates, 
     - uses them again to fill up empty spaces, with a random rotation angle.
@@ -22,7 +22,7 @@ def Files2MTGs(cropdict, ToRotate=True):
         """ returns the coordinates of the anchorage of the plant in the XY plane"""
         return (nodeOfMTG.XX, nodeOfMTG.YY)
 
-    def PositionIt(noeud, orx, ory, rotc, rots, shiftx, shifty, shiftz, doRotate):
+    def PositionIt(noeud, orx, ory, rotc, rots, shiftx, shifty, shiftz):
         """ positions the node "noeud"
         the node gets
         - moved to the origin point as (orx, ory)
@@ -41,12 +41,8 @@ def Files2MTGs(cropdict, ToRotate=True):
         """
         x0=noeud.XX - orx
         y0=noeud.YY - ory
-        if doRotate :
-            x1 = x0*rotc - y0*rots
-            y1 = y0*rotc + x0*rots
-        else:
-            x1 = x0
-            y1 = y0
+        x1 = x0*rotc - y0*rots
+        y1 = y0*rotc + x0*rots
         noeud.XX = x1 + shiftx
         noeud.YY = y1 + shifty
         noeud.ZZ += shiftz
@@ -73,16 +69,10 @@ def Files2MTGs(cropdict, ToRotate=True):
             noeud = mtg.node(1)      # the anchorage of the plant
             (ox,oy)= BaseOfPlant(noeud)
             
-            PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz, ToRotate)
-            #if ToRotate :
-            #    RotateIt(noeud, cosa, sina)
-            #ShiftIt(noeud, shiftRot[0])
+            PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
             for vtx in mtg.vertices(scale=2): # the rest of the plant
                 noeud = mtg.node(vtx)
-                #if ToRotate :
-                #    RotateIt(noeud, cosa, sina)
-                #ShiftIt(noeud, shiftRot[0])
-                PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz, ToRotate)
+                PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
             listofmtgs += [mtg] 
 
    # return outputs
