@@ -53,7 +53,7 @@ def CropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13
             listOfNums += [clef]
         # there may be plants we do not want to use for filling.
         if len(excludelist) > 0:
-            for noClef in excludelist if len(excludelist) > 0:
+            for noClef in excludelist:
                 listOfNums.remove(noClef)
 
         # the length of the list of existing MTG files, for random choice
