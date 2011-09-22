@@ -2,7 +2,7 @@
 # -*- coding: iso-8859-1 -*-
 import re
 import urllib
-def httpDir2DictOfFiles(url, filtre='') :
+def httpDir2DictOfFiles(url, filtre='.mtg') :
     # downloads files from a web server in temp. files, then return the dictionnary that associates temp files and filenames.
     dictoffiles = {}
     listoffiles=[]
@@ -13,7 +13,7 @@ def httpDir2DictOfFiles(url, filtre='') :
     htmlfileContent=htmlfile.read()
     htmlfileContent = htmlfileContent.split("\n")
     for ligne in htmlfileContent:
-        print "ligne= %s" % ligne
+        #print "ligne= %s" % ligne
         if re.search (filtre, ligne):
             filename=re.sub("<li><a href=\"","",ligne)
             filename=re.sub("\">.*</a></li>$","", filename)
