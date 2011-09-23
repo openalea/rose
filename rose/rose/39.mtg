@@ -13,7 +13,7 @@ LEFT	RIGHT	RELTYPE	MAX
 P	P	+	?	
 P	P	<	?	
 E	E,R,S	+	?	
-I	E,B	<	?	
+E	E,B	<	?	
 R	E,F	+	?										
 R	R	<	?										
 S	E	+	?										

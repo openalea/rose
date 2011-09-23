@@ -89,16 +89,21 @@ def leaflet_orientation(mtg,geom_file,mesh):
     if g=={'index': 0, 'complex': None, 'scale': 0, 'vid': 0, 'label': ''}:
         scene=scene
     else:
+        if "Ouverture" in g.properties() :
+            echelle = 10.
+        else:
+            echelle = 1.0
         list_s=[]
         # List of stipules id
         for i in range(len(g)):
             if g.class_name(i)=='F':
-                list_s.append(i)
+                if g.edge_type(i) == '+' :
+                    list_s.append(i)
         if len(list_s)>0:
             # Transforms stipule geoms according to mtg
             for fol in list_s:
                 # Scaling
-                length = float(g.property('Length')[fol])/10.0
+                length = float(g.property('Length')[fol])/echelle
                 if mesh==None:
                     geom_movecenter=Translated((-0.5,0,0),geom)
                 else:
@@ -106,7 +111,10 @@ def leaflet_orientation(mtg,geom_file,mesh):
                 geom_scal = Scaled((length,length*0.30,1),geom_movecenter)
 
                 # Rotation according to Euler angles according to the opening degree of the leaflet
-                opening_note=g.property('Ouverture')[fol]
+                if "Ouverture" in g.properties() :
+                    opening_note=g.property('Ouverture')[fol]
+                else:
+                    opening_note=g.property('Opening')[fol]
                 opening=Opening(opening_note)
                 #print opening
                 #opening=radians(90)
@@ -128,7 +136,7 @@ def leaflet_orientation(mtg,geom_file,mesh):
                     #print vector[1]
                 
                     if int(g.property('FolID')[fol])!=1:
-                        if int((g.property('FolID')[fol]-int(g.property('FolID')[fol]))*10)==1:
+                        if int((g.property('FolID')[fol]-int(g.property('FolID')[fol]))*echelle)==1:
                             #print "1" 
                             #print ortho,vector
                             #geom_eulrot1 = EulerRotated(Conv2Euler(ortho)[0]+3.1416,Conv2Euler(ortho)[1],Conv2Euler(ortho)[2]-3.14/2+radians(opening)/2, geom_scal)
