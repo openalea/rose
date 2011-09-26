@@ -56,6 +56,7 @@ def traverse_with_turtle(g, vid, visitor, turtle=None):
         turtle.startGC()
         visitor(g,v,turtle)
         turtle.stopGC()
+    turtle.pop()
     return turtle.getScene()
  
 ######################################################

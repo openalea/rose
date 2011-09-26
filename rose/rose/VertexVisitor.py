@@ -3,7 +3,7 @@ import openalea.plantgl.all as pgl
 #import sphere
 def position(n):
     """ returns the position of the node in a Vector3 data """
-    return openalea.plantgl.all.Vector3(n.XX, n.YY, n.ZZ)
+    return pgl.Vector3(n.XX, n.YY, n.ZZ)
     
 def compute_leaflet(points, turtle):
     """ default function to draw up a leaflet 
@@ -42,7 +42,6 @@ def VertexVisitor(leaf_factory=None):
 
             if n.edge_type() == '+'  or not n.parent():
                 turtle.setWidth(n.Diameter / 2.)
-                #pass
 
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
@@ -74,20 +73,20 @@ def VertexVisitor(leaf_factory=None):
             turtle.pop()
         elif n.label == "O1" :
             turtle.push()
-            turtle.stopGC()
-            turtle.startGC()	    
+            #turtle.stopGC()
+            #turtle.startGC()	    
             turtle.setColor(3) # red
             # CPL
             turtle.setWidth(n.parent().Diameter*.5)   
-            turtle.lineTo(pt)
+            turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter*.5)   
             turtle.pop()
 
         elif symbol == "T":
             if n.label == "T1":
-                turtle.stopGC()
+                #turtle.stopGC()
                 turtle.incColor()
-                turtle.startGC()
+                #turtle.startGC()
                 turtle.move(pt)
 
 #X                 oldPt=turtle.getPosition()

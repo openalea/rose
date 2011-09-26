@@ -3,14 +3,26 @@ from openalea.mtg.aml import MTG as myMTG
 from openalea.mtg.plantframe import *
 from alinea.rose import turtle, VertexVisitor, ReconstructionWithTurtle
 
+position = VertexVisitor.position
 
-datadir = path(__file__).dirname()/'../share/P3'
+datadir = path('../share/P3')
+datadir_P1 = path('../share/P1')
+
 
 def test1():
+    mtg_file = '9.mtg'
+    #mtg_file = '141.mtg'
+    g = myMTG(datadir_P1/mtg_file)
+    return run(g)
+
+def test2():
     mtg_file = '136.mtg'
     #mtg_file = '141.mtg'
     g = myMTG(datadir/mtg_file)
+    return run(g)
 
+    
+def run(g):
     _visitor, = VertexVisitor.VertexVisitor()
     scene, = ReconstructionWithTurtle.ReconstructionWithTurtle(g, _visitor, power=3.)
     return scene
