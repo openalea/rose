@@ -60,17 +60,20 @@ def VertexVisitor(leaf_factory=None):
 	    
         elif n.label == "B1" :
             # 4 testing
+            oldPt=turtle.getPosition()
+            radiusOfBud=(pt-oldPt)*0.5
+            centerOfBud=oldPt + radiusOfBud
+            turtle.oLineTo(centerOfBud)
             turtle.push()
             #turtle.incColor()
             turtle.setColor(4) # apple green
-            oldPt=turtle.getPosition()
-            radiusOfBud=(pt-oldPt)*0.5
-            radius = pgl.norm(radiusOfBud)*1.1
-            geometry= pgl.Translated(radiusOfBud, pgl.Sphere(radius))
+            radius = pgl.norm(radiusOfBud)
+            geometry=  pgl.Sphere(radius)
             #return pgl.Translated(distance, pgl.Sphere(radius))
             #geom = leaf_factory(points)
             turtle.customGeometry(geometry, 1)
             turtle.pop()
+            turtle.setWidth(radius*.8)
         elif n.label == "O1" :
             turtle.push()
             #turtle.stopGC()
@@ -79,30 +82,21 @@ def VertexVisitor(leaf_factory=None):
             # CPL
             turtle.setWidth(n.parent().Diameter*.5)   
             turtle.oLineTo(pt)
-            turtle.setWidth(n.Diameter*.5)   
+            turtle.setWidth(n.Diameter*.5)
             turtle.pop()
 
         elif symbol == "T":
-            if n.label == "T1":
-                #turtle.stopGC()
+            # The turtle is supposed to be at the top of the previous vertex
+            #turtle.stopGC() # not useful anymore
+            couleur=turtle.getColor()
+            if n.parent().label=="B1":
+                turtle.setColor(4)
+            else:
                 turtle.incColor()
-                #turtle.startGC()
-                turtle.move(pt)
-
-#X                 oldPt=turtle.getPosition()
-#X                 radiusOfBud=(pt-oldPt)*0.5
-#X                 turtle.oLineTo(oldPt+radiusOfBud)
-#X                 turtle.stopGC()
-#X                 turtle.incColor()
-#X                 turtle.startGC()
-#X                 #turtle.setWidth(2.5)
-                #turtle.setWidth(n.parent().Diameter/2.)
-
-            if n.label == "T2":
-                turtle.lineTo(pt)
-                turtle.setWidth(0.01)	    
-                turtle.decColor()
-
+            #turtle.startGC()
+            turtle.oLineTo(pt)
+            turtle.setWidth(0.01)	    
+            turtle.setColor(couleur)
 
     # return outputs
     return visitor,

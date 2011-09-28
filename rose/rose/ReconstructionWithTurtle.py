@@ -27,8 +27,6 @@ def ReconstructionWithTurtle(g, visitor, power=3.):
     # return outputs
     return thscene,
 
-radius =1.2 
-
 #### Copy from mtg.turtle ###
 def traverse_with_turtle(g, vid, visitor, turtle=None):
     if turtle is None:
@@ -63,7 +61,7 @@ def traverse_with_turtle(g, vid, visitor, turtle=None):
 def TurtleFrame(g, visitor):
     n = g.max_scale()
     turtle = pgl.PglTurtle()
-    #turtle.setWidth(radius)
+    #
     for plant_id in g.vertices(scale=1):
         plant_node = g.node(plant_id)
         # moved the "position" function away
