@@ -1,5 +1,5 @@
 
-# This file has been generated at Tue Sep 27 16:41:27 2011
+# This file has been generated at Mon Oct  3 09:10:46 2011
 
 from openalea.core import *
 
@@ -17,9 +17,9 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['httpDir2DictOfFiles_httpDir2DictOfFiles', 'mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'MTG_union_MTG_union', '_66463056', 'PlantFrame_Rose_PlantFrame_Rose', 'PlantReconstruction', 'httpFileList_httpFileList', 'LocalDir2DictOfFiles_LocalDir2DictOfFiles', 'Canopy2011Driver', 'GetLocalFiles', 'DigitReconstruction', '_66462480', 'RoseLpy', 'GetMTG_GetMTG', 'NoLeaflet_NoLeaflet', 'SceneRotation_SceneRotation', '_66462224', 'computeLeaflet4pts_computeLeaflet4pts', 'CanopyReconstruction2011', 'PlantPositionning_PlantPositionning', 'CropGeneration_2011_CropGeneration_2011', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', 'ReconstructionWithTurtle_ReconstructionWithTurtle', 'GetWebFiles', 'CropGeneration_CropGeneration', 'tortue_tortue', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', 'VertexVisitor_VertexVisitor', '_66462928', 'gridFile2Dict_gridFile2Dict', 'Files2MTGs_Files2MTGs']
+__all__ = ['httpDir2DictOfFiles_httpDir2DictOfFiles', 'mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'MTG_union_MTG_union', '_61228432', '_61228880', 'PlantFrame_Rose_PlantFrame_Rose', 'PlantReconstruction', 'httpFileList_httpFileList', 'LocalDir2DictOfFiles_LocalDir2DictOfFiles', 'Canopy2011Driver', 'GetLocalFiles', 'DigitReconstruction', 'RoseLpy', 'GetMTG_GetMTG', '_61229712', 'NoLeaflet_NoLeaflet', 'SceneRotation_SceneRotation', 'computeLeaflet4pts_computeLeaflet4pts', 'CanopyReconstruction2011', 'PlantPositionning_PlantPositionning', 'CropGeneration_2011_CropGeneration_2011', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', 'ReconstructionWithTurtle_ReconstructionWithTurtle', 'GetWebFiles', 'CropGeneration_CropGeneration', 'tortue_tortue', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', '_61228048', 'VertexVisitor_VertexVisitor', 'gridFile2Dict_gridFile2Dict',"Files2MTGs"]
 
-
+Files2MTGs=Factory(name='Files2MTGs', nodemodule='rose', nodeclass='Files2MTGs')
 
 httpDir2DictOfFiles_httpDir2DictOfFiles = Factory(name='httpDir2DictOfFiles',
                 authors=' (wralea authors)',
@@ -408,7 +408,14 @@ MTG_union_MTG_union = Factory(name='MTG_union',
 
 
 
-_66463056 = DataFactory(name='rose.drf',
+_61228432 = DataFactory(name='21052010_BFV.txt',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_61228880 = DataFactory(name='simpleRoseField.lpy',
                     description='',
                     editors=None,
                     includes=None,
@@ -1457,13 +1464,6 @@ DigitReconstruction = CompositeNodeFactory(name='DigitReconstruction',
 
 
 
-_66462480 = DataFactory(name='21052010_BFV.txt',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
 
 RoseLpy = CompositeNodeFactory(name='RoseLpy',
                              description='',
@@ -1684,6 +1684,13 @@ GetMTG_GetMTG = Factory(name='GetMTG',
 
 
 
+_61229712 = DataFactory(name='test2011OK.mtg',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
 
 NoLeaflet_NoLeaflet = Factory(name='NoLeaflet',
                 authors=' (wralea authors)',
@@ -1712,13 +1719,6 @@ SceneRotation_SceneRotation = Factory(name='SceneRotation',
                 widgetclass=None,
                )
 
-
-
-_66462224 = DataFactory(name='simpleRoseField.lpy',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
 
 
 
@@ -2231,38 +2231,78 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
    38: [],
    '__in__': [],
    '__out__': []},
-                             elt_ad_hoc={  2: {'position': [-322.86464048257778, 100.29775454952555], 'userColor': None, 'useUserColor': False},
-   3: {'position': [-192.54211918077516, -350.3030205575231], 'userColor': None, 'useUserColor': False},
-   4: {'position': [-290.99251516508514, 147.27860016544926], 'userColor': None, 'useUserColor': False},
-   5: {'position': [-156.68196364229487, -102.97942081175903], 'userColor': None, 'useUserColor': False},
-   6: {'position': [-192.20442668002173, -48.10531897315424], 'userColor': None, 'useUserColor': False},
-   7: {'position': [-188.37089713162212, -169.14476994867408], 'userColor': None, 'useUserColor': False},
+                             elt_ad_hoc={  2: {  'position': [-322.86464048257778, 100.29775454952555],
+         'useUserColor': False,
+         'userColor': None},
+   3: {  'position': [-192.54211918077516, -350.3030205575231],
+         'useUserColor': False,
+         'userColor': None},
+   4: {  'position': [-290.99251516508514, 147.27860016544926],
+         'useUserColor': False,
+         'userColor': None},
+   5: {  'position': [-156.68196364229487, -102.97942081175903],
+         'useUserColor': False,
+         'userColor': None},
+   6: {  'position': [-192.20442668002173, -48.10531897315424],
+         'useUserColor': False,
+         'userColor': None},
+   7: {  'position': [-188.37089713162212, -169.14476994867408],
+         'useUserColor': False,
+         'userColor': None},
    8: {  'position': [-420.54776563791262, -181.78945923870654],
          'useUserColor': False,
          'userColor': None},
-   9: {'position': [-229.05849328834412, -353.7553121583378], 'userColor': None, 'useUserColor': False},
-   10: {'position': [-101.4861591109233, 144.01396348336726], 'userColor': None, 'useUserColor': False},
-   11: {'position': [-21.326045013615591, 105.83488376705117], 'userColor': None, 'useUserColor': False},
-   12: {'position': [-239.68110061780695, 204.3764183044203], 'userColor': None, 'useUserColor': False},
-   13: {'position': [-109.04894037162521, 103.93590374819951], 'userColor': None, 'useUserColor': False},
-   14: {'position': [-287.9404601540125, -49.940310144900486], 'userColor': None, 'useUserColor': False},
-   15: {'position': [-123.54798621712861, 24.659050017335097], 'userColor': None, 'useUserColor': False},
-   16: {'position': [-57.548194337662011, -48.474977803934067], 'userColor': None, 'useUserColor': False},
-   17: {'position': [-240.1782813676827, -216.19610879579847], 'userColor': None, 'useUserColor': False},
-   18: {'position': [-108.87049973427234, 69.281227103627842], 'userColor': None, 'useUserColor': False},
-   19: {'position': [-10.49770347873428, -48.655581454513325], 'userColor': None, 'useUserColor': False},
-   20: {'position': [-94.444175932671271, -48.444270750610499], 'userColor': None, 'useUserColor': False},
+   9: {  'position': [-229.05849328834412, -353.7553121583378],
+         'useUserColor': False,
+         'userColor': None},
+   10: {  'position': [-101.4861591109233, 144.01396348336726],
+          'useUserColor': False,
+          'userColor': None},
+   11: {  'position': [-21.326045013615591, 105.83488376705117],
+          'useUserColor': False,
+          'userColor': None},
+   12: {  'position': [-239.68110061780695, 204.3764183044203],
+          'useUserColor': False,
+          'userColor': None},
+   13: {  'position': [-109.04894037162521, 103.93590374819951],
+          'useUserColor': False,
+          'userColor': None},
+   14: {  'position': [-287.9404601540125, -49.940310144900486],
+          'useUserColor': False,
+          'userColor': None},
+   15: {  'position': [-123.54798621712861, 24.659050017335097],
+          'useUserColor': False,
+          'userColor': None},
+   16: {  'position': [-57.548194337662011, -48.474977803934067],
+          'useUserColor': False,
+          'userColor': None},
+   17: {  'position': [-240.1782813676827, -216.19610879579847],
+          'useUserColor': False,
+          'userColor': None},
+   18: {  'position': [-108.87049973427234, 69.281227103627842],
+          'useUserColor': False,
+          'userColor': None},
+   19: {  'position': [-10.49770347873428, -48.655581454513325],
+          'useUserColor': False,
+          'userColor': None},
+   20: {  'position': [-94.444175932671271, -48.444270750610499],
+          'useUserColor': False,
+          'userColor': None},
    21: {  'position': [-504.37891135193468, -299.10041080486371],
           'useUserColor': False,
           'userColor': None},
    22: {  'position': [-402.57888905055626, -144.95463345680403],
           'useUserColor': False,
           'userColor': None},
-   23: {'position': [31.158507267609792, -48.75352013438156], 'userColor': None, 'useUserColor': False},
+   23: {  'position': [31.158507267609792, -48.75352013438156],
+          'useUserColor': False,
+          'userColor': None},
    24: {  'position': [-488.00925134686446, -240.88072265045287],
           'useUserColor': False,
           'userColor': None},
-   25: {'position': [-432.79009486241887, -356.05940399118487], 'userColor': None, 'useUserColor': False},
+   25: {  'position': [-432.79009486241887, -356.05940399118487],
+          'useUserColor': False,
+          'userColor': None},
    26: {  'position': [-347.16606340173507, -77.597681765437073],
           'useUserColor': False,
           'userColor': None},
@@ -2272,30 +2312,44 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
    28: {  'position': [-99.983089875370126, -135.83052984787673],
           'useUserColor': False,
           'userColor': None},
-   29: {'position': [-118.02082383335258, -217.10678790758431], 'userColor': None, 'useUserColor': False},
-   30: {'position': [-164.31394858734245, -313.87665483747207], 'userColor': None, 'useUserColor': False},
-   31: {'position': [-331.76023570665063, -353.70077013858349], 'userColor': None, 'useUserColor': False},
-   32: {'position': [-380.65839104110381, -353.89880567792977], 'userColor': None, 'useUserColor': False},
-   33: {'position': [-293.97727402812109, -353.50943214356045], 'userColor': None, 'useUserColor': False},
+   29: {  'position': [-118.02082383335258, -217.10678790758431],
+          'useUserColor': False,
+          'userColor': None},
+   30: {  'position': [-164.31394858734245, -313.87665483747207],
+          'useUserColor': False,
+          'userColor': None},
+   31: {  'position': [-331.76023570665063, -353.70077013858349],
+          'useUserColor': False,
+          'userColor': None},
+   32: {  'position': [-380.65839104110381, -353.89880567792977],
+          'useUserColor': False,
+          'userColor': None},
+   33: {  'position': [-293.97727402812109, -353.50943214356045],
+          'useUserColor': False,
+          'userColor': None},
    34: {  'position': [-276.2018920778616, -220.83523138663014],
           'useUserColor': False,
           'userColor': None},
    35: {  'position': [-322.00578287593231, -268.31799820817355],
           'useUserColor': False,
           'userColor': None},
-   36: {'position': [-266.01713046847806, -351.02494686488427], 'userColor': None, 'useUserColor': False},
+   36: {  'position': [-266.01713046847806, -351.02494686488427],
+          'useUserColor': False,
+          'userColor': None},
    37: {  'position': [-195.77435379668933, -249.03497121111116],
           'useUserColor': False,
           'userColor': None},
-   38: {'position': [-366.10395714436925, -164.75512899943163], 'userColor': None, 'useUserColor': False},
+   38: {  'position': [-366.10395714436925, -164.75512899943163],
+          'useUserColor': False,
+          'userColor': None},
    39: {  'position': [-376.02678813618286, -112.32110811799886],
           'useUserColor': False,
           'userColor': None},
    40: {  'position': [-400.96866028060941, -239.84253878079087],
           'useUserColor': False,
           'userColor': None},
-   '__in__': {'position': [0, 0], 'userColor': None, 'useUserColor': True},
-   '__out__': {'position': [0, 0], 'userColor': None, 'useUserColor': True}},
+   '__in__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None},
+   '__out__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None}},
                              lazy=True,
                              eval_algo='LambdaEvaluation',
                              )
@@ -2831,6 +2885,13 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
 
 
 
+_61228048 = DataFactory(name='rose.drf',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
 
 VertexVisitor_VertexVisitor = Factory(name='VertexVisitor',
                 authors=' (wralea authors)',
@@ -2846,13 +2907,6 @@ VertexVisitor_VertexVisitor = Factory(name='VertexVisitor',
 
 
 
-_66462928 = DataFactory(name='test2011OK.mtg',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
 
 gridFile2Dict_gridFile2Dict = Factory(name='gridFile2Dict',
                 authors=' (wralea authors)',
@@ -2862,21 +2916,6 @@ gridFile2Dict_gridFile2Dict = Factory(name='gridFile2Dict',
                 nodeclass='gridFile2Dict',
                 inputs=[{'interface': IFileStr, 'name': 'gridFileName', 'value': '2011-M1-PARfort-P1.txt', 'desc': 'The name of file that associates pant numbers and indexes in a 2D grid'}],
                 outputs=[{'interface': IDict, 'name': 'DictOfIndices', 'desc': 'Dictionnary that associates plant number and 2D indices'}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
-Files2MTGs_Files2MTGs = Factory(name='Files2MTGs',
-                authors=' (wralea authors)',
-                description='reads MTG files, then places them both onto their coordinates, and uses them to fill up empty spaces.',
-                category='data processing',
-                nodemodule='Files2MTGs',
-                nodeclass='Files2MTGs',
-                inputs=[{'interface': IDict, 'name': 'CropDict', 'value': None, 'desc': 'A dictionnary of filenames associated to lists of coordinates.'}],
-                outputs=[{'interface': ISequence, 'name': 'ListOfMTGs', 'desc': 'A list of MTG objects.'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
