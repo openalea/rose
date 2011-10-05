@@ -45,9 +45,16 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
         '''    compute leaflet geometry from 4 points
         '''
         geometry = None; 
-        turtle.push()
 
         #print "1:",printPoints(points)
+
+        # if the list of points is not a complete leaf
+        # we have to return without pushing the turtle ;
+        #We could display a red sphere to make the miss very visible, as well
+        if len(points) < 4:
+            return
+
+        turtle.push()
 
         # We compute the main rib vector as "Axis"
         Axis=points[2]-points[0]
