@@ -54,6 +54,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
         if len(points) < 4:
             return
 
+
         turtle.push()
 
         # We compute the main rib vector as "Axis"
