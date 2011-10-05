@@ -135,7 +135,9 @@ def leaflet_orientation(mtg,geom_file,mesh):
                     #print geom_scal.scale
                     #print vector[1]
                 
+                    # if it is not the "a" leaflet
                     if int(g.property('FolID')[fol])!=1:
+                        # if it is the left leaflet (or echelle not == 10 ...)
                         if int((g.property('FolID')[fol]-int(g.property('FolID')[fol]))*echelle)==1:
                             #print "1" 
                             #print ortho,vector
@@ -143,6 +145,7 @@ def leaflet_orientation(mtg,geom_file,mesh):
                             #geom_eulrot2 = EulerRotated(Conv2Euler(ortho)[0]+3.1416,Conv2Euler(ortho)[1],Conv2Euler(ortho)[2]-3.14/2-radians(opening)/2, geom_scal)
                             geom_eulrot1 = EulerRotated(Conv2Euler(ortho)[0],0.,0.-3.14/2+radians(opening)/2, geom_scal)
                             geom_eulrot2 = EulerRotated(Conv2Euler(ortho)[0],0.,0.-3.14/2-radians(opening)/2, geom_scal)
+                        # else it should be the riht leaflet (can only reach this code if echelle == 10 ...)
                         else:
                             #print "2"
                             #ortho2=Vector3(-ortho[0],-ortho[1],0.)
@@ -151,10 +154,12 @@ def leaflet_orientation(mtg,geom_file,mesh):
                             #geom_eulrot2 = EulerRotated(Conv2Euler(ortho)[0]+3.1416*2,Conv2Euler(ortho)[1],Conv2Euler(ortho)[2]-3.14/2-radians(opening)/2, geom_scal)
                             geom_eulrot1 = EulerRotated(Conv2Euler(ortho)[0]+3.1416,0.,0.-3.14/2+radians(opening)/2, geom_scal)
                             geom_eulrot2 = EulerRotated(Conv2Euler(ortho)[0]+3.1416,0.,0.-3.14/2-radians(opening)/2, geom_scal)
+                    # else it is the "a" leaflet
                     else:
                         #print "a",Conv2Euler(vector)*180/3.1416
                         geom_eulrot1 = EulerRotated(Conv2Euler(vector)[0],Conv2Euler(vector)[1],0.-3.14/2+radians(opening)/2, geom_scal)
                         geom_eulrot2 = EulerRotated(Conv2Euler(vector)[0],Conv2Euler(vector)[1],0.-3.14/2-radians(opening)/2, geom_scal)
+                # else we can read Euler's Angles in the MTG.
                 else:
                     geom_eulrot1 = EulerRotated(radians(int(g.property('AA')[fol])), radians(int(g.property('BB')[fol])),radians(int(g.property('CC')[fol]))-3.14/2+radians(opening)/2, geom_scal)
                     geom_eulrot2 = EulerRotated(radians(int(g.property('AA')[fol])), radians(int(g.property('BB')[fol])),radians(int(g.property('CC')[fol]))-3.14/2-radians(opening)/2, geom_scal)

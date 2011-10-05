@@ -56,6 +56,17 @@ def VertexVisitor(leaf_factory=None):
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
+
+            # Odd code 4 testing
+            #turtle.push()
+            #barycenter = sum(points, pgl.Vector3())/len(points)
+            #distance = barycenter-points[0]
+            #radius = pgl.norm(distance)/10.
+            #geometry= pgl.Translated(distance, pgl.Sphere(radius))
+            #turtle.setColor(3)
+            #turtle.customGeometry(geometry, 1)
+            #turtle.pop()
+            # End odd code
             leaf_computer(points,turtle)
 	    
         elif n.label == "B1" :
