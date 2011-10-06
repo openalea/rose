@@ -3,7 +3,7 @@
 
 from openalea.mtg.aml import MTG
 import math
-from openalea.mtg.plantframe import * # for PglTurtle
+from openalea.mtg.plantframe import *
 
 from openalea.core.external import * 
 from openalea.core.logger  import *
@@ -41,7 +41,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
     '''
     compute_leaf = None ; 
     # write the node code here.
-    def compute_leaf(points, turtle=None):
+    def meshedLeaflet(points, turtle=None):
         '''    compute leaflet geometry from 4 points
         '''
         geometry = None; 
@@ -88,9 +88,10 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
         halfWidth =  sideLength * norm(side^Axis)
 
         # jessica's code for  building the mesh
+        # I tried to use zMesh, but it has had no efect.
         ls_ptA=[Vector3(0.,0.,0.)]
         for i in xrange(len(xMesh)-1):
-            ls_ptA.append(Vector3(xMesh[i],-yMesh[i],zMesh[i]))
+            ls_ptA.append(Vector3(xMesh[i],-yMesh[i],0))
             ls_ptA.append(Vector3(xMesh[i],0,0))
         ls_ptA.append(Vector3(1.,0.,0.))
         # we reverse them triangles Cwise
@@ -168,7 +169,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
         turtle.pop() # against 1st push()
         
     # return outputs
-    return compute_leaf,
+    return meshedLeaflet,
 
 class ComputeLeaflet4pts(Node):
     def __init__(self):
@@ -188,7 +189,7 @@ def polygonLeaflet():
     """
     compute_leaf = None ; 
     # write the node code here.
-    def compute_leaf(points, turtle=None):
+    def rawLeaflet(points, turtle=None):
         '''    compute leaflet geometry from 4 points
         '''
         turtle.push()
@@ -199,7 +200,7 @@ def polygonLeaflet():
         turtle.stopPolygon()
         turtle.pop()
     # return outputs
-    return compute_leaf,
+    return rawLeaflet,
 # end polygonLeaflet
 
 class PolygonLeaflet(Node):
@@ -213,17 +214,17 @@ class PolygonLeaflet(Node):
 
 ########################################""
 
-def noLeaflet():
+def makeNoLeaflet():
     '''    make no leaflets, so we can watch the plantframe  
     '''
-    computeNoLeaflet  = None; 
+    noLeaflet  = None; 
     # write the node code here.
-    def computeNoLeaflet(points, turtle=None):
+    def noLeaflet(points, turtle=None):
 	    """ """
 	    geometry = None; 
     # return outputs
-    return computeNoLeaflet,
-# end noLeaflet
+    return noLeaflet,
+# end makeNoLeaflet
 
 class NoLeaflet(Node):
     def __init__(self):
@@ -232,6 +233,6 @@ class NoLeaflet(Node):
                          interface = IFunction )
 
     def __call__( self, inputs ):
-        return noLeaflet()
+        return makeNoLeaflet()
 
 ########################################""
