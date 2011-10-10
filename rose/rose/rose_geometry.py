@@ -10,13 +10,12 @@ from openalea.core.logger  import *
 
 #import openalea.plantgl.all as pgl
 
-def computeLateralAxis(front,side):
+def computeLateralAxis(front, up):
     """ Computes and returns a vector that is
     - normal to front 
     - in the <front,side> plan
     - such as lateral is by the other side from front than side """
-    localUp=side^front
-    Lateral=front^localUp
+    Lateral=front^up
     Lateral.normalize()
     return Lateral
 # end computeLateralAxis
@@ -28,7 +27,7 @@ def computeUpAxis(front,side):
     Up=side^front
     Up.normalize()
     return Up
-# end computeLateralAxis
+# end computeUpAxis
 
 def printPoints(points):
     """ debug info """
@@ -75,9 +74,9 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
         side=points[3]-points[0]
         sideLength=norm(side)
         side.normalize()
-        Lateral = -computeLateralAxis(Axis,side)
-        # for debug purposes ()
         Up=computeUpAxis(Axis,side)
+        Lateral = -computeLateralAxis(Axis,Up)
+        # for debug purposes ()
 
         # Debug information
         #print "A:%s"% Axis
@@ -89,16 +88,16 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
 
         # jessica's code for  building the mesh
         # I tried to use zMesh, but it has had no efect.
-        ls_ptA=[Vector3(0.,0.,0.)]
+        ls_pts=[Vector3(0.,0.,0.)]
         for i in xrange(len(xMesh)-1):
-            ls_ptA.append(Vector3(xMesh[i],-yMesh[i],0))
-            ls_ptA.append(Vector3(xMesh[i],0,0))
-        ls_ptA.append(Vector3(1.,0.,0.))
+            ls_pts.append(Vector3(xMesh[i],-yMesh[i],0))
+            ls_pts.append(Vector3(xMesh[i],0,0))
+        ls_pts.append(Vector3(1.,0.,0.))
         # we reverse them triangles Cwise
-        ls_indA=[Index3(0,2,1),Index3(1,2,3),Index3(2,4,3),Index3(3,4,5),Index3(4,6,5),Index3(5,6,7)]        
-        trianglesetA=TriangleSet(Point3Array(ls_ptA),Index3Array(ls_indA))
+        ls_ind=[Index3(0,2,1),Index3(1,2,3),Index3(2,4,3),Index3(3,4,5),Index3(4,6,5),Index3(5,6,7)]        
+        triangleSet=TriangleSet(Point3Array(ls_pts),Index3Array(ls_ind))
 
-        geom=trianglesetA
+        geom=triangleSet
         #turtle.push() #try
         geom=Scaled((axisLength,halfWidth,1),geom)
         # Oriented() makes the ribs where the polygon leaf doesn't.
@@ -113,23 +112,18 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
         side=points[1]-points[0]
         sideLength=norm(side)
         side.normalize()
-        Lateral = -computeLateralAxis(Axis,side)
         Up=computeUpAxis(Axis,side)
+        Lateral = -computeLateralAxis(Axis,Up)
         #print Lateral
         
         # 4 : compute the width of the left half leaflet
         halfWidth =  sideLength * norm(side^Axis)
 
-        ls_ptA=[Vector3(0.,0.,0.)]
-        for i in xrange(len(xMesh)-1):
-            ls_ptA.append(Vector3(xMesh[i],-yMesh[i],0))
-            ls_ptA.append(Vector3(xMesh[i],0,0))
-        ls_ptA.append(Vector3(1.,0.,0.))
         # list of index (CCwise)   
-        ls_indA=[Index3(0,1,2),Index3(1,3,2),Index3(2,3,4),Index3(3,5,4),Index3(4,5,6),Index3(5,7,6)]
-        trianglesetA=TriangleSet(Point3Array(ls_ptA),Index3Array(ls_indA))
+        ls_ind=[Index3(0,1,2),Index3(1,3,2),Index3(2,3,4),Index3(3,5,4),Index3(4,5,6),Index3(5,7,6)]
+        triangleSet=TriangleSet(Point3Array(ls_pts),Index3Array(ls_ind))
 
-        geom=trianglesetA
+        geom=triangleSet
         geom=Scaled((axisLength,halfWidth,1),geom)
         #geom=Oriented(Axis,Lateral,geom)
         # setHead() see previously
