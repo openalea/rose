@@ -38,7 +38,7 @@ def printPoints(points):
 def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zMesh=[0,0,0,0]):
     '''    compute leaflet geometry from 4 points
     '''
-    compute_leaf = None ; 
+    meshedLeaflet = None ; 
     # write the node code here.
     def meshedLeaflet(points, turtle=None):
         '''    compute leaflet geometry from 4 points
@@ -196,16 +196,6 @@ def polygonLeaflet():
     """
     compute_leaf = None ; 
     # write the node code here.
-#R    def rawLeaflet(points, turtle=None):
-#R        '''    compute leaflet geometry from 4 points
-#R        '''
-#R        turtle.push()
-#R        turtle.startPolygon()
-#R        for pt in points[1:]:
-#R            turtle.lineTo(pt)
-#R        turtle.lineTo(points[0])
-#R        turtle.stopPolygon()
-#R        turtle.pop()
     # return outputs
     return rawLeaflet,
 # end polygonLeaflet
@@ -219,59 +209,159 @@ class PolygonLeaflet(Node):
     def __call__( self, inputs ):
         return polygonLeaflet()
 
-########################################""
 
-def makeNoLeaflet():
-    '''    make no leaflets, so we can watch the plantframe  
-    '''
-    noLeaflet  = None; 
+########################################
+
+def bezierPatchFlower(controlpointmatrix=None,uStride=10,vStride=10):
+    ''' interface to return bpFlower ''' 
+    bpFlower=None
     # write the node code here.
-    def noLeaflet(points, turtle=None):
-	    """ """
-	    geometry = None; 
-    # return outputs
-    return noLeaflet,
-# end makeNoLeaflet
+    def bpFlower(points, turtle=None,):
+        ''' computes a flower from two points and the diameters associated to 
+        the flower.
+        '''
+        if controlpointmatrix is None:
+            return
+        #mat=getMaterialFromDialog()
+        mat=Material(Color3(255,127,127))
 
-class NoLeaflet(Node):
+        if vStride < 3:
+            vStride = 3
+        if uStride < 3:
+            uStride = 3
+
+        leaf=BezierPatch(controlpointmatrix,uStride, vStride)
+        leaf=Scaled(Vector3(0.5, 0.8, 0.2),leaf)
+        leaf=AxisRotated((0,0,1),72,leaf)
+        forme=Shape(leaf,mat)
+
+        turtle.push()
+        turtle.setColor(3) # red
+        # I'll insert appropriate code HERE
+        turtle.customGeometry(forme, 1)
+        turtle.pop()
+
+    return bpFlower
+
+class BezierPatchFlower(Node):
+    ''' '''
     def __init__(self):
         Node.__init__(self)
-        self.add_output( name = 'compute_leaf', 
+        self.add_input( name='controlpointmatrix',
+                        interface=IData)
+        self.add_input(name='uStride',
+                       interface=IInt)
+        self.add_input(name='vStride',
+                       interface=IInt)
+        self.add_output( name = 'compute_flower', 
+                         interface = IFunction )
+        
+    def __call__( self, inputs ): 
+        #controlpointmatrix=self.get_input('controlpointmatrix')
+        #uStride=self.get_input('uStride')
+        #vStride=self.get_input('vStride')
+        #return bezierPatchFlower(controlpointmatrix, uStride, vStride)
+        return bezierPatchFlower()
+    
+########################################
+def rawFlower(points, turtle=None):
+    '''    computes a flower from 2 pairs [position, diameter]
+    '''
+    # 
+    turtle.push()
+    turtle.setColor(3) # red
+    #print "point= %s" % points
+
+    # THis should be already done
+    #Diameter=points[0][1]
+    #turtle.setWidth(Diameter*.5)
+   
+    turtle.oLineTo(points[0][0])
+    Diameter=points[1][1]
+    turtle.oLineTo(points[1][0])
+    turtle.setWidth(Diameter*.5)
+    turtle.pop()
+# end rawFlower
+
+def coneFlower():
+    """ default function to draw up a flower 
+    """
+    # write the node code here.
+    # return outputs
+    return rawFlower,
+# end coneFlower
+
+class RawFlower(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'compute_flower', 
                          interface = IFunction )
 
     def __call__( self, inputs ):
-        return makeNoLeaflet()
-
+        return coneFlower()
 ########################################""
+
+def makeNoOrgan():
+    '''    make no leaflets, so we can watch the plantframe  
+    '''
+    noThing  = None; 
+    # write the node code here.
+    def noThing(points, turtle=None):
+	    """ """
+	    geometry = None; 
+    # return outputs
+    return noThing,
+# end makeNoLeaflet
+
+class NoOrgan(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'compute_nothing', 
+                         interface = IFunction )
+
+    def __call__( self, inputs ):
+        return makeNoOrgan()
+
+########################################
+
+def ctrlpointMatrix():
+    '''    control point matrix for bezier patches
+    '''
+    ctpm = None; 
+    # write the node code here.
+    ctpm = [[Vector4(0,0,0,1),Vector4(0,0,0,1)],[Vector4(2,-1,0.8,1),Vector4(2,1,1.2,1)],[Vector4(4,-2,2.1,1),Vector4(4,2,1.8,1)],[Vector4(6,-1,0.3,1),Vector4(6,1,0.5,1)],[Vector4(7,0,-1,1),Vector4(7,0,-1,1)]]
+
+    # return outputs
+    return ctpm,
+
+class ControlPointsMatrix(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'ctpm', 
+                         interface = IData )
+
+    def __call__( self, inputs ):
+        return ctrlpointMatrix()
+
+########################################
 def position(n):
     """ returns the position of the node in a Vector3 data """
     return Vector3(n.XX, n.YY, n.ZZ)
     
-#Odef compute_leaflet(points, turtle):
-#O    """ default function to draw up a leaflet 
-#O    NOTE : without the turtle.push() and turtle.pop(),
-#O    it hangs the viewer up with a message to the father shell :
-#O        *** glibc detected *** /usr/bin/python: double free or corruption (out): 0x0000000004bfebd0 ***
-#O    """
-#O    turtle.push()
-#O    turtle.startPolygon()
-#O    for pt in points[1:]:
-#O        turtle.lineTo(pt)
-#O    turtle.lineTo(points[0])
-#O    turtle.stopPolygon()
-#O    turtle.pop()
-
-def vertexVisitor(leaf_factory=None):
+def vertexVisitor(leaf_factory=None, flower_factory=None):
     '''    function to visit MTG nodes
     '''
     # write the node code here.   
     visitor = None; 
 
-
     if leaf_factory is None:
         leaf_factory=rawLeaflet
 
-    def visitor(g, v, turtle, leaf_computer=leaf_factory):
+    if flower_factory is None:
+        flower_factory=rawFlower
+
+    def visitor(g, v, turtle, leaf_computer=leaf_factory, \
+                    flower_computer=flower_factory):
         n = g.node(v)
         pt = position(n)
         symbol = n.label[0]
@@ -328,15 +418,8 @@ def vertexVisitor(leaf_factory=None):
             turtle.pop()
             turtle.setWidth(radius*.8)
         elif n.label == "O1" :
-            turtle.push()
-            #turtle.stopGC()
-            #turtle.startGC()	    
-            turtle.setColor(3) # red
-            # CPL
-            turtle.setWidth(n.parent().Diameter*.5)   
-            turtle.oLineTo(pt)
-            turtle.setWidth(n.Diameter*.5)
-            turtle.pop()
+            points=[[position(n.parent()),n.parent().Diameter],[pt,n.Diameter]]
+            flower_computer (points, turtle)
 
         elif symbol == "T":
             # The turtle is supposed to be at the top of the previous vertex
@@ -359,9 +442,12 @@ class VertexVisitor(Node):
         Node.__init__(self)
         self.add_input( name = 'leaf_factory',
                         interface = IFunction)
+        self.add_input( name = 'flower_factory',
+                        interface = IFunction)
         self.add_output( name = 'VertexVisitor', 
                          interface = IFunction )
 
     def __call__( self, inputs ):
         leaf_factory=self.get_input('leaf_factory')
-        return vertexVisitor(leaf_factory)
+        flower_factory=self.get_input('flower_factory')
+        return vertexVisitor(leaf_factory,flower_factory)
