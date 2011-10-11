@@ -212,33 +212,46 @@ class PolygonLeaflet(Node):
 
 ########################################
 
-def bezierPatchFlower(controlpointmatrix=None,uStride=10,vStride=10):
+def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
     ''' interface to return bpFlower ''' 
     bpFlower=None
+    print "BezierPatchFlower called ; uStride is %s" % ustride
     # write the node code here.
     def bpFlower(points, turtle=None,):
         ''' computes a flower from two points and the diameters associated to 
         the flower.
+        @param points : list of pairs[Vector3, scalar] resp. (position;diameter)
         '''
         if controlpointmatrix is None:
             return
-        #mat=getMaterialFromDialog()
+        else:
+            print "controlpointmatrix = %s" % controlpointmatrix
+        #if ustride < 3:
+        #    ustride = 3
+        #if vstride < 3:
+        #    vstride = 3
+        ustride=5 # DBG
+        vstride=5 # DBG
+        basePos=points[0][0]
+        topPos=points[1][0]
+        baseDiam=points[0][1]
+        flowerDiam=points[1][1]
+        
         mat=Material(Color3(255,127,127))
-
-        if vStride < 3:
-            vStride = 3
-        if uStride < 3:
-            uStride = 3
-
-        leaf=BezierPatch(controlpointmatrix,uStride, vStride)
-        leaf=Scaled(Vector3(0.5, 0.8, 0.2),leaf)
-        leaf=AxisRotated((0,0,1),72,leaf)
-        forme=Shape(leaf,mat)
-
+        petalMesh=BezierPatch(controlpointmatrix,ustride, vstride)
+        petalMesh=Scaled( \
+            Vector3(flowerDiam *0.5, flowerDiam *0.25,flowerDiam * 0.1),\
+                petalMesh)
         turtle.push()
         turtle.setColor(3) # red
-        # I'll insert appropriate code HERE
-        turtle.customGeometry(forme, 1)
+        # I'll insert appropriate code 
+        turtle.customGeometry(petalMesh, 1)
+        Pi=3.14159 # or so...
+        rad1=Pi/3
+        for iIndex in range(1,5):
+            petal=AxisRotated((0,0,1),iIndex*rad1,petalMesh)
+            turtle.customGeometry(petal, 1) # whats this 1 ? 
+
         turtle.pop()
 
     return bpFlower
@@ -249,19 +262,19 @@ class BezierPatchFlower(Node):
         Node.__init__(self)
         self.add_input( name='controlpointmatrix',
                         interface=IData)
-        self.add_input(name='uStride',
+        self.add_input(name='ustride',
                        interface=IInt)
-        self.add_input(name='vStride',
+        self.add_input(name='vstride',
                        interface=IInt)
         self.add_output( name = 'compute_flower', 
                          interface = IFunction )
         
     def __call__( self, inputs ): 
-        #controlpointmatrix=self.get_input('controlpointmatrix')
-        #uStride=self.get_input('uStride')
-        #vStride=self.get_input('vStride')
-        #return bezierPatchFlower(controlpointmatrix, uStride, vStride)
-        return bezierPatchFlower()
+        controlpointmatrix=self.get_input('controlpointmatrix')
+        ustride=self.get_input('ustride')
+        vstride=self.get_input('vstride')
+        return bezierPatchFlower(controlpointmatrix, ustride, vstride)
+        #return bezierPatchFlower()
     
 ########################################
 def rawFlower(points, turtle=None):
