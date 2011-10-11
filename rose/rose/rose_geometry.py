@@ -215,7 +215,7 @@ class PolygonLeaflet(Node):
 def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
     ''' interface to return bpFlower ''' 
     bpFlower=None
-    print "BezierPatchFlower called ; uStride is %s" % ustride
+    #print "BezierPatchFlower called ; uStride is %s" % ustride
     # write the node code here.
     def bpFlower(points, turtle=None,):
         ''' computes a flower from two points and the diameters associated to 
@@ -224,8 +224,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
         '''
         if controlpointmatrix is None:
             return
-        else:
-            print "controlpointmatrix = %s" % controlpointmatrix
+        #else:  print "controlpointmatrix = %s" % controlpointmatrix
         #if ustride < 3:
         #    ustride = 3
         #if vstride < 3:
@@ -235,22 +234,35 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
         basePos=points[0][0]
         topPos=points[1][0]
         baseDiam=points[0][1]
-        flowerDiam=points[1][1]
+        flowerRay=points[1][1] * 0.5
+        petalMesh=BezierPatch(controlpointmatrix,ustride, vstride)
         
         mat=Material(Color3(255,127,127))
-        petalMesh=BezierPatch(controlpointmatrix,ustride, vstride)
-        petalMesh=Scaled( \
-            Vector3(flowerDiam *0.5, flowerDiam *0.25,flowerDiam * 0.1),\
-                petalMesh)
         turtle.push()
-        turtle.setColor(3) # red
         # I'll insert appropriate code 
-        turtle.customGeometry(petalMesh, 1)
+        #
         Pi=3.14159 # or so...
-        rad1=Pi/3
-        for iIndex in range(1,5):
-            petal=AxisRotated((0,0,1),iIndex*rad1,petalMesh)
-            turtle.customGeometry(petal, 1) # whats this 1 ? 
+        rad5eTour=Pi/2.5
+
+        turtle.setColor(4) # kind of yellow-green
+        plateau=Disc(flowerRay *0.3,8)
+        turtle.customGeometry(plateau, 1) # 
+        #petalMesh=Translated(Vector3(flowerRay * 0.01 , 0, 0), petalMesh)
+
+        # TODO : compute the closing angle of the petals from height and width
+        turtle.setColor(3) # red
+        for iIndex in range(0,5):
+            # closing the flower : 
+            petal=AxisRotated((0,1,0),-rad5eTour*0.3,petalMesh)
+            # twisting a bit to limit collisions [Todo in the patch]
+            petal=AxisRotated((1,0,0),rad5eTour*0.1,petal)
+            angle=iIndex*rad5eTour
+            petal=AxisRotated((0,0,1),angle,petal)
+            petal=Translated(Vector3(flowerRay*0.01 *math.cos(angle),\
+                                         flowerRay*0.01 *math.sin(angle),\
+                                         0),\
+                                 petal)
+            turtle.customGeometry(petal, flowerRay) #  
 
         turtle.pop()
 
@@ -342,7 +354,8 @@ def ctrlpointMatrix():
     '''
     ctpm = None; 
     # write the node code here.
-    ctpm = [[Vector4(0,0,0,1),Vector4(0,0,0,1)],[Vector4(2,-1,0.8,1),Vector4(2,1,1.2,1)],[Vector4(4,-2,2.1,1),Vector4(4,2,1.8,1)],[Vector4(6,-1,0.3,1),Vector4(6,1,0.5,1)],[Vector4(7,0,-1,1),Vector4(7,0,-1,1)]]
+    #ctpm = [[Vector4(0,0,0,7.),Vector4(0,0,0,7.)],[Vector4(2,-2,-0.8,7.),Vector4(2,2,-0.8,7.)],[Vector4(4,-4,-1.2,7.),Vector4(4,4,-1.2,7.)],[Vector4(6,-5,-1.5,7.),Vector4(6,5,-0.5,7.)],[Vector4(7,0,0,7.),Vector4(7,0,0,7.)]]
+    ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,-0.13,1),Vector4(0.28,0.38,-0.13,1)],[Vector4(.56,-0.56,-0.17,1),Vector4(.56,0.56,-0.17,1)],[Vector4(0.86,-0.7,-0.21,1),Vector4(.86,.7,-0.01,1)],[Vector4(1,0,0,1),Vector4(1,0,0,1)]]
 
     # return outputs
     return ctpm,
@@ -431,6 +444,7 @@ def vertexVisitor(leaf_factory=None, flower_factory=None):
             turtle.pop()
             turtle.setWidth(radius*.8)
         elif n.label == "O1" :
+            #turtle.oLineTo(pt) # pt is the top of the flower
             points=[[position(n.parent()),n.parent().Diameter],[pt,n.Diameter]]
             flower_computer (points, turtle)
 
