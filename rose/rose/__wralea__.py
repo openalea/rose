@@ -1,5 +1,5 @@
 
-# This file has been generated at Tue Oct 11 15:17:26 2011
+# This file has been generated at Tue Oct 11 15:20:31 2011
 
 from openalea.core import *
 
@@ -17,7 +17,7 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'rose_geometry_computeLeaflet4pts', 'RoseLpy', 'rose_CropGeneration_2011', 'rose_MTG_union', '_61250192', 'PlantFrame_Rose_PlantFrame_Rose', 'rose_HttpDir2DictOfFiles', 'DigitReconstruction', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', 'rose_Files2MTGs', 'rose_GetMTG', 'rose_geometry_VertexVisitor', 'Canopy2011Driver', 'GetLocalFiles', 'PlantReconstruction', 'rose_LocalDir2DictOfFiles', 'ReconstructionWithTurtle_ReconstructionWithTurtle', 'rose_geometry_PolygonLeaflet', 'SceneRotation_SceneRotation', 'CanopyReconstruction2011', 'PlantPositionning_PlantPositionning', 'rose_geometry_BezierPatchFlower', 'rose_GridFile2Dict', 'rose_geometry_NoOrgan', '_61250448', 'rose_geometry_ControlPointsMatrix', 'GetWebFiles', 'CropGeneration_CropGeneration', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', 'rose_geometry_RawFlower', '_61250000']
+__all__ = ['mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'computeLeaflet4pts', 'RoseLpy', 'rose_CropGeneration_2011', 'rose_MTG_union', '_61250192', 'PlantFrame_Rose_PlantFrame_Rose', 'rose_HttpDir2DictOfFiles', 'DigitReconstruction', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', 'rose_Files2MTGs', 'rose_GetMTG', 'rose_geometry_VertexVisitor', 'Canopy2011Driver', 'GetLocalFiles', 'PlantReconstruction', 'rose_LocalDir2DictOfFiles', 'ReconstructionWithTurtle_ReconstructionWithTurtle', 'rose_geometry_PolygonLeaflet', 'SceneRotation_SceneRotation', 'CanopyReconstruction2011', 'PlantPositionning_PlantPositionning', 'rose_geometry_BezierPatchFlower', 'rose_GridFile2Dict', 'rose_geometry_NoOrgan', '_61250448', 'rose_geometry_ControlPointsMatrix', 'GetWebFiles', 'CropGeneration_CropGeneration', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', 'rose_geometry_RawFlower', '_61250000']
 
 
 
@@ -379,13 +379,13 @@ HybridReconstruction = CompositeNodeFactory(name='HybridReconstruction',
 
 
 
-rose_geometry_computeLeaflet4pts = Factory(name='ComputeLeaflet4pts',
+computeLeaflet4pts = Factory(name='ComputeLeaflet4pts',
                 authors=' (rose authors)',
                 description='compute leaflet geometry from 4 points',
                 category='data processing',
                 nodemodule='rose_geometry',
                 nodeclass='computeLeaflet4pts',
-                inputs=[{'interface': ISequence, 'name': 'x', 'value': [0.25, 0.5, 0.074999999999999997, 1.0], 'desc': ''}, {'interface': ISequence, 'name': 'y', 'value': [0.81000000000000005, 0.92000000000000004, 0.94999999999999996, 1.0], 'desc': 'sequence of positions along the y axis'}, {'interface': ISequence, 'name': 'z', 'value': [0, 0, 0, 0], 'desc': 'sequence of positions along the z axis'}],
+                inputs=[{'interface': ISequence, 'name': 'x', 'value': [0.25, 0.5, 0.075, 1.0], 'desc': ''}, {'interface': ISequence, 'name': 'y', 'value': [0.81, 0.92, 0.95, 1.0], 'desc': 'sequence of positions along the y axis'}],
                 outputs=[{'interface': IFunction, 'name': 'computeLeaflet4pts', 'desc': 'function that computes a leaflet from 4 digitization points'}],
                 widgetmodule=None,
                 widgetclass=None,
@@ -1904,7 +1904,7 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
          'user_application': None,
          'user_color': None},
    5: {  'block': False,
-         'caption': "'8.mtg'",
+         'caption': "'*.mtg'",
          'delay': 0,
          'factory': '<openalea.core.node.NodeFactory object at 0x473b750> : "string"',
          'hide': True,
@@ -1946,7 +1946,7 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
          'user_application': None,
          'user_color': None},
    9: {  'block': False,
-         'caption': '2',
+         'caption': '1',
          'delay': 0,
          'factory': '<openalea.core.node.NodeFactory object at 0x4732d10> : "int"',
          'hide': True,
@@ -2394,10 +2394,10 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
                              elt_value={  2: [],
    3: [(0, "'/mnt/echange/samba/MTG/'")],
    4: [],
-   5: [(0, "'8.mtg'")],
+   5: [(0, "'*.mtg'")],
    6: [],
    8: [],
-   9: [(0, '2')],
+   9: [(0, '1')],
    10: [(2, 'False')],
    11: [(0, "'/home/hautret/tmp/canopy.pf'")],
    12: [],

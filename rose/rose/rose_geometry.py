@@ -35,7 +35,7 @@ def printPoints(points):
 
 
 
-def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zMesh=[0,0,0,0]):
+def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
     '''    compute leaflet geometry from 4 points
     '''
     meshedLeaflet = None ; 
@@ -75,6 +75,9 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
         sideLength=norm(side)
         side.normalize()
         Up=computeUpAxis(Axis,side)
+        # dbg
+        if abs(norm(Up)) < 0.001 :
+            print "Z.bug= %s" % points[0][2]
         Lateral = -computeLateralAxis(Axis,Up)
         # for debug purposes ()
 
@@ -168,11 +171,17 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0],zM
 class ComputeLeaflet4pts(Node):
     def __init__(self):
         Node.__init__(self)
+        self.add_input( name='xMesh',
+                        interface=ISequence)
+        self.add_input(name='yMesh',
+                       interface=ISequence)
         self.add_output( name = 'compute_leaf', 
                          interface = IFunction )
 
     def __call__( self, inputs ):
-        return computeLeaflet4pts()
+        xMesh=self.get_input('xMesh')
+        yMesh=self.get_input('yMesh')
+        return computeLeaflet4pts(xMesh,yMesh)
 
 #########################################
 def rawLeaflet(points, turtle=None):
@@ -217,6 +226,8 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
     bpFlower=None
     #print "BezierPatchFlower called ; uStride is %s" % ustride
     # write the node code here.
+    ustride=ustride
+    vstride=vstride
     def bpFlower(points, turtle=None,):
         ''' computes a flower from two points and the diameters associated to 
         the flower.
@@ -233,36 +244,52 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
         vstride=5 # DBG
         basePos=points[0][0]
         topPos=points[1][0]
-        baseDiam=points[0][1]
+        pedDiam=points[0][1]
         flowerRay=points[1][1] * 0.5
-        petalMesh=BezierPatch(controlpointmatrix,ustride, vstride)
-        
-        mat=Material(Color3(255,127,127))
-        turtle.push()
-        # I'll insert appropriate code 
-        #
-        Pi=3.14159 # or so...
-        rad5eTour=Pi/2.5
+        flowerHeight=norm(topPos-basePos)
+        baseRay=max(flowerRay *0.2, flowerHeight*0.2) # arbitrarily
+        deltaRay=flowerRay-baseRay
+        petalLength=math.sqrt(flowerHeight*flowerHeight + deltaRay*deltaRay)
 
+        # we build the generic patch
+        petalMesh=BezierPatch(controlpointmatrix,ustride, vstride)
+        # patch is scaled according to the global flower dimensions
+        petalMesh=Scaled(Vector3(petalLength,max(baseRay,flowerRay)*1.1,flowerRay),petalMesh)
+        # 
+        rad5eTour=math.pi/2.5 # a fifth of a tour
+
+        # compute the pitch angle (flower opening)
+        if deltaRay > 0 : # opened flower
+            pitchAngle=math.atan(flowerHeight/(deltaRay))
+        elif deltaRay < 0 : # flower not opened yet
+            pitchAngle=math.pi*0.5+math.atan((-deltaRay)/flowerHeight)
+        else: # say half opened
+            pitchAngle=math.pi*0.5
+
+        #ovary=Disc(baseRay ,8)
+        ovary=Sphere(baseRay ,8)
+
+        turtle.push() # we draw now
+        # mat=Material(Color3(255,127,127)) # just 6 colors here
         turtle.setColor(4) # kind of yellow-green
-        plateau=Disc(flowerRay *0.3,8)
-        turtle.customGeometry(plateau, 1) # 
+
+        turtle.customGeometry(ovary, 1) # 
         #petalMesh=Translated(Vector3(flowerRay * 0.01 , 0, 0), petalMesh)
 
         # TODO : compute the closing angle of the petals from height and width
         turtle.setColor(3) # red
         for iIndex in range(0,5):
             # closing the flower : 
-            petal=AxisRotated((0,1,0),-rad5eTour*0.3,petalMesh)
+            petal=AxisRotated((0,1,0),-pitchAngle,petalMesh)
             # twisting a bit to limit collisions [Todo in the patch]
-            petal=AxisRotated((1,0,0),rad5eTour*0.1,petal)
+            petal=AxisRotated((1,0,0),pitchAngle*0.05,petal)
             angle=iIndex*rad5eTour
             petal=AxisRotated((0,0,1),angle,petal)
-            petal=Translated(Vector3(flowerRay*0.01 *math.cos(angle),\
-                                         flowerRay*0.01 *math.sin(angle),\
+            petal=Translated(Vector3(baseRay *math.cos(angle) *0.8,\
+                                         baseRay *math.sin(angle) *0.8,\
                                          0),\
                                  petal)
-            turtle.customGeometry(petal, flowerRay) #  
+            turtle.customGeometry(petal, 1) #flowerHeight) #  
 
         turtle.pop()
 
@@ -355,7 +382,7 @@ def ctrlpointMatrix():
     ctpm = None; 
     # write the node code here.
     #ctpm = [[Vector4(0,0,0,7.),Vector4(0,0,0,7.)],[Vector4(2,-2,-0.8,7.),Vector4(2,2,-0.8,7.)],[Vector4(4,-4,-1.2,7.),Vector4(4,4,-1.2,7.)],[Vector4(6,-5,-1.5,7.),Vector4(6,5,-0.5,7.)],[Vector4(7,0,0,7.),Vector4(7,0,0,7.)]]
-    ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,-0.13,1),Vector4(0.28,0.38,-0.13,1)],[Vector4(.56,-0.56,-0.17,1),Vector4(.56,0.56,-0.17,1)],[Vector4(0.86,-0.7,-0.21,1),Vector4(.86,.7,-0.01,1)],[Vector4(1,0,0,1),Vector4(1,0,0,1)]]
+    ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,-0.13,1),Vector4(0.28,0.38,-0.13,1)],[Vector4(.56,-0.56,-0.17,1),Vector4(.56,0.56,-0.17,1)],[Vector4(0.86,-0.7,-0.21,1),Vector4(.86,.7,-0.01,1)],[Vector4(1,-0.25,0,1),Vector4(1,0.25,0,1)]]
 
     # return outputs
     return ctpm,
