@@ -226,8 +226,6 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
     bpFlower=None
     #print "BezierPatchFlower called ; uStride is %s" % ustride
     # write the node code here.
-    ustride=ustride
-    vstride=vstride
     def bpFlower(points, turtle=None,):
         ''' computes a flower from two points and the diameters associated to 
         the flower.
@@ -236,12 +234,14 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
         if controlpointmatrix is None:
             return
         #else:  print "controlpointmatrix = %s" % controlpointmatrix
-        #if ustride < 3:
-        #    ustride = 3
-        #if vstride < 3:
-        #    vstride = 3
-        ustride=5 # DBG
-        vstride=5 # DBG
+        luStride=ustride
+        lvStride=vstride
+        if luStride < 5:
+            luStride = 5
+        if lvStride < 5:
+            lvStride = 5
+        #ustride=5 
+        #vstride=5 
         basePos=points[0][0]
         topPos=points[1][0]
         pedDiam=points[0][1]
@@ -252,9 +252,9 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
         petalLength=math.sqrt(flowerHeight*flowerHeight + deltaRay*deltaRay)
 
         # we build the generic patch
-        petalMesh=BezierPatch(controlpointmatrix,ustride, vstride)
+        petalMesh=BezierPatch(controlpointmatrix,luStride, lvStride)
         # patch is scaled according to the global flower dimensions
-        petalMesh=Scaled(Vector3(petalLength,max(baseRay,flowerRay)*1.1,flowerRay),petalMesh)
+        petalMesh=Scaled(Vector3(petalLength,max(baseRay,flowerRay)*1.1,baseRay),petalMesh)
         # 
         rad5eTour=math.pi/2.5 # a fifth of a tour
 
@@ -266,8 +266,8 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
         else: # say half opened
             pitchAngle=math.pi*0.5
 
-        #ovary=Disc(baseRay ,8)
-        ovary=Sphere(baseRay ,8)
+        #ovary=Disc(baseRay ,luStride)
+        ovary=Sphere(baseRay ,luStride)
 
         turtle.push() # we draw now
         # mat=Material(Color3(255,127,127)) # just 6 colors here
@@ -299,14 +299,10 @@ class BezierPatchFlower(Node):
     ''' '''
     def __init__(self):
         Node.__init__(self)
-        self.add_input( name='controlpointmatrix',
-                        interface=IData)
-        self.add_input(name='ustride',
-                       interface=IInt)
-        self.add_input(name='vstride',
-                       interface=IInt)
-        self.add_output( name = 'compute_flower', 
-                         interface = IFunction )
+        self.add_input( name='controlpointmatrix', interface=IData)
+        self.add_input(name='ustride', interface=IInt)
+        self.add_input(name='vstride', interface=IInt)
+        self.add_output( name = 'compute_flower', interface = IFunction )
         
     def __call__( self, inputs ): 
         controlpointmatrix=self.get_input('controlpointmatrix')
@@ -354,13 +350,13 @@ class RawFlower(Node):
 ########################################""
 
 def makeNoOrgan():
-    '''    make no leaflets, so we can watch the plantframe  
+    '''    make no change to the turtle, so we can watch otherwise hidden details.
     '''
     noThing  = None; 
     # write the node code here.
     def noThing(points, turtle=None):
-	    """ """
-	    geometry = None; 
+        """ """
+        pass
     # return outputs
     return noThing,
 # end makeNoLeaflet
@@ -381,8 +377,12 @@ def ctrlpointMatrix():
     '''
     ctpm = None; 
     # write the node code here.
+    # with a scale factor : seems to cause problems with Translate
     #ctpm = [[Vector4(0,0,0,7.),Vector4(0,0,0,7.)],[Vector4(2,-2,-0.8,7.),Vector4(2,2,-0.8,7.)],[Vector4(4,-4,-1.2,7.),Vector4(4,4,-1.2,7.)],[Vector4(6,-5,-1.5,7.),Vector4(6,5,-0.5,7.)],[Vector4(7,0,0,7.),Vector4(7,0,0,7.)]]
-    ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,-0.13,1),Vector4(0.28,0.38,-0.13,1)],[Vector4(.56,-0.56,-0.17,1),Vector4(.56,0.56,-0.17,1)],[Vector4(0.86,-0.7,-0.21,1),Vector4(.86,.7,-0.01,1)],[Vector4(1,-0.25,0,1),Vector4(1,0.25,0,1)]]
+    # the previous, normalized 
+    #ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,-0.13,1),Vector4(0.28,0.38,-0.13,1)],[Vector4(.56,-0.56,-0.17,1),Vector4(.56,0.56,-0.17,1)],[Vector4(0.86,-0.7,-0.21,1),Vector4(.86,.7,-0.01,1)],[Vector4(1,-0.25,0,1),Vector4(1,0.25,0,1)]]
+    # a new shape
+    ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],[Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],[Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],[Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
 
     # return outputs
     return ctpm,
