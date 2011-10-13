@@ -71,6 +71,50 @@ class RawBud(Node):
     def __call__( self, inputs ):
         return rawBud()
 
+################################################ BUD
+def builtBud(pointList=None,stride=5):
+    ''' returns a function to draw buds as revolution object'''
+    
+    def computeBuiltBud(points, turtle=None):
+        '''draw a bud as a revolution object'''
+        # TODO : parametrize and simplify that stuff of variables
+        botPt=points[0]
+        topPt=points[-1]
+        budAxis=Vector3(topPt-botPt)
+        step=norm(budAxis) 
+        #print "step=%f" % step
+        #print "len(points)=%d" % len(points)
+
+        turtle.push() #
+        # prolongation of ped
+        turtle.oLineTo(points[0])
+        turtle.setColor(4) # 
+       
+        radiusOfOvary=step /12. 
+        centerOfOvary=botPt + budAxis/12.
+        turtle.move(centerOfOvary)
+        turtle.customGeometry(Sphere(radiusOfOvary*1.1), 1)
+        turtle.move(botPt +budAxis/3.0)
+        turtle.customGeometry(Sphere(step/6.), 1)
+        turtle.move(botPt +budAxis *.4)
+        para=Paraboloid(step/7.,step*2/3.,0.4,True,8,8)
+        turtle.customGeometry(para,1)
+        #turtle.move(Vector3(0,0,1) * step*1.5)
+        
+        turtle.pop()
+    # end computeBuiltBud
+        
+    return computeBuiltBud
+    # end revolutionBud
+
+class BuiltBud(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'compute_bud', 
+                         interface = IFunction )
+    def __call__( self, inputs ):
+        return builtBud()
+   
 
 ################################################ LEAFLET
 def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
