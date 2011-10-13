@@ -33,8 +33,46 @@ def printPoints(points):
     """ debug info """
     print "Zs : %7.3f  %7.3f %7.3f %7.3f"%(points[0][2],points[1][2],points[2][2],points[3][2])
 
+################################################ BUD
+def rawBud():
+    ''' returns a function to draw 'raw' buds wiht a sphere and a cone'''
+    
+    def computeRawBud(points, turtle=None):
+        #print "points= %s" %  points
+        turtle.push()
+        turtle.setColor(4) # apple green
+
+        oldPt=points[0]
+        radiusOfBud=(points[1]-oldPt)*0.5
+        centerOfBud=oldPt + radiusOfBud
+        turtle.oLineTo(centerOfBud)
+        turtle.push()
+        radius = norm(radiusOfBud)
+        geometry=  Sphere(radius)
+        #return Translated(distance, Sphere(radius))
+        #geom = leaf_factory(points)
+        turtle.customGeometry(geometry, 1)
+        turtle.pop()
+        turtle.setWidth(radius*.8)
+        if len(points) >2: # i.e top not forgotten
+            turtle.oLineTo(points[2])
+            turtle.setWidth(0.01)	    
+        turtle.pop()
+    # end computeRawBud
+
+    return computeRawBud
+
+class RawBud(Node): 
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'compute_bud', 
+                         interface = IFunction )
+
+    def __call__( self, inputs ):
+        return rawBud()
 
 
+################################################ LEAFLET
 def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
     '''    compute leaflet geometry from 4 points
     '''
@@ -52,7 +90,6 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
         #We could display a red sphere to make the miss very visible, as well
         if len(points) < 4:
             return
-
 
         turtle.push()
 
@@ -219,8 +256,7 @@ class PolygonLeaflet(Node):
         return polygonLeaflet()
 
 
-########################################
-
+######################################## FLOWER
 def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
     ''' interface to return bpFlower ''' 
     bpFlower=None
@@ -319,10 +355,6 @@ def rawFlower(points, turtle=None):
     turtle.push()
     turtle.setColor(3) # red
     #print "point= %s" % points
-
-    # THis should be already done
-    #Diameter=points[0][1]
-    #turtle.setWidth(Diameter*.5)
    
     turtle.oLineTo(points[0][0])
     Diameter=points[1][1]
@@ -349,14 +381,14 @@ class RawFlower(Node):
         return coneFlower()
 ########################################""
 
+def noThing(points, turtle=None):
+    """ """
+    pass
+
 def makeNoOrgan():
     '''    make no change to the turtle, so we can watch otherwise hidden details.
     '''
-    noThing  = None; 
     # write the node code here.
-    def noThing(points, turtle=None):
-        """ """
-        pass
     # return outputs
     return noThing,
 # end makeNoLeaflet
@@ -401,7 +433,8 @@ def position(n):
     """ returns the position of the node in a Vector3 data """
     return Vector3(n.XX, n.YY, n.ZZ)
     
-def vertexVisitor(leaf_factory=None, flower_factory=None):
+########################################
+def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
     '''    function to visit MTG nodes
     '''
     # write the node code here.   
@@ -409,11 +442,14 @@ def vertexVisitor(leaf_factory=None, flower_factory=None):
 
     if leaf_factory is None:
         leaf_factory=rawLeaflet
-
+    if bud_factory is None:
+        bud_factory=rawBud
     if flower_factory is None:
         flower_factory=rawFlower
 
-    def visitor(g, v, turtle, leaf_computer=leaf_factory, \
+    def visitor(g, v, turtle, \
+                    leaf_computer=leaf_factory, \
+                    bud_computer=bud_factory,\
                     flower_computer=flower_factory):
         n = g.node(v)
         pt = position(n)
@@ -455,38 +491,40 @@ def vertexVisitor(leaf_factory=None, flower_factory=None):
             leaf_computer(points,turtle)
 	    
         elif n.label == "B1" :
-            # 4 testing
-            oldPt=turtle.getPosition()
-            radiusOfBud=(pt-oldPt)*0.5
-            centerOfBud=oldPt + radiusOfBud
-            turtle.oLineTo(centerOfBud)
-            turtle.push()
-            #turtle.incColor()
-            turtle.setColor(4) # apple green
-            radius = norm(radiusOfBud)
-            geometry=  Sphere(radius)
-            #return Translated(distance, Sphere(radius))
-            #geom = leaf_factory(points)
-            turtle.customGeometry(geometry, 1)
-            turtle.pop()
-            turtle.setWidth(radius*.8)
+            points = [position(n.parent()), pt]
+            while n.nb_children() == 1:
+                n = list(n.children())[0]
+                points.append(position(n))
+            bud_computer(points,turtle)
+#B            # 4 testing
+#B            oldPt=turtle.getPosition()
+#B            radiusOfBud=(pt-oldPt)*0.5
+#B            centerOfBud=oldPt + radiusOfBud
+#B            turtle.oLineTo(centerOfBud)
+#B            turtle.push()
+#B            #turtle.incColor()
+#B            turtle.setColor(4) # apple green
+#B            radius = norm(radiusOfBud)
+#B            geometry=  Sphere(radius)
+#B            #return Translated(distance, Sphere(radius))
+#B            #geom = leaf_factory(points)
+#B            turtle.customGeometry(geometry, 1)
+#B            turtle.pop()
+#B            turtle.setWidth(radius*.8)
+
         elif n.label == "O1" :
             #turtle.oLineTo(pt) # pt is the top of the flower
             points=[[position(n.parent()),n.parent().Diameter],[pt,n.Diameter]]
             flower_computer (points, turtle)
 
-        elif symbol == "T":
+        elif n.label == "T1":
             # The turtle is supposed to be at the top of the previous vertex
             #turtle.stopGC() # not useful anymore
-            couleur=turtle.getColor()
-            if n.parent().label=="B1":
-                turtle.setColor(4)
-            else:
-                turtle.incColor()
+            turtle.incColor()
             #turtle.startGC()
             turtle.oLineTo(pt)
             turtle.setWidth(0.01)	    
-            turtle.setColor(couleur)
+            turtle.decColor()
 
     # return outputs
     return visitor,
@@ -496,6 +534,8 @@ class VertexVisitor(Node):
         Node.__init__(self)
         self.add_input( name = 'leaf_factory',
                         interface = IFunction)
+        self.add_input( name = 'bud_factory',
+                        interface = IFunction)
         self.add_input( name = 'flower_factory',
                         interface = IFunction)
         self.add_output( name = 'VertexVisitor', 
@@ -503,5 +543,6 @@ class VertexVisitor(Node):
 
     def __call__( self, inputs ):
         leaf_factory=self.get_input('leaf_factory')
+        bud_factory=self.get_input('bud_factory')
         flower_factory=self.get_input('flower_factory')
-        return vertexVisitor(leaf_factory,flower_factory)
+        return vertexVisitor(leaf_factory,bud_factory,flower_factory)
