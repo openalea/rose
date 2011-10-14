@@ -72,16 +72,24 @@ class RawBud(Node):
         return rawBud()
 
 ################################################ BUD
-def builtBud(pointList=None,stride=5):
-    ''' returns a function to draw buds as revolution object'''
+def builtBud(stride=10):
+    ''' returns a function to draw buds'''
     
     def computeBuiltBud(points, turtle=None):
-        '''draw a bud as a revolution object'''
-        # TODO : parametrize and simplify that stuff of variables
+        '''draw a bud with 2 spheres and a paraboloid '''
+        # TODO1 : adjust the paraboloid onto the upper sphere
+        # TODO2 : parametrize and simplify that stuff of variables
+
+        # fineness of drawing definition
+        lStride = stride
+        if lStride < 5:
+            lStride = 5
+            
         botPt=points[0]
         topPt=points[-1]
         budAxis=Vector3(topPt-botPt)
-        step=norm(budAxis) 
+        step=norm(budAxis) /12.
+        budAxis.normalize()
         #print "step=%f" % step
         #print "len(points)=%d" % len(points)
 
@@ -90,15 +98,36 @@ def builtBud(pointList=None,stride=5):
         turtle.oLineTo(points[0])
         turtle.setColor(4) # 
        
-        radiusOfOvary=step /12. 
-        centerOfOvary=botPt + budAxis/12.
-        turtle.move(centerOfOvary)
-        turtle.customGeometry(Sphere(radiusOfOvary*1.1), 1)
-        turtle.move(botPt +budAxis/3.0)
-        turtle.customGeometry(Sphere(step/6.), 1)
-        turtle.move(botPt +budAxis *.4)
-        para=Paraboloid(step/7.,step*2/3.,0.4,True,8,8)
+        # we must orient the turtle before to draw 
+        # this makes better fitting of the sphere and the paraboloid
+        upAxis=computeUpAxis(budAxis,Vector3(1,0,0))
+        # ifever a bud grows along the x axis :
+        if abs(norm(upAxis)) < 0.001 :
+            upAxis=computeUpAxis(budAxis,Vector3(0,1,0))
+        turtle.setHead(budAxis,upAxis)
+
+        #radiusOfOvary=step /12. 
+        #centerOfOvary=botPt + budAxis/12.
+        turtle.move(botPt + budAxis *step )
+        turtle.customGeometry(Sphere(step * 1.2,lStride ), 1)
+        turtle.move(botPt +budAxis * step*4)
+        turtle.customGeometry(Sphere(step*2, lStride ), 1)
+
+        # we move to the center of the 2nd sph plus a half ray, 
+        # i.e ray * sin(pi/6) (step *5, say) ajusted to 4.9 because 
+        # the base of the paraboloid appears rather dark if visible.
+        turtle.move(botPt +budAxis *step * 4.9) 
+        # so the base diameter of the paraboloid is ray * cos(pi/6)
+        # its length is bud heigth * (12 -4.9) / 12
+        # its concavity is fitted to make it tangent to the sphere
+        para=Paraboloid(step* 1.732,step*7.1,0.4,True, lStride,lStride)
         turtle.customGeometry(para,1)
+
+        # visual control test
+        #turtle.move(topPt)
+        #turtle.setColor(0)
+        #turtle.customGeometry(Sphere(step/2.), 1)
+        # end test
         #turtle.move(Vector3(0,0,1) * step*1.5)
         
         turtle.pop()
@@ -110,10 +139,12 @@ def builtBud(pointList=None,stride=5):
 class BuiltBud(Node):
     def __init__(self):
         Node.__init__(self)
+        self.add_input( name = 'stride', interface = IInt )
         self.add_output( name = 'compute_bud', 
                          interface = IFunction )
     def __call__( self, inputs ):
-        return builtBud()
+        stride=self.get_input('stride')
+        return builtBud(stride)
    
 
 ################################################ LEAFLET
@@ -301,7 +332,7 @@ class PolygonLeaflet(Node):
 
 
 ######################################## FLOWER
-def bezierPatchFlower(controlpointmatrix=None,ustride=10,vstride=10):
+def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
     ''' interface to return bpFlower ''' 
     bpFlower=None
     #print "BezierPatchFlower called ; uStride is %s" % ustride
