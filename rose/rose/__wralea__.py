@@ -17,7 +17,7 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'rose_geometry_computeLeaflet4pts', 'RoseLpy', 'rose_CropGeneration_2011', 'rose_MTG_union', '_173713168', 'PlantFrame_Rose_PlantFrame_Rose', 'rose_HttpDir2DictOfFiles', 'DigitReconstruction', 'rose_Files2MTGs', 'rose_GetMTG', 'rose_geometry_RawBud', 'rose_geometry_VertexVisitor', 'Canopy2011Driver', 'GetLocalFiles', 'PlantReconstruction', 'rose_LocalDir2DictOfFiles', 'ReconstructionWithTurtle_ReconstructionWithTurtle', 'rose_geometry_PolygonLeaflet', 'SceneRotation_SceneRotation', 'CanopyReconstruction2011', 'PlantPositionning_PlantPositionning', 'rose_geometry_BezierPatchFlower', 'rose_geometry_BuiltBud', '_166726992', 'rose_GridFile2Dict', 'rose_geometry_NoOrgan', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', '_166727120', 'rose_geometry_ControlPointsMatrix', 'GetWebFiles', 'CropGeneration_CropGeneration', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', 'rose_geometry_RawFlower']
+__all__ = ['RevolutionFig','BudArray','PointArray','mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'rose_geometry_computeLeaflet4pts', 'RoseLpy', 'rose_CropGeneration_2011', 'rose_MTG_union', '_173713168', 'PlantFrame_Rose_PlantFrame_Rose', 'rose_HttpDir2DictOfFiles', 'DigitReconstruction', 'rose_Files2MTGs', 'rose_GetMTG', 'rose_geometry_RawBud', 'rose_geometry_VertexVisitor', 'Canopy2011Driver', 'GetLocalFiles', 'PlantReconstruction', 'rose_LocalDir2DictOfFiles', 'ReconstructionWithTurtle_ReconstructionWithTurtle', 'rose_geometry_PolygonLeaflet', 'SceneRotation_SceneRotation', 'CanopyReconstruction2011', 'PlantPositionning_PlantPositionning', 'rose_geometry_BezierPatchFlower', 'rose_geometry_BuiltBud', '_166726992', 'rose_GridFile2Dict', 'rose_geometry_NoOrgan', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', '_166727120', 'rose_geometry_ControlPointsMatrix', 'GetWebFiles', 'CropGeneration_CropGeneration', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', 'rose_geometry_RawFlower']
 
 
 
@@ -2430,7 +2430,7 @@ rose_geometry_BezierPatchFlower = Factory(name='BezierPatchFlower',
 
 rose_geometry_BuiltBud = Factory(name='BuiltBud',
                 authors=' (rose authors)',
-                description='builds a bud with a revolution volume',
+                description='a function builds a bud with 2 spheres and a paraboloid.',
                 category='data processing',
                 nodemodule='rose_geometry',
                 nodeclass='BuiltBud',
@@ -2473,6 +2473,43 @@ rose_geometry_NoOrgan = Factory(name='NoOrgan',
                 nodeclass='NoOrgan',
                 inputs=[],
                 outputs=[{'interface': IFunction, 'name': 'PolygonLeaflet', 'desc': 'Makes nothing.'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+PointArray = Factory(name='PointArray',
+                authors=' (rose authors)',
+                description='returns a points array.',
+                category='data processing',
+                nodemodule='rose_geometry',
+                nodeclass='PointArray',
+                inputs=[],
+                outputs=[{'interface': IData, 'name': 'pts_array', 'desc': 'A Vector2 array.'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+BudArray = Factory(name='BudArray',
+                authors=' (rose authors)',
+                description='returns a points array.',
+                category='data processing',
+                nodemodule='rose_geometry',
+                nodeclass='BudArray',
+                inputs=[],
+                outputs=[{'interface': IData, 'name': 'bud_array', 'desc': 'A Vector2 array.'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+RevolutionFig = Factory(name='RevolutionFig',
+                authors=' (rose authors)',
+                description='returns a 3D revolution volume.',
+                category='data processing',
+                nodemodule='rose_geometry',
+                nodeclass='RevolutionFig',
+                inputs=[{ 'interface': IData,'name':'pointArray','value':None, 'desc':'a 2D points array'},{'interface':IInt,'name':'stride','value':8,'desc':'the 3D volume number of revolution slices.'}],
+                outputs=[{'interface': IData, 'name': 'rev_fig', 'desc': 'A 3D revolution volume.'}],
                 widgetmodule=None,
                 widgetclass=None,
                )

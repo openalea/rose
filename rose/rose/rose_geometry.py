@@ -134,7 +134,7 @@ def builtBud(stride=10):
     # end computeBuiltBud
         
     return computeBuiltBud
-    # end revolutionBud
+    # end builtBud
 
 class BuiltBud(Node):
     def __init__(self):
@@ -145,6 +145,120 @@ class BuiltBud(Node):
     def __call__( self, inputs ):
         stride=self.get_input('stride')
         return builtBud(stride)
+   
+###################################### Revolution Bud
+def pointArray():
+    ''' returns an array of points to feed a revolution object '''
+    #print "Inside pointArray()" 
+    pts=[Vector2(0.10, 0.00),
+         Vector2(0.50, 0.06),
+         Vector2(0.40, 0.14),
+         Vector2(0.60, 0.18),
+         Vector2(1.00, 0.30),
+         Vector2(0.90, 0.42),
+         Vector2(0.50, 0.60),
+         Vector2(0.30, 0.84),
+         Vector2(1.00, 1.00)] # to be edited
+    return pts
+
+def budArray():
+    ''' returns an array of points to feed a revolution object '''
+    #print "Inside pointArray()" 
+    pts=[Vector2(0.1, 0.00),
+         Vector2(0.50, 0.06),
+         Vector2(0.40, 0.14),
+         Vector2(0.60, 0.18),
+         Vector2(1.00, 0.30),
+         Vector2(0.90, 0.42),
+         Vector2(0.50, 0.60),
+         Vector2(0.30, 0.84),
+         Vector2(0.00, 1.00)]
+    return pts
+
+def revolution(points=None, stride=8):
+    ''' returns a revolution volume made from the input points'''
+    #lStride = stride
+    if stride < 5:
+        stride = 5
+
+    if points is None:
+        points=budArray()
+    print points
+    pa=Point2Array(points)
+    pl=Polyline2D(pa)
+    rev=Revolution(pl,stride)
+    return rev
+
+def revolutionBud(revVol=None):
+    ''' We return a func that draws a bud from a revolution volume '''
+    if revVol is None:
+        revVol=revolution(pointArray())
+    def drawRevBud(points, turtle=None):
+            
+        botPt=points[0]
+        topPt=points[-1]
+        budAxis=Vector3(topPt-botPt)
+        lengthVector=budAxis
+        budAxis.normalize() # necessary ?
+
+        turtle.push() #
+        # prolongation of ped
+        turtle.oLineTo(points[0])
+        turtle.setColor(4) # 
+       
+        # we must orient the turtle before to draw 
+        # this makes better fitting of the sphere and the paraboloid
+        upAxis=computeUpAxis(budAxis,Vector3(1,0,0))
+        # ifever a bud grows along the x axis :
+        if abs(norm(upAxis)) < 0.001 :
+            upAxis=computeUpAxis(budAxis,Vector3(0,1,0))
+        turtle.setHead(budAxis,upAxis)
+
+        revBud=Scaled(lengthVector, upAxis*0.16, revVol)
+        # we are ready to draw the rev'bud
+        turtle.customGeometry(revVol,1)
+        turtle.pop()
+
+    return drawRevBud
+
+class PointArray(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'pts_array', 
+                         interface = IData )
+    def __call__( self, inputs ):
+        return pointArray()
+  
+class BudArray(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'bud_array', 
+                         interface = IData )
+    def __call__( self, inputs ):
+        return budArray()
+  
+
+class RevolutionFig(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name = 'pointArray', interface = IData, value=None )
+        self.add_input( name = 'stride', interface = IInt )
+        self.add_output( name = 'rev_fig', 
+                         interface = IData )
+    def __call__( self, inputs ):
+        pointArray=self.get_input('pointArray')
+        stride=self.get_input('stride')
+        return revolution(pointArray, stride)
+
+class RevolutionBud(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name = 'revFig', interface = IData )
+        self.add_output( name = 'rev_bud', 
+                         interface = IFunction )
+    def __call__( self, inputs ):
+        revFig=self.get_input('revFig')
+        return (revolutionBud(revFig))
    
 
 ################################################ LEAFLET
