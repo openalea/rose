@@ -253,7 +253,7 @@ class BudArray(Node):
 class RevolutionFig(Node):
     def __init__(self):
         Node.__init__(self)
-        self.add_input( name = 'pointArray', interface = ISequence, value=None )
+        self.add_input( name = 'pointArray', interface = ISequence )
         self.add_input( name = 'stride', interface = IInt,  value=8)
         self.add_output( name = 'rev_fig', 
                          interface = IData )
