@@ -183,7 +183,7 @@ def revolution(points=None, stride=8):
 
     if points is None:
         points=budArray()
-    print points
+    #print points
     pa=Point2Array(points)
     pl=Polyline2D(pa)
     rev=Revolution(pl,stride)
@@ -199,24 +199,36 @@ def revolutionBud(revVol=None):
         topPt=points[-1]
         budAxis=Vector3(topPt-botPt)
         lengthVector=budAxis
+        length=norm(lengthVector)
         budAxis.normalize() # necessary ?
 
         turtle.push() #
         # prolongation of ped
         turtle.oLineTo(points[0])
+        turtle.push()
+        turtle.oLineTo(points[0]+budAxis*4) # + 4 units (mm)
+        turtle.pop()
         turtle.setColor(4) # 
        
         # we must orient the turtle before to draw 
-        # this makes better fitting of the sphere and the paraboloid
         upAxis=computeUpAxis(budAxis,Vector3(1,0,0))
         # ifever a bud grows along the x axis :
         if abs(norm(upAxis)) < 0.001 :
             upAxis=computeUpAxis(budAxis,Vector3(0,1,0))
-        turtle.setHead(budAxis,upAxis)
-
-        revBud=Scaled(lengthVector, upAxis*0.16, revVol)
+        lateralAxis = computeLateralAxis(budAxis,upAxis)
+        turtle.setHead(budAxis, lateralAxis) # ?? #
+        #print length
+        revBud=Scaled(Vector3(length *0.2, length *0.2, length),  revVol)
+        #revBud=Oriented(upAxis, budAxis, revBud)
         # we are ready to draw the rev'bud
-        turtle.customGeometry(revVol,1)
+        turtle.customGeometry(revBud,1)
+        
+        ## visual control test 
+        #turtle.move(topPt)
+        #turtle.setColor(0)
+        #turtle.customGeometry(Sphere(length/12.), 1)
+        # end test # SUCCESSFUL @ 20111019
+
         turtle.pop()
 
     return drawRevBud
@@ -225,7 +237,7 @@ class PointArray(Node):
     def __init__(self):
         Node.__init__(self)
         self.add_output( name = 'pts_array', 
-                         interface = IData )
+                         interface = ISequence )
     def __call__( self, inputs ):
         return pointArray()
   
@@ -233,7 +245,7 @@ class BudArray(Node):
     def __init__(self):
         Node.__init__(self)
         self.add_output( name = 'bud_array', 
-                         interface = IData )
+                         interface = ISequence )
     def __call__( self, inputs ):
         return budArray()
   
@@ -241,8 +253,8 @@ class BudArray(Node):
 class RevolutionFig(Node):
     def __init__(self):
         Node.__init__(self)
-        self.add_input( name = 'pointArray', interface = IData, value=None )
-        self.add_input( name = 'stride', interface = IInt )
+        self.add_input( name = 'pointArray', interface = ISequence, value=None )
+        self.add_input( name = 'stride', interface = IInt,  value=8)
         self.add_output( name = 'rev_fig', 
                          interface = IData )
     def __call__( self, inputs ):
