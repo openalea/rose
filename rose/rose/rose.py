@@ -80,8 +80,11 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13
                     randPlant = listOfNums[randPlantNum]
                     # we give a random rotation by 1/4 of tour 
                     # say : -1/4, 0, 1/4, 1/2 tour
-                    if DoRotate :
-                        randAngle = random.randint(-1, 2) * 0.5 * 3.14159
+                    if DoRotate == True :
+                        ## random 1/4 tour angle
+                        #randAngle = random.randint(-1, 2) * 0.5 * math.pi
+                        # random angle in one tour
+                        randAngle = random.uniform(-1,1) * math.pi
                     else :
                         randAngle = 0
                     dictOfPositions[mtgFiles[randPlant]] += [[Index2Coord(coords),randAngle]]
@@ -260,8 +263,34 @@ class GetMTG(Node):
         return getMTG(dirname,IDplant)
 
 #################################################################
+def getOrigin(originFilename):
+    ''' reads the 3D coordinates of the 1st plant (i.e the one 
+    in the [0,0] position) from a file '''
+    import csv
+    origin=None
+    origin_file = open(originFilename, 'r')
+    originCsv = csv.reader(origin_file,delimiter=',')
+    header=originCsv.next()
+    if header == ['x','y','z']:
+        origin = [ float(item) for item in originCsv.next()]
+    return origin
+
+class GetOrigin(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name = 'originFilename',
+                        interface=IStr)
+        self.add_output(name = 'originCoordinates',
+                        interface=ISequence)
+
+    def __call__( self, inputs ):
+        originFilename= self.get_input( 'originFilename' )
+        return getOrigin(originFilename)
+#end GetOrigin
+
+#################################################################
 def gridFile2Dict(gridfilename):
-    '''    Makse a dictionnary from file that contains plants indexes inside a 2D grid.
+    '''    Makes a dictionnary from file that contains plants indexes inside a 2D grid.
     '''
     dictofindices = None; 
     # write the node code here.

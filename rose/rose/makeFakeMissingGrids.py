@@ -25,6 +25,8 @@ def InstallGrids():
     TrueOnes=RealsProc.stdout.read()
     TrueOnes=TrueOnes.split("\n")
     TrueOnes.remove("")
+    positions="positions.txt"
+    origine="origin.txt"
     for manip in dicManips.keys():
         print "manip %s" %manip
         #if re.search(manip, TrueFile):
@@ -39,7 +41,7 @@ def InstallGrids():
                 Target="2011-%s-P%d.txt" % (sousManip, prel) 
                 if Target in TrueOnes :
                     print " ---------- Got one!"
-                    sCommande = "cp %s %s" % (Target, fullPath)
+                    sCommande = "cp %s %s/%s" % (Target, fullPath, positions )
                     #print sCommande
                     #os.system(sCommande)
                     
@@ -47,9 +49,19 @@ def InstallGrids():
                     print " ---------- Nope..."
                     FakeFile="2011-%s-P%d.fake" % (sousManip, prel)
                     sCommande = "cp %s %s/%s" % \
-                        (FakeFile ,fullPath ,Target )
+                        (FakeFile ,fullPath ,positions )
                 print sCommande
                 os.system(sCommande)
+                # Origine
+                # TODO : find out what is the origin for Manip3_C1C2
+                # and set up this code properly
+                if re.search("C1",fullPath):
+                    sCommande = "cp C1_origine.txt %s/%s" %(fullPath , origine)
+                else:
+                    sCommande = "cp C2_origine.txt %s/%s"%(fullPath , origine)
+                print sCommande
+                os.system(sCommande)
+                   
                 #continue
                             
                                 
