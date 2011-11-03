@@ -28,7 +28,8 @@ def computeUpAxis(front,side):
     """ Computes and returns a vector that is normal to front and
     supposed to point upside the half leaflet
     """
-    Up=side^front
+    #Up=side^front
+    Up=front^side
     Up.normalize()
     return Up
 # end computeUpAxis
@@ -127,11 +128,11 @@ def builtBud(stride=10):
         para=Paraboloid(step* 1.732,step*7.1,0.4,True, lStride,lStride)
         turtle.customGeometry(para,1)
 
-        # visual control test
+        ## visual control test
         #turtle.move(topPt)
         #turtle.setColor(0)
         #turtle.customGeometry(Sphere(step/2.), 1)
-        # end test
+        ## end test
         #turtle.move(Vector3(0,0,1) * step*1.5)
         
         turtle.pop()
@@ -219,8 +220,7 @@ def revolutionBud(revVol=None):
         # ifever a bud grows along the x axis :
         if abs(norm(upAxis)) < 0.001 :
             upAxis=computeUpAxis(budAxis,Vector3(0,1,0))
-        lateralAxis = computeLateralAxis(budAxis,upAxis)
-        turtle.setHead(budAxis, lateralAxis) # ?? #
+        turtle.setHead(budAxis, upAxis) 
         #print length
         revBud=Scaled(Vector3(length *0.2, length *0.2, length),  revVol)
         #revBud=Oriented(upAxis, budAxis, revBud)
@@ -231,7 +231,7 @@ def revolutionBud(revVol=None):
         #turtle.move(topPt)
         #turtle.setColor(0)
         #turtle.customGeometry(Sphere(length/12.), 1)
-        # end test # SUCCESSFUL @ 20111019
+        ## end test # SUCCESSFUL @ 20111019
 
         turtle.pop()
 
@@ -316,13 +316,24 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
         # Half leaflets
         # A: the /right/ leaflet ("right" accordingly to the digitization protocol : 
         # the ending leaflet close to the observer).
-        # Note that the points 2 and 4 of most leaflets has been swapped in order to turn
+        # Note that the points 2 and 4 of most leaflets has been swapped in
+        # the program that converts the txt files to MTGs in order to turn
         # the leaflets upside-down in the MTG building, so that they get oriented UP.
         # So we treat the data as if the folks had turned CCw to digitize the leaflets.
-        # 1st : compute the lateral axis of the right part of the leaflet
+        # 1st : compute the up axis of the (new) left(*) part of the leaflet
+        # (*) left is seen from the bottom of the leaflet.
         #
-        # DBG : anti-3points leaflets
-        # side=points[-1]-points[0]
+
+        # jessica's code for  building the mesh
+        # I tried to use zMesh, but it has had no efect.
+        ls_pts=[Vector3(0.,0.,0.)]
+        for i in xrange(len(xMesh)-1):
+            ls_pts.append(Vector3(xMesh[i],yMesh[i],0))
+            ls_pts.append(Vector3(xMesh[i],0,0))
+        ls_pts.append(Vector3(1.,0.,0.))
+
+        # leftmost leaflet
+        # Up Axis
         side=points[3]-points[0]
         sideLength=norm(side)
         side.normalize()
@@ -330,59 +341,38 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
         # dbg
         if abs(norm(Up)) < 0.001 :
             print "Z.bug= %s" % points[0][2]
-        Lateral = -computeLateralAxis(Axis,Up)
-        # for debug purposes ()
-
-        # Debug information
-        #print "A:%s"% Axis
-        #print "L:%s"% Lateral
-        #print "U:%s"% Up
         
         # 2nd : compute the width of the right half leaflet (sin(angle) * sideLength)
-        halfWidth =  sideLength * norm(side^Axis)
+        halfWidth =  sideLength * norm(Axis^side)
 
-        # jessica's code for  building the mesh
-        # I tried to use zMesh, but it has had no efect.
-        ls_pts=[Vector3(0.,0.,0.)]
-        for i in xrange(len(xMesh)-1):
-            ls_pts.append(Vector3(xMesh[i],-yMesh[i],0))
-            ls_pts.append(Vector3(xMesh[i],0,0))
-        ls_pts.append(Vector3(1.,0.,0.))
-        # we reverse them triangles Cwise
+        # we reverse them triangles Clock wise
         ls_ind=[Index3(0,2,1),Index3(1,2,3),Index3(2,4,3),Index3(3,4,5),Index3(4,6,5),Index3(5,6,7)]        
         triangleSet=TriangleSet(Point3Array(ls_pts),Index3Array(ls_ind))
 
         geom=triangleSet
-        #turtle.push() #try
         geom=Scaled((axisLength,halfWidth,1),geom)
-        # Oriented() makes the ribs where the polygon leaf doesn't.
-        #geom=Oriented(Axis,Lateral,geom)
-        # setHead() works when swapping arguments relatively to the 
-        # error message we get when calling setHead with no arguments.
+        # setHead() sets the turtle such as the xy plane is displayed by it side 
         turtle.setHead(Up,Axis)
+        # TEST turtle.customGeometry(Cone(5,25), 1)
         turtle.customGeometry(geom, 1)
 
-        # Half left leaflet
-        # 3 : compute the  lateral axis
+        # Rightmost leaflet
+        # Up Axis
         side=points[1]-points[0]
         sideLength=norm(side)
         side.normalize()
         Up=computeUpAxis(Axis,side)
-        Lateral = -computeLateralAxis(Axis,Up)
-        #print Lateral
         
-        # 4 : compute the width of the left half leaflet
+        #  compute the width of the right half leaflet
         halfWidth =  sideLength * norm(side^Axis)
 
-        # list of index (CCwise)   
+        # list of index Counter clock wise)   
         ls_ind=[Index3(0,1,2),Index3(1,3,2),Index3(2,3,4),Index3(3,5,4),Index3(4,5,6),Index3(5,7,6)]
         triangleSet=TriangleSet(Point3Array(ls_pts),Index3Array(ls_ind))
-
         geom=triangleSet
         geom=Scaled((axisLength,halfWidth,1),geom)
-        #geom=Oriented(Axis,Lateral,geom)
         # setHead() see previously
-        turtle.setHead(Up,Axis)
+        turtle.setHead(Up, Axis)
         turtle.customGeometry(geom, 1)
 
 #P        # polygon code for testing if it maps the meshed leaves
@@ -409,6 +399,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
 #S        barycenter = sum(points, Vector3())/len(points)
 #S        distance = barycenter-points[0] 
 #S        radius = norm(distance)/10.
+#S        Lateral = computeLateralAxis(Axis, Up)
 #S        turtle.setHead(Lateral,distance)
 #S        geometry= Translated(Vector3(radius*10,0,0), Sphere(radius))
 #S        turtle.setColor(0) # grey 
@@ -539,8 +530,15 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
         # mat=Material(Color3(255,127,127)) # just 6 colors here
         turtle.setColor(4) # kind of yellow-green
 
+        # TODO : orient the turtle by a generic way and make a func'
+        flowerAxis=topPos-basePos
+        upAxis=computeUpAxis(Vector3(1,0,0),flowerAxis)
+        # ifever a bud grows along the x axis :
+        if abs(norm(upAxis)) < 0.001 :
+            upAxis=computeUpAxis(Vector3(0,1,0),flowerAxis)
+        turtle.setHead(flowerAxis,upAxis)
+
         turtle.customGeometry(ovary, 1) # 
-        #petalMesh=Translated(Vector3(flowerRay * 0.01 , 0, 0), petalMesh)
 
         # TODO : compute the closing angle of the petals from height and width
         turtle.setColor(3) # red
@@ -556,6 +554,12 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
                                          0),\
                                  petal)
             turtle.customGeometry(petal, 1) #flowerHeight) #  
+
+        ## visual control test 
+        #turtle.move(topPos)
+        #turtle.setColor(0)
+        #turtle.customGeometry(Sphere(flowerHeight/10.), 1)
+        ## successful @20111003 : sphere in flower axis
 
         turtle.pop()
 
