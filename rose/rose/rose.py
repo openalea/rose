@@ -12,6 +12,7 @@ from openalea.mtg.algo import union
 from openalea.core.external import *
 from openalea.core.logger  import *
 
+
 def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13, n_y=6, s_x=150, s_y=150, origin=(0, 0, 800), DoFill=True, DoRotate=True):
     '''    Generates a dictionnary of filenames associated with one or more position and orientation.
     '''
@@ -427,4 +428,4 @@ class MTG_union(Node):
         mtgsin= self.get_input( 'mtgsin' )
         return mTG_union(mtgsin)
 #end mTG_union
-#################################################################
+

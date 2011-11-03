@@ -8,7 +8,11 @@ from openalea.mtg.plantframe import *
 from openalea.core.external import * 
 from openalea.core.logger  import *
 
-#import openalea.plantgl.all as pgl
+# for TurtleFrame
+import openalea.plantgl.all as pgl
+from openalea.mtg.turtle import pre_order2_with_filter
+#from openalea.mtg.plantframe import *
+from openalea.mtg.traversal import pre_order2_with_filter
 
 def computeLateralAxis(front, up):
     """ Computes and returns a vector that is
@@ -192,7 +196,7 @@ def revolution(points=None, stride=8):
 def revolutionBud(revVol=None):
     ''' We return a func that draws a bud from a revolution volume '''
     if revVol is None:
-        revVol=revolution(pointArray())
+        revVol=revolution(budArray())
     def drawRevBud(points, turtle=None):
             
         botPt=points[0]
@@ -253,7 +257,7 @@ class BudArray(Node):
 class RevolutionFig(Node):
     def __init__(self):
         Node.__init__(self)
-        self.add_input( name = 'pointArray', interface = ISequence )
+        self.add_input( name = 'pointArray', interface = ISequence, value=None )
         self.add_input( name = 'stride', interface = IInt,  value=8)
         self.add_output( name = 'rev_fig', 
                          interface = IData )
@@ -265,13 +269,23 @@ class RevolutionFig(Node):
 class RevolutionBud(Node):
     def __init__(self):
         Node.__init__(self)
-        self.add_input( name = 'revFig', interface = IData )
+        self.add_input( name = 'revFig', interface = IData, value=None )
         self.add_output( name = 'rev_bud', 
                          interface = IFunction )
     def __call__( self, inputs ):
         revFig=self.get_input('revFig')
         return (revolutionBud(revFig))
    
+ ## GROUPING items for buds
+class drawBuds(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'budsComputers', 
+                         interface = ISequence )
+
+    def __call__( self, inputs ):
+        return (noThing, rawBud(), builtBud(), revolutionBud() )
+    
 
 ################################################ LEAFLET
 def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
@@ -456,6 +470,16 @@ class PolygonLeaflet(Node):
     def __call__( self, inputs ):
         return polygonLeaflet()
 
+ ## GROUPING items for leaves
+class drawLeaves(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'leavesComputers', 
+                         interface = ISequence )
+
+    def __call__( self, inputs ):
+        return (noThing, rawLeaflet, computeLeaflet4pts() )
+    
 
 ######################################## FLOWER
 def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
@@ -463,14 +487,19 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
     bpFlower=None
     #print "BezierPatchFlower called ; uStride is %s" % ustride
     # write the node code here.
+    lControlpointmatrix=controlpointmatrix
+
+    #print "controlpointmatrix = %s" % controlpointmatrix
+    if controlpointmatrix is None:
+        # the return value of ctrlpointMatrix() yields an error. Why ?
+        lControlpointmatrix= [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],[Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],[Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],[Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
+    #print "lControlpointmatrix = %s" % lControlpointmatrix
+        
     def bpFlower(points, turtle=None,):
         ''' computes a flower from two points and the diameters associated to 
         the flower.
         @param points : list of pairs[Vector3, scalar] resp. (position;diameter)
         '''
-        if controlpointmatrix is None:
-            return
-        #else:  print "controlpointmatrix = %s" % controlpointmatrix
         luStride=ustride
         lvStride=vstride
         if luStride < 5:
@@ -489,7 +518,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
         petalLength=math.sqrt(flowerHeight*flowerHeight + deltaRay*deltaRay)
 
         # we build the generic patch
-        petalMesh=BezierPatch(controlpointmatrix,luStride, lvStride)
+        petalMesh=BezierPatch(lControlpointmatrix,luStride, lvStride)
         # patch is scaled according to the global flower dimensions
         petalMesh=Scaled(Vector3(petalLength,max(baseRay,flowerRay)*1.1,baseRay),petalMesh)
         # 
@@ -536,7 +565,7 @@ class BezierPatchFlower(Node):
     ''' '''
     def __init__(self):
         Node.__init__(self)
-        self.add_input( name='controlpointmatrix', interface=IData)
+        self.add_input( name='controlpointmatrix', interface=ISequence, value=None)
         self.add_input(name='ustride', interface=IInt)
         self.add_input(name='vstride', interface=IInt)
         self.add_output( name = 'compute_flower', interface = IFunction )
@@ -580,6 +609,17 @@ class RawFlower(Node):
 
     def __call__( self, inputs ):
         return coneFlower()
+
+ ## GROUPING items for flowerss
+class drawFlowers(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'flowersComputers', 
+                         interface = ISequence )
+
+    def __call__( self, inputs ):
+        return (noThing, coneFlower(), bezierPatchFlower() )
+
 ########################################""
 
 def noThing(points, turtle=None):
@@ -605,17 +645,18 @@ class NoOrgan(Node):
 
 ########################################
 
+ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],[Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],[Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],[Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
+
 def ctrlpointMatrix():
     '''    control point matrix for bezier patches
     '''
-    ctpm = None; 
+    #ctpm = None; 
     # write the node code here.
     # with a scale factor : seems to cause problems with Translate
     #ctpm = [[Vector4(0,0,0,7.),Vector4(0,0,0,7.)],[Vector4(2,-2,-0.8,7.),Vector4(2,2,-0.8,7.)],[Vector4(4,-4,-1.2,7.),Vector4(4,4,-1.2,7.)],[Vector4(6,-5,-1.5,7.),Vector4(6,5,-0.5,7.)],[Vector4(7,0,0,7.),Vector4(7,0,0,7.)]]
     # the previous, normalized 
     #ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,-0.13,1),Vector4(0.28,0.38,-0.13,1)],[Vector4(.56,-0.56,-0.17,1),Vector4(.56,0.56,-0.17,1)],[Vector4(0.86,-0.7,-0.21,1),Vector4(.86,.7,-0.01,1)],[Vector4(1,-0.25,0,1),Vector4(1,0.25,0,1)]]
     # a new shape
-    ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],[Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],[Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],[Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
 
     # return outputs
     return ctpm,
@@ -678,17 +719,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
-
-            # Odd code 4 testing
-            #turtle.push()
-            #barycenter = sum(points, Vector3())/len(points)
-            #distance = barycenter-points[0]
-            #radius = norm(distance)/10.
-            #geometry= Translated(distance, Sphere(radius))
-            #turtle.setColor(3)
-            #turtle.customGeometry(geometry, 1)
-            #turtle.pop()
-            # End odd code
             leaf_computer(points,turtle)
 	    
         elif n.label == "B1" :
@@ -697,21 +727,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
                 n = list(n.children())[0]
                 points.append(position(n))
             bud_computer(points,turtle)
-#B            # 4 testing
-#B            oldPt=turtle.getPosition()
-#B            radiusOfBud=(pt-oldPt)*0.5
-#B            centerOfBud=oldPt + radiusOfBud
-#B            turtle.oLineTo(centerOfBud)
-#B            turtle.push()
-#B            #turtle.incColor()
-#B            turtle.setColor(4) # apple green
-#B            radius = norm(radiusOfBud)
-#B            geometry=  Sphere(radius)
-#B            #return Translated(distance, Sphere(radius))
-#B            #geom = leaf_factory(points)
-#B            turtle.customGeometry(geometry, 1)
-#B            turtle.pop()
-#B            turtle.setWidth(radius*.8)
 
         elif n.label == "O1" :
             #turtle.oLineTo(pt) # pt is the top of the flower
@@ -747,3 +762,89 @@ class VertexVisitor(Node):
         bud_factory=self.get_input('bud_factory')
         flower_factory=self.get_input('flower_factory')
         return vertexVisitor(leaf_factory,bud_factory,flower_factory)
+
+
+#################################### ReconstructionWithTurtle ##########
+
+#### Copy from mtg.turtle ###
+def traverse_with_turtle(g, vid, visitor, turtle=None):
+    if turtle is None:
+        turtle = PglTurtle()
+
+    def push_turtle(v):
+        if g.edge_type(v) == '+':
+            turtle.push()
+            #turtle.startGC()
+            turtle.setId(v)
+        return True
+
+    def pop_turtle(v):
+        if g.edge_type(v) == '+':
+            #turtle.stopGC()
+            turtle.pop()
+
+    turtle.push()
+    turtle.startGC()
+
+    visitor(g,vid,turtle)
+    turtle.stopGC()
+    for v in pre_order2_with_filter(g, vid, None, push_turtle, pop_turtle):
+        if v == vid: continue
+        turtle.startGC()
+        visitor(g,v,turtle)
+        turtle.stopGC()
+    turtle.pop()
+    return turtle.getScene()
+ 
+######################################################
+def TurtleFrame(g, visitor):
+    n = g.max_scale()
+    turtle = pgl.PglTurtle()
+    #
+    for plant_id in g.vertices(scale=1):
+        plant_node = g.node(plant_id)
+        # moved the "position" function away
+        origin = pgl.Vector3(plant_node.XX, plant_node.YY, plant_node.ZZ)
+        turtle.move(origin)
+
+        vid =  g.component_roots_at_scale(plant_id, scale=n).next()
+        traverse_with_turtle(g, vid, visitor, turtle)
+    return turtle.getScene()
+
+def reconstructWithTurtle(g, visitor, powerParam):
+    '''    builds a scene from "4pts leaflet" MTGs
+    
+    .. todo:: Add some constant in the arguments
+    '''
+    # Compute the radius with pipe model
+    theScene=None
+    diameter = g.property('Diameter')
+    for v in g:
+        if g.class_name(v) == 'R':
+            diameter[v] = 0.75
+
+    drf = DressingData(LeafClass=['F', 'S'], 
+        FlowerClass='O', FruitClass='B',
+        MinTopDiameter=dict(E=0.5))
+    pf = PlantFrame(g, TopDiameter='Diameter', DressingData=drf, 
+        Exclude = 'F S O B T'.split())
+    diameter = pf.algo_diameter(power=powerParam)
+    g.properties()['Diameter'] = diameter
+    theScene=TurtleFrame(g, visitor)
+    # return outputs
+    return theScene,
+
+class ReconstructWithTurtle(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name = 'g', interface=IData)
+        self.add_input( name = 'Visitor', interface=IFunction)
+        self.add_input( name = 'powerParam', value=2.2, interface=IFloat)
+        self.add_output(name = 'TheScene', interface = IData)
+
+    def __call__( self, inputs ):
+        g = self.get_input( 'g' )
+        Visitor = self.get_input( 'Visitor' )
+        powerParam = self.get_input( 'powerParam' )
+        return reconstructWithTurtle(g, Visitor, powerParam)
+#end ReconstructWithTurtle
