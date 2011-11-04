@@ -34,6 +34,14 @@ def computeUpAxis(front,side):
     return Up
 # end computeUpAxis
 
+def headTo(turtle, direction):
+    direction.normalize()
+    upAxis=computeUpAxis(direction, Vector3(1,0,0))
+    # ifever the direction  goes along the x axis :
+    if abs(norm(upAxis)) < 0.001 :
+        upAxis=computeUpAxis(direction, Vector3(0,1,0))
+    turtle.setHead(direction,upAxis)
+
 def printPoints(points):
     """ debug info """
     print "Zs : %7.3f  %7.3f %7.3f %7.3f"%(points[0][2],points[1][2],points[2][2],points[3][2])
@@ -102,14 +110,9 @@ def builtBud(stride=10):
         # prolongation of ped
         turtle.oLineTo(points[0])
         turtle.setColor(4) # 
-       
-        # we must orient the turtle before to draw 
-        # this makes better fitting of the sphere and the paraboloid
-        upAxis=computeUpAxis(budAxis,Vector3(1,0,0))
-        # ifever a bud grows along the x axis :
-        if abs(norm(upAxis)) < 0.001 :
-            upAxis=computeUpAxis(budAxis,Vector3(0,1,0))
-        turtle.setHead(budAxis,upAxis)
+        ## we must orient the turtle before to draw 
+        ## this makes better fitting of the sphere and the paraboloid
+        headTo(turtle,budAxis)
 
         #radiusOfOvary=step /12. 
         #centerOfOvary=botPt + budAxis/12.
@@ -216,12 +219,8 @@ def revolutionBud(revVol=None):
         turtle.setColor(4) # 
        
         # we must orient the turtle before to draw 
-        upAxis=computeUpAxis(budAxis,Vector3(1,0,0))
-        # ifever a bud grows along the x axis :
-        if abs(norm(upAxis)) < 0.001 :
-            upAxis=computeUpAxis(budAxis,Vector3(0,1,0))
-        turtle.setHead(budAxis, upAxis) 
-        #print length
+        headTo(turtle,budAxis)
+
         revBud=Scaled(Vector3(length *0.2, length *0.2, length),  revVol)
         #revBud=Oriented(upAxis, budAxis, revBud)
         # we are ready to draw the rev'bud
@@ -288,6 +287,13 @@ class drawBuds(Node):
     
 
 ################################################ LEAFLET
+def  displayNormalVector(turtle,points,color):
+    turtle.push()
+    turtle.move(points[0] +(points[2]-points[0]) *.5)
+    turtle.setColor(color)
+    turtle.customGeometry(Cone(2,13), 1)
+    turtle.pop()
+
 def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
     '''    compute leaflet geometry from 4 points
     '''
@@ -324,6 +330,20 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
         # (*) left is seen from the bottom of the leaflet.
         #
 
+
+        # leftmost leaflet
+        # normal Axis
+        side=points[3]-points[0]
+        sideLength=norm(side)
+        side.normalize()
+        normAxis=computeUpAxis(Axis,side)
+        # dbg
+        if abs(norm(normAxis)) < 0.001 :
+            print "Z.bug= %s" % points[0][2]
+        
+        # 2nd : compute the width of this half leaflet (sin(angle)*sideLength)
+        halfWidth =  sideLength * norm(Axis^side)
+
         # jessica's code for  building the mesh
         # I tried to use zMesh, but it has had no efect.
         ls_pts=[Vector3(0.,0.,0.)]
@@ -331,49 +351,44 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
             ls_pts.append(Vector3(xMesh[i],yMesh[i],0))
             ls_pts.append(Vector3(xMesh[i],0,0))
         ls_pts.append(Vector3(1.,0.,0.))
-
-        # leftmost leaflet
-        # Up Axis
-        side=points[3]-points[0]
-        sideLength=norm(side)
-        side.normalize()
-        Up=computeUpAxis(Axis,side)
-        # dbg
-        if abs(norm(Up)) < 0.001 :
-            print "Z.bug= %s" % points[0][2]
-        
-        # 2nd : compute the width of the right half leaflet (sin(angle) * sideLength)
-        halfWidth =  sideLength * norm(Axis^side)
-
-        # we reverse them triangles Clock wise
+        # we build triangles C O U N T E R Clockwise
         ls_ind=[Index3(0,2,1),Index3(1,2,3),Index3(2,4,3),Index3(3,4,5),Index3(4,6,5),Index3(5,6,7)]        
         triangleSet=TriangleSet(Point3Array(ls_pts),Index3Array(ls_ind))
 
         geom=triangleSet
         geom=Scaled((axisLength,halfWidth,1),geom)
-        # setHead() sets the turtle such as the xy plane is displayed by it side 
-        turtle.setHead(Up,Axis)
-        # TEST turtle.customGeometry(Cone(5,25), 1)
+        #setHead sets the turtle such as the xy plane is displayed by it side 
+        turtle.setHead(normAxis,Axis)
         turtle.customGeometry(geom, 1)
 
+        # 4 testing : display normal vector for this half-leaflet
+        displayNormalVector(turtle,points,0)
+
         # Rightmost leaflet
-        # Up Axis
+        # normAxis Axis
         side=points[1]-points[0]
         sideLength=norm(side)
         side.normalize()
-        Up=computeUpAxis(Axis,side)
+        normAxis=computeUpAxis(side, Axis)
         
         #  compute the width of the right half leaflet
         halfWidth =  sideLength * norm(side^Axis)
 
-        # list of index Counter clock wise)   
+        # we change the sign of the y coordinates of the mesh
+        for meshPoint in ls_pts:
+            meshPoint[1] *= -1.
+        # As the Y coordinate has changed its sign, we build 
+        # the triangles C C W again.
         ls_ind=[Index3(0,1,2),Index3(1,3,2),Index3(2,3,4),Index3(3,5,4),Index3(4,5,6),Index3(5,7,6)]
         triangleSet=TriangleSet(Point3Array(ls_pts),Index3Array(ls_ind))
         geom=triangleSet
         geom=Scaled((axisLength,halfWidth,1),geom)
         # setHead() see previously
-        turtle.setHead(Up, Axis)
+        turtle.setHead(normAxis, Axis)
         turtle.customGeometry(geom, 1)
+
+        # 4 testing
+        displayNormalVector(turtle,points,3)
 
 #P        # polygon code for testing if it maps the meshed leaves
 #P        turtle.push()
@@ -399,7 +414,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
 #S        barycenter = sum(points, Vector3())/len(points)
 #S        distance = barycenter-points[0] 
 #S        radius = norm(distance)/10.
-#S        Lateral = computeLateralAxis(Axis, Up)
+#S        Lateral = computeLateralAxis(Axis, normAxis)
 #S        turtle.setHead(Lateral,distance)
 #S        geometry= Translated(Vector3(radius*10,0,0), Sphere(radius))
 #S        turtle.setColor(0) # grey 
@@ -530,14 +545,9 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
         # mat=Material(Color3(255,127,127)) # just 6 colors here
         turtle.setColor(4) # kind of yellow-green
 
-        # TODO : orient the turtle by a generic way and make a func'
+        #  orient the turtle 
         flowerAxis=topPos-basePos
-        upAxis=computeUpAxis(Vector3(1,0,0),flowerAxis)
-        # ifever a bud grows along the x axis :
-        if abs(norm(upAxis)) < 0.001 :
-            upAxis=computeUpAxis(Vector3(0,1,0),flowerAxis)
-        turtle.setHead(flowerAxis,upAxis)
-
+        headTo(turtle,flowerAxis)
         turtle.customGeometry(ovary, 1) # 
 
         # TODO : compute the closing angle of the petals from height and width
