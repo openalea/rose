@@ -1,0 +1,129 @@
+#! /usr/bin/env python
+# -*- coding: iso-8859-1 -*-
+
+from openalea.mtg.plantframe import *
+""" there are 5 builtin colors in oa.mtg.plantframe :
+    0 : kind of black
+    1 : copper
+    2 : green
+    3 : red
+    4 : sort of yellow
+    So we add up colors from the electrical color code from 11 to 19,
+      and next will be pastels.
+    # we do neither define nor use all of these colors for now
+    """
+brown=11
+red=12
+orange=13
+yellow=14
+green=15
+blue=16
+purple=17
+grey=18
+white=19
+# Newt will be pastels useful for roses
+lightGrey=20
+lightBrown=21
+pink=22
+lightOrange=23
+lightYellow=24
+lightGreen=25
+lightBlue=26
+lightPurple=27
+perlGrey=28
+brokenWhite=29
+
+def Blue():
+    return Color3(80,80,255)
+def LightBlue():
+    return Color3(127,192,255) 
+def Brown():
+    return Color3(70,32,10) 
+def LightBrown():
+    return Color3(139,69,19) # from SaddleBrown in /usr/share/X11/rgb.txt
+def Green():
+    return Color3(80,255,80)   # flashy green
+def LightGreen():
+    return Color3(176,255,176)
+def LightGrey():
+    return Color3(192,192,192)
+def PerlGrey():
+    return Color3(228,228,228)
+def Orange():
+    return Color3(255,127,0)
+def LightOrange():
+    return Color3(255,192,127)
+def Purple():
+    return Color3(255,80,255)
+def LightPurple():
+    return Color3(255,144,255)
+def Pink():
+    return Color3(255,192,203)
+def White():
+    return Color3(255,255,255)
+def BrokenWhite():
+    return Color3(240,240,240)
+def Yellow():
+    return Color3(240,240,16)
+def LightYellow():
+    return Color3(250,250,192)
+
+def setTurtleBlue(t):
+    t.setColorAt(blue, Blue())
+    t.setColor(blue) 
+def setTurtleLightBlue(t):
+    t.setColorAt(lightBlue, LightBlue())
+    t.setColor(lightBlue) 
+
+def setTurtleBrown(t):
+    t.setColorAt(brown, Brown())
+    t.setColor(brown) 
+def setTurtleLightBrown(t):
+    t.setColorAt(lightBrown, LightBrown())
+    t.setColor(lightBrown) 
+
+def setTurtleGreen(t):
+    t.setColorAt(green, Green())
+    t.setColor(green) 
+def setTurtleLightGreen(t):
+    t.setColorAt(lightGreen, LightGreen())
+    t.setColor(lightGreen) 
+
+def setTurtleOrange(t):
+    t.setColorAt(orange, Orange())
+    t.setColor(orange) 
+def setTurtleLightOrange(t):
+    t.setColorAt(lightOrange, LightOrange())
+    t.setColor(lightOrange) 
+
+def setTurtleLightGrey(t):
+    t.setColorAt(lightGrey, LightGrey())
+    t.setColor(lightGrey) 
+def setTurtlePerlGrey(t):
+    t.setColorAt(perlGrey, PerlGrey())
+    t.setColor(perlGrey) 
+
+def setTurtlePink(t):
+    t.setColorAt(pink, Pink())
+    t.setColor(pink) 
+
+def setTurtlePurple(t):
+    t.setColorAt(purple, Purple())
+    t.setColor(purple) 
+def setTurtleLightPurple(t):
+    t.setColorAt(lightPurple, LightPurple())
+    t.setColor(lightPurple) 
+
+def setTurtleWhite(t):
+    t.setColorAt(white,White())
+    t.setColor(white) 
+def setTurtleBrokenWhite(t):
+    t.setColorAt(brokenWhite, BrokenWhite())
+    t.setColor(brokenWhite) 
+
+def setTurtleYellow(t):
+    t.setColorAt(yellow,Yellow())
+    t.setColor(yellow) 
+def setTurtleLightYellow(t):
+    t.setColorAt(lightYellow, LightYellow())
+    t.setColor(lightYellow) 
