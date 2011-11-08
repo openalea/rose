@@ -14,6 +14,9 @@ from openalea.mtg.turtle import pre_order2_with_filter
 #from openalea.mtg.plantframe import *
 from openalea.mtg.traversal import pre_order2_with_filter
 
+def Pink():
+    return Color3(255,64,127)
+
 def computeLateralAxis(front, up):
     """ Computes and returns a vector that is
     - normal to front 
@@ -501,7 +504,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
         lControlpointmatrix= [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],[Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],[Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],[Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
     #print "lControlpointmatrix = %s" % lControlpointmatrix
         
-    def bpFlower(pointsnDiamters, turtle=None,):
+    def bpFlower(pointsnDiameters, turtle=None,):
         ''' computes a flower from two points and the diameters associated to 
         the flower.
         @param points : list of pairs[Vector3, scalar] resp. (position;diameter)
@@ -514,6 +517,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
             lvStride = 5
         #ustride=5 
         #vstride=5 
+
         basePos=pointsnDiameters[0][0]
         topPos=pointsnDiameters[1][0]
         pedDiam=pointsnDiameters[0][1]
@@ -542,15 +546,19 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
         ovary=Sphere(baseRay ,luStride)
 
         turtle.push() # we draw now
-        turtle.setColor(4) # kind of yellow-green
+        # let color nr3 be some pink 
+        turtle.setColorAt(3,Pink())
 
         #  orient the turtle 
         flowerAxis=topPos-basePos
         headTo(turtle,flowerAxis)
+        turtle.setColor(4) # kind of yellow-green
         turtle.customGeometry(ovary, 1) # 
 
         # TODO : compute the closing angle of the petals from height and width
-        turtle.setColor(3) # red
+        # T R Y turtle.Material & family
+        turtle.setColor(3) # custom 
+
         for iIndex in range(0,5):
             # closing the flower : 
             petal=AxisRotated((0,1,0),-pitchAngle,petalMesh)
@@ -587,6 +595,7 @@ class BezierPatchFlower(Node):
         controlpointmatrix=self.get_input('controlpointmatrix')
         ustride=self.get_input('ustride')
         vstride=self.get_input('vstride')
+        
         return bezierPatchFlower(controlpointmatrix, ustride, vstride)
         #return bezierPatchFlower()
     
@@ -604,6 +613,8 @@ def rawFlower(pointsnDiameters, turtle=None):
     '''
     # 
     turtle.push()
+    # let color nr3 be some pink 
+    turtle.setColorAt(3,Pink())
     turtle.setColor(3) # red
     #print "point= %s" % pointsnDiameters
    
@@ -623,24 +634,24 @@ class RawFlower(Node):
     def __call__( self, inputs ):
         return coneFlower()
 
-def taperedFlower(controlpointmatrix=None,ustride=8,vstride=8):
+def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8):
     ''' interface to return bpFlower ''' 
     bpFlower=None
     #print "BezierPatchFlower called ; uStride is %s" % ustride
     # write the node code here.
-    lControlpointmatrix=controlpointmatrix
+    lCtrlPntMatrix=ctrlPntMatrix
 
-    #print "controlpointmatrix = %s" % controlpointmatrix
-    if controlpointmatrix is None:
+    #print "ctrlPntMatrix = %s" % ctrlPntMatrix
+    if ctrlPntMatrix is None:
         # the return value of ctrlpointMatrix() yields an error. Why ?
-        lControlpointmatrix= [[Vector4(0,-0.40,0,1),Vector4(0,0.4,0,1)],
-                              [Vector4(0.28,-0.45,0.08,1),Vector4(0.28,0.45,0.08,1)],
-                              [Vector4(.56,-0.45,0.31,1),Vector4(.56,0.45,0.31,1)],
-                              [Vector4(0.86,-0.45,0.73,1),Vector4(.86,0.45,0.75,1)],
-                              [Vector4(0.95,-0.5,0.9,1),Vector4(.96,0.5,0.9,1)],
-                              [Vector4(0.98,-0.45,0.96,1),Vector4(.98,.45,0.96,1)],
-                             [Vector4(1,-0.10,1,1),Vector4(1,0.10,1,1)]]
-    #print "lControlpointmatrix = %s" % lControlpointmatrix
+        lCtrlPntMatrix= [[Vector4(0,-0.40,0,1),Vector4(0,0.4,0,1)],
+                         [Vector4(0.28,-0.45,0.08,1),Vector4(0.28,0.45,0.08,1)],
+                         [Vector4(.56,-0.45,0.31,1),Vector4(.56,0.45,0.31,1)],
+                         [Vector4(0.86,-0.45,0.73,1),Vector4(.86,0.45,0.75,1)],
+                         [Vector4(0.95,-0.5,0.9,1),Vector4(.96,0.5,0.9,1)],
+                         [Vector4(0.98,-0.45,0.96,1),Vector4(.98,.45,0.96,1)],
+                         [Vector4(1,-0.10,1,1),Vector4(1,0.10,1,1)]]
+    #print "lCtrlPntMatrix = %s" % lCtrlPntMatrix
         
     def tpFlower(pointsnDiameters, turtle=None,):
         ''' computes a flower from two points and the diameters associated to 
@@ -666,9 +677,12 @@ def taperedFlower(controlpointmatrix=None,ustride=8,vstride=8):
         rad5eTour=math.pi/2.5 # a fifth of a tour
 
         # we build the generic patch
-        petalMesh=BezierPatch(lControlpointmatrix,luStride, lvStride)
+        petalMesh=BezierPatch(lCtrlPntMatrix,luStride, lvStride)
 
         turtle.push()
+        # let color nr3 be some pink 
+        turtle.setColorAt(3,Pink())
+
         #  orient the turtle 
         flowerAxis=topPos-basePos
         headTo(turtle,flowerAxis)
@@ -678,7 +692,7 @@ def taperedFlower(controlpointmatrix=None,ustride=8,vstride=8):
         turtle.setColor(4) # kind of yellow-green
         turtle.customGeometry(ovary, 1) #  we draw the ovary now
 
-        turtle.setColor(3) # red
+        turtle.setColor(3) # custom
         
         # we shall draw two rows of petals
         moreRoll=0.
@@ -702,16 +716,6 @@ def taperedFlower(controlpointmatrix=None,ustride=8,vstride=8):
             else: # say half opened
                 pitchAngle=math.pi*0.5
 
-
-            ## an attempt to use openalea.mtg.plantframe.Material
-            ## fails because PglTurtle.customGeometry(PglTurtle, Shape, int) 
-            ## did not match C++ signature: 
-            ## customGeometry(PGL::PglTurtle {lvalue}, TOOLS::RefCountPtr, double)
-            #mat=Material(Color3(125,127,255))
-            #leaf=BezierPatch(controlpointmatrix,ustride, vstride)
-            #forme=Shape(leaf,mat)
-            #turtle.customGeometry(forme, 1)
-            ## R E T R Y via turtle.Material(...)
 
             # TODO : compute the closing angle of the petals from height and width
 
