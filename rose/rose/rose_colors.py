@@ -1,6 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 
+from openalea.core.external import * 
+from openalea.core.logger  import *
+
 from openalea.mtg.plantframe import *
 """ there are 5 builtin colors in oa.mtg.plantframe :
     0 : kind of black
@@ -12,6 +15,7 @@ from openalea.mtg.plantframe import *
       and next will be pastels.
     # we do neither define nor use all of these colors for now
     """
+strand=1
 brown=11
 red=12
 orange=13
@@ -59,6 +63,8 @@ def LightPurple():
     return Color3(255,144,255)
 def Pink():
     return Color3(255,192,203)
+def Strand():
+    return Color3(80,80,20) # set a realistic one
 def White():
     return Color3(255,255,255)
 def BrokenWhite():
@@ -106,6 +112,9 @@ def setTurtlePerlGrey(t):
 def setTurtlePink(t):
     t.setColorAt(pink, Pink())
     t.setColor(pink) 
+def setTurtleStrand(t):
+    t.setColorAt(strand, Strand())
+    t.setColor(strand) 
 
 def setTurtlePurple(t):
     t.setColorAt(purple, Purple())
@@ -127,3 +136,20 @@ def setTurtleYellow(t):
 def setTurtleLightYellow(t):
     t.setColorAt(lightYellow, LightYellow())
     t.setColor(lightYellow) 
+
+class ColorFuncs(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'colorFuncs', 
+                         interface = ISequence )
+
+    def __call__( self, inputs ):
+        return (setTurtleBrown, setTurtleLightBrown, 
+                setTurtleOrange, setTurtleLightOrange, 
+                setTurtleYellow, setTurtleLightYellow,
+                setTurtleGreen, setTurtleLightGreen,
+                setTurtleBlue, setTurtleLightBlue, 
+                setTurtlePink, setTurtlePurple, setTurtleLightPurple,
+                setTurtleLightGrey, setTurtlePerlGrey, 
+                setTurtleBrokenWhite,setTurtleWhite)
+    

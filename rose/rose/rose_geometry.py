@@ -55,7 +55,6 @@ def rawBud():
     def computeRawBud(points, turtle=None):
         #print "points= %s" %  points
         turtle.push()
-        turtle.setColor(4) # apple green
 
         oldPt=points[0]
         radiusOfBud=(points[1]-oldPt)*0.5
@@ -103,6 +102,7 @@ def builtBud(stride=10):
         botPt=points[0]
         topPt=points[-1]
         budAxis=Vector3(topPt-botPt)
+        # ray of the floral receptacle
         step=norm(budAxis) /12.
         budAxis.normalize()
         #print "step=%f" % step
@@ -111,15 +111,18 @@ def builtBud(stride=10):
         turtle.push() #
         # prolongation of ped
         turtle.oLineTo(points[0])
-        turtle.setColor(4) # 
+        #turtle.setColor(4) # 
         ## we must orient the turtle before to draw 
         ## this makes better fitting of the sphere and the paraboloid
         headTo(turtle,budAxis)
 
         #radiusOfOvary=step /12. 
         #centerOfOvary=botPt + budAxis/12.
+        # we prolongate the axis to intersect with the receptacle
         turtle.move(botPt + budAxis *step )
+        # the ray of the receptacle is increased by 20% to intersect the upper sphere  
         turtle.customGeometry(Sphere(step * 1.2,lStride ), 1)
+        # we draw the upper sphere of the bud (the one formd by the sepals)
         turtle.move(botPt +budAxis * step*4)
         turtle.customGeometry(Sphere(step*2, lStride ), 1)
 
@@ -215,10 +218,10 @@ def revolutionBud(revVol=None):
         turtle.push() #
         # prolongation of ped
         turtle.oLineTo(points[0])
-        turtle.push()
+        #turtle.push()
         turtle.oLineTo(points[0]+budAxis*4) # + 4 units (mm)
-        turtle.pop()
-        turtle.setColor(4) # 
+        #turtle.pop()
+        #turtle.setColor(4) # 
        
         # we must orient the turtle before to draw 
         headTo(turtle,budAxis)
@@ -317,9 +320,6 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
         turtle.push()
 
         # We compute the main rib vector as "Axis"
-        Axis=points[2]-points[0]
-        axisLength=norm(Axis)
-        Axis.normalize()
 
         # Half leaflets
         # A: the /right/ leaflet ("right" accordingly to the digitization protocol : 
@@ -332,6 +332,9 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
         # (*) left is seen from the bottom of the leaflet.
         #
 
+        Axis=points[2]-points[0]
+        axisLength=norm(Axis)
+        Axis.normalize()
 
         # leftmost leaflet
         # normal Axis
@@ -343,7 +346,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
         if abs(norm(normAxis)) < 0.001 :
             print "Z.bug= %s" % points[0][2]
         
-        # 2nd : compute the width of this half leaflet (sin(angle)*sideLength)
+        # 2nd : compute the width of this half leaflet (sideLength * sin(angle))
         halfWidth =  sideLength * norm(Axis^side)
 
         # jessica's code for  building the mesh
@@ -490,7 +493,7 @@ class drawLeaves(Node):
     
 
 ######################################## FLOWER
-def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
+def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None):
     ''' interface to return bpFlower ''' 
     bpFlower=None
     #print "BezierPatchFlower called ; uStride is %s" % ustride
@@ -502,6 +505,9 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
         # the return value of ctrlpointMatrix() yields an error. Why ?
         lControlpointmatrix= [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],[Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],[Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],[Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
     #print "lControlpointmatrix = %s" % lControlpointmatrix
+    myColorFunc=colorFunc
+    if colorFunc is None:
+        myColorFunc=setTurtlePink # custom 
         
     def bpFlower(pointsnDiameters, turtle=None,):
         ''' computes a flower from two points and the diameters associated to 
@@ -549,10 +555,10 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8):
         #  orient the turtle 
         flowerAxis=topPos-basePos
         headTo(turtle,flowerAxis)
-        turtle.setColor(4) # kind of yellow-green
+        #turtle.setColor(4) # kind of yellow-green
         turtle.customGeometry(ovary, 1) # 
 
-        setTurtleLightYellow(turtle) # custom 
+        myColorFunc(turtle)
 
         for iIndex in range(0,5):
             # closing the flower : 
@@ -584,51 +590,58 @@ class BezierPatchFlower(Node):
         self.add_input( name='controlpointmatrix', interface=ISequence, value=None)
         self.add_input(name='ustride', interface=IInt)
         self.add_input(name='vstride', interface=IInt)
+        self.add_input( name='colorFunc', interface=IFunction, value=None)
         self.add_output( name = 'compute_flower', interface = IFunction )
         
     def __call__( self, inputs ): 
         controlpointmatrix=self.get_input('controlpointmatrix')
         ustride=self.get_input('ustride')
         vstride=self.get_input('vstride')
+        colorFunc=self.get_input('colorFunc')
         
-        return bezierPatchFlower(controlpointmatrix, ustride, vstride)
+        return bezierPatchFlower(controlpointmatrix, ustride, vstride, colorFunc)
         #return bezierPatchFlower()
     
 ########################################
-def coneFlower():
+def coneFlower(colorFunc=None):
     """ default function to draw up a flower 
     """
     # write the node code here.
+    myColorFunc=colorFunc
+    if colorFunc is None:
+        myColorFunc=setTurtlePink # custom 
+        
+    def rawFlower(pointsnDiameters, turtle=None):
+        '''    computes a flower from 2 pairs [position, diameter]
+        '''
+        # 
+        turtle.push()
+        # 
+        myColorFunc(turtle)
+        #print "point= %s" % pointsnDiameters
+        
+        turtle.oLineTo(pointsnDiameters[0][0])
+        Diameter=pointsnDiameters[1][1]
+        turtle.oLineTo(pointsnDiameters[1][0])
+        turtle.setWidth(Diameter*.5)
+        turtle.pop()
+        # end rawFlower
     # return outputs
     return rawFlower,
 # end coneFlower
 
-def rawFlower(pointsnDiameters, turtle=None):
-    '''    computes a flower from 2 pairs [position, diameter]
-    '''
-    # 
-    turtle.push()
-    # 
-    setTurtleWhite(turtle)
-    #print "point= %s" % pointsnDiameters
-   
-    turtle.oLineTo(pointsnDiameters[0][0])
-    Diameter=pointsnDiameters[1][1]
-    turtle.oLineTo(pointsnDiameters[1][0])
-    turtle.setWidth(Diameter*.5)
-    turtle.pop()
-# end rawFlower
-
 class RawFlower(Node):
     def __init__(self):
         Node.__init__(self)
+        self.add_input( name='colorFunc', interface=IFunction, value=None)
         self.add_output( name = 'compute_flower', 
                          interface = IFunction )
 
     def __call__( self, inputs ):
-        return coneFlower()
+        colorFunc=self.get_input('colorFunc')
+        return coneFlower(colorFunc)
 
-def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8):
+def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8, colorFunc=None):
     ''' interface to return bpFlower ''' 
     bpFlower=None
     #print "BezierPatchFlower called ; uStride is %s" % ustride
@@ -646,7 +659,10 @@ def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8):
                          [Vector4(0.98,-0.45,0.96,1),Vector4(.98,.45,0.96,1)],
                          [Vector4(1,-0.10,1,1),Vector4(1,0.10,1,1)]]
     #print "lCtrlPntMatrix = %s" % lCtrlPntMatrix
-        
+    myColorFunc=colorFunc
+    if colorFunc is None:
+        myColorFunc=setTurtlePink # custom 
+       
     def tpFlower(pointsnDiameters, turtle=None,):
         ''' computes a flower from two points and the diameters associated to 
         the flower.
@@ -681,10 +697,10 @@ def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8):
 
         #ovary=Disc(baseRay ,luStride)
         ovary=Sphere(baseRay ,luStride)
-        turtle.setColor(4) # kind of yellow-green
+        #turtle.setColor(4) # kind of yellow-green
         turtle.customGeometry(ovary, 1) #  we draw the ovary now
 
-        setTurtleLightPurple(turtle) 
+        myColorFunc(turtle) 
         
         # we shall draw two rows of petals
         moreRoll=0.
@@ -740,23 +756,21 @@ def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8):
 class TaperedFlower(Node):
     def __init__(self):
         Node.__init__(self)
+        self.add_input( name='controlpointmatrix', interface=ISequence, value=None)
+        self.add_input(name='ustride', interface=IInt, value=5 )
+        self.add_input(name='vstride', interface=IInt, value=5 )
+        self.add_input( name='colorFunc', interface=IFunction, value=None)
         self.add_output( name = 'compute_flower', 
                          interface = IFunction )
 
     def __call__( self, inputs ):
-        return taperedFlower()
+        controlpointmatrix=self.get_input('controlpointmatrix')
+        ustride=self.get_input('ustride')
+        vstride=self.get_input('vstride')
+        colorFunc=self.get_input('colorFunc')
+        return taperedFlower(controlpointmatrix, ustride, vstride, colorFunc)
 
-## GROUPING items for flowerss
-class drawFlowers(Node):
-    def __init__(self):
-        Node.__init__(self)
-        self.add_output( name = 'flowersComputers', 
-                         interface = ISequence )
-
-    def __call__( self, inputs ):
-        return (noThing, coneFlower(), bezierPatchFlower(), taperedFlower())
-
-########################################""
+########################################
 
 def noThing(points, turtle=None):
     """ """
@@ -833,6 +847,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
         pt = position(n)
         symbol = n.label[0]
         turtle.setId(v)
+        currentColor=turtle.getColor()
 
         if symbol in ['E', 'R']:
             if n.Diameter is None:
@@ -847,9 +862,9 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
 
         elif n.label in [ 'F1', 'S1' ]:
             if symbol == 'F':
-                turtle.incColor()
+                turtle.setColor(2) # green
             else :
-                turtle.setColor(4)
+                turtle.setColor(4) # apple green
             
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
@@ -858,6 +873,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
             leaf_computer(points,turtle)
 	    
         elif n.label == "B1" :
+            turtle.setColor(4) # apple green
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -866,17 +882,19 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
 
         elif n.label == "O1" :
             #turtle.oLineTo(pt) # pt is the top of the flower
+            turtle.setColor(4) # apple green
             points=[[position(n.parent()),n.parent().Diameter],[pt,n.Diameter]]
             flower_computer (points, turtle)
 
         elif n.label == "T1":
             # The turtle is supposed to be at the top of the previous vertex
             #turtle.stopGC() # not useful anymore
-            turtle.incColor()
+            turtle.setColor(2) # green
             #turtle.startGC()
             turtle.oLineTo(pt)
-            turtle.setWidth(0.01)	    
-            turtle.decColor()
+            turtle.setWidth(0.01)
+
+        turtle.setColor(currentColor)
 
     # return outputs
     return visitor,
@@ -900,7 +918,7 @@ class VertexVisitor(Node):
         return vertexVisitor(leaf_factory,bud_factory,flower_factory)
 
 
-#################################### ReconstructionWithTurtle ##########
+#################################### ReconstructWithTurtle ##########
 
 #### Copy from mtg.turtle ###
 def traverse_with_turtle(g, vid, visitor, turtle=None):
@@ -936,7 +954,10 @@ def traverse_with_turtle(g, vid, visitor, turtle=None):
 def TurtleFrame(g, visitor):
     n = g.max_scale()
     turtle = pgl.PglTurtle()
-    #
+    ## we want to change the default color
+    ## let's wait to have scanned some photographs to set this
+    #setTurtleStrand(turtle)
+
     for plant_id in g.vertices(scale=1):
         plant_node = g.node(plant_id)
         # moved the "position" function away
@@ -947,26 +968,30 @@ def TurtleFrame(g, visitor):
         traverse_with_turtle(g, vid, visitor, turtle)
     return turtle.getScene()
 
-def reconstructWithTurtle(g, visitor, powerParam):
+def reconstructWithTurtle(mtg, visitor, powerParam):
     '''    builds a scene from "4pts leaflet" MTGs
     
     .. todo:: Add some constant in the arguments
     '''
     # Compute the radius with pipe model
     theScene=None
-    diameter = g.property('Diameter')
-    for v in g:
-        if g.class_name(v) == 'R':
+    diameter = mtg.property('Diameter')
+    for v in mtg:
+        if mtg.class_name(v) == 'R':
             diameter[v] = 0.75
 
     drf = DressingData(LeafClass=['F', 'S'], 
         FlowerClass='O', FruitClass='B',
         MinTopDiameter=dict(E=0.5))
-    pf = PlantFrame(g, TopDiameter='Diameter', DressingData=drf, 
-        Exclude = 'F S O B T'.split())
-    diameter = pf.algo_diameter(power=powerParam)
-    g.properties()['Diameter'] = diameter
-    theScene=TurtleFrame(g, visitor)
+    pf = PlantFrame(mtg, TopDiameter='Diameter', 
+                    DressingData=drf, 
+                    Exclude = 'F S O B T'.split())
+    #diameter = pf.algo_diameter(power=powerParam)
+    #mtg.properties()['Diameter'] = diameter 
+    #test : 
+    mtg.properties()['Diameter'] = pf.algo_diameter(power=powerParam)
+
+    theScene=TurtleFrame(mtg, visitor)
     # return outputs
     return theScene,
 
