@@ -1,5 +1,5 @@
 
-# This file has been generated at Wed Nov 16 16:43:41 2011
+# This file has been generated at Wed Nov 16 17:05:41 2011
 
 from openalea.core import *
 
@@ -17,7 +17,7 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['drawLeaflets', 'mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'rose_geometry_computeLeaflet4pts', 'RoseLpy', 'rose_CropGeneration_2011', 'rose_MTG_union', 'rose_geometry_BezierPatchFlower', 'PlantFrame_Rose_PlantFrame_Rose', 'rose_HttpDir2DictOfFiles', 'DigitReconstruction', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', 'rose_Files2MTGs', 'rose_GetMTG', 'rose_geometry_RawBud', 'rose_geometry_VertexVisitor', 'rose_geometry_PointArray', 'GetLocalFiles', 'PlantReconstruction', 'rose_LocalDir2DictOfFiles', '_61555024', 'PlantPositionning_PlantPositionning', 'rose_geometry_PolygonLeaflet', 'SceneRotation_SceneRotation', 'rose_geometry_ReconstructWithTurtle', 'testRevolutionFig', 'CanopyReconstruction2011', 'rose_geometry_BuiltBud', 'drawFlowers', 'revolutionTest1file_revolutionTest1file', 'rose_GridFile2Dict', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', 'rose_GetOrigin', '_61556560', 'rose_geometry_RevolutionBud', '_61325008', 'rose_geometry_RevolutionFig', 'rose_geometry_ControlPointsMatrix', 'GetWebFiles', 'Canopy2011Driver', 'rose_geometry_TaperedFlower', 'rose_geometry_BudArray', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', 'rose_colors_ColorFuncs', 'rose_geometry_FineBudArray', 'drawBuds', 'CropGeneration_CropGeneration']
+__all__ = ['drawLeaflets', 'mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'rose_geometry_computeLeaflet4pts', 'RoseLpy', 'rose_CropGeneration_2011', 'rose_MTG_union', 'rose_geometry_BezierPatchFlower', 'PlantFrame_Rose_PlantFrame_Rose', 'rose_HttpDir2DictOfFiles', 'DigitReconstruction', 'rose_Files2MTGs', 'rose_GetMTG', 'rose_geometry_RawBud', 'rose_geometry_VertexVisitor', 'rose_geometry_PointArray', 'GetLocalFiles', 'PlantReconstruction', 'rose_LocalDir2DictOfFiles', 'PlantPositionning_PlantPositionning', 'rose_geometry_PolygonLeaflet', 'SceneRotation_SceneRotation', 'rose_geometry_ReconstructWithTurtle', 'testRevolutionFig', 'CanopyReconstruction2011', 'rose_GridFile2Dict', '_60724816', 'revolutiontestinonefile_revolutiontestinonefile', 'rose_geometry_BuiltBud', 'drawFlowers', '_60724688', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', 'rose_GetOrigin', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', 'rose_geometry_RevolutionBud', 'rose_geometry_RevolutionFig', 'rose_geometry_ControlPointsMatrix', 'GetWebFiles', 'Canopy2011Driver', 'CropGeneration_CropGeneration', '_60723792', 'rose_geometry_BudArray', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', 'rose_colors_ColorFuncs', 'rose_geometry_FineBudArray', 'drawBuds', 'rose_geometry_TaperedFlower']
 
 
 
@@ -1274,21 +1274,6 @@ DigitReconstruction = CompositeNodeFactory(name='DigitReconstruction',
 
 
 
-Leaflet_Orientation_4points_Leaflet_Orientation_4points = Factory(name='Leaflet Orientation 4points',
-                authors=' (wralea authors)',
-                description='',
-                category='Unclassified',
-                nodemodule='Leaflet_Orientation_4points',
-                nodeclass='Leaflet_Orientation_4points',
-                inputs=[{'interface': IData, 'name': 'mtg', 'value': None, 'desc': ''}, {'interface': None, 'name': 'mesh', 'value': None, 'desc': ''}],
-                outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
 rose_Files2MTGs = Factory(name='Files2MTGs',
                 authors=' (rose authors)',
                 description='Makes MTG objects from MTG files',
@@ -1635,13 +1620,6 @@ rose_LocalDir2DictOfFiles = Factory(name='LocalDir2DictOfFiles',
                 widgetclass=None,
                )
 
-
-
-_61555024 = DataFactory(name='simpleRoseField.lpy',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
 
 
 
@@ -2462,6 +2440,43 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
 
 
 
+rose_GridFile2Dict = Factory(name='GridFile2Dict',
+                authors=' (rose authors) ',
+                description='Makes a dictionnary of pairs {plant num : plant position} in a 2D grid of int coordinates',
+                category='data processing',
+                nodemodule='rose',
+                nodeclass='GridFile2Dict',
+                inputs=[{'interface': IFileStr, 'name': 'GridFileName', 'value': '', 'desc': 'A file which contains a grid of plant numbers vs. positions in a 2D grid'}],
+                outputs=[{'interface': IDict, 'name': 'dictOfPlantNums', 'desc': 'A dict which associates plant numbers with a position in a 2D grid.'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+_60724816 = DataFactory(name='rose.drf',
+                    description='dressing file for rose stem',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+
+revolutiontestinonefile_revolutiontestinonefile = Factory(name='revolutiontestinonefile',
+                authors=' (wralea authors)',
+                description='test the load of uninode files',
+                category='category test',
+                nodemodule='revolutiontestinonefile',
+                nodeclass='revolutiontestinonefile',
+                inputs=[],
+                outputs=[{'interface': None, 'name': 'OUT1', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
 rose_geometry_BuiltBud = Factory(name='BuiltBud',
                 authors=' (rose authors)',
                 description='a function builds a bud with 2 spheres and a paraboloid.',
@@ -2659,34 +2674,11 @@ drawFlowers = CompositeNodeFactory(name='drawFlowers',
 
 
 
-
-revolutionTest1file_revolutionTest1file = Factory(name='revolutionTest1file',
-                authors=' (wralea authors)',
-                description='revolution fig test node in 1 file',
-                category='category test',
-                nodemodule='revolutionTest1file',
-                nodeclass='revolutionTest1file',
-                inputs=[],
-                outputs=[{'interface': None, 'name': 'scene', 'desc': 'scene'}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
-rose_GridFile2Dict = Factory(name='GridFile2Dict',
-                authors=' (rose authors) ',
-                description='Makes a dictionnary of pairs {plant num : plant position} in a 2D grid of int coordinates',
-                category='data processing',
-                nodemodule='rose',
-                nodeclass='GridFile2Dict',
-                inputs=[{'interface': IFileStr, 'name': 'GridFileName', 'value': '', 'desc': 'A file which contains a grid of plant numbers vs. positions in a 2D grid'}],
-                outputs=[{'interface': IDict, 'name': 'dictOfPlantNums', 'desc': 'A dict which associates plant numbers with a position in a 2D grid.'}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
+_60724688 = DataFactory(name='21052010_BFV.txt',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
 
 
 
@@ -2734,11 +2726,19 @@ rose_GetOrigin = Factory(name='GetOrigin',
 
 
 
-_61556560 = DataFactory(name='21052010_BFV.txt',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
+
+Leaflet_Orientation_4points_Leaflet_Orientation_4points = Factory(name='Leaflet Orientation 4points',
+                authors=' (wralea authors)',
+                description='',
+                category='Unclassified',
+                nodemodule='Leaflet_Orientation_4points',
+                nodeclass='Leaflet_Orientation_4points',
+                inputs=[{'interface': IData, 'name': 'mtg', 'value': None, 'desc': ''}, {'interface': None, 'name': 'mesh', 'value': None, 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
 
 
 
@@ -2754,13 +2754,6 @@ rose_geometry_RevolutionBud = Factory(name='RevolutionBud',
                 widgetclass=None,
                )
 
-
-
-_61325008 = DataFactory(name='rose.drf',
-                    description='dressing file for rose stem',
-                    editors=None,
-                    includes=None,
-                    )
 
 
 
@@ -3240,18 +3233,25 @@ Canopy2011Driver = CompositeNodeFactory(name='Canopy2011Driver',
 
 
 
-rose_geometry_TaperedFlower = Factory(name='TaperedFlower',
-                authors=' (rose authors)',
-                description='computes a flower.',
+CropGeneration_CropGeneration = Factory(name='CropGeneration',
+                authors=' (wralea authors)',
+                description='',
                 category='data processing',
-                nodemodule='rose_geometry',
-                nodeclass='TaperedFlower',
-                inputs=[{'interface': ISequence, 'name': 'controlPointMatrix', 'value': None, 'desc': 'control points matrix of Vector4'}, {'interface': IInt, 'name': 'uStride', 'value': 8, 'desc': '"U" stride'}, {'interface': IInt, 'name': 'vStride', 'value': 8, 'desc': '"V" stride'}],
-                outputs=[{'interface': IFunction, 'name': 'TaperedFlower', 'desc': 'computes a flower from 2 points and a diameter.'}],
+                nodemodule='CropGeneration',
+                nodeclass='CropGeneration',
+                inputs=[{'interface': IFileStr, 'name': 'txtfile', 'value': None, 'desc': ''}, {'interface': IStr, 'name': 'Plt_Not_Use', 'value': [], 'desc': ''}, {'interface': IBool, 'name': 'filling', 'value': True, 'desc': ''}, {'interface': IFloat, 'name': 'crop_width', 'value': 90.0, 'desc': ''}, {'interface': IFloat, 'name': 'crop_length', 'value': 200.0, 'desc': ''}, {'interface': IFloat, 'name': 'spacing', 'value': 15.0, 'desc': ''}],
+                outputs=[{'interface': IDict, 'name': 'dico_complete', 'desc': ''}, {'interface': ISequence, 'name': 'IDplants', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
                )
 
+
+
+_60723792 = DataFactory(name='simpleRoseField.lpy',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
 
 
 
@@ -3892,14 +3892,14 @@ drawBuds = CompositeNodeFactory(name='drawBuds',
 
 
 
-CropGeneration_CropGeneration = Factory(name='CropGeneration',
-                authors=' (wralea authors)',
-                description='',
+rose_geometry_TaperedFlower = Factory(name='TaperedFlower',
+                authors=' (rose authors)',
+                description='computes a flower.',
                 category='data processing',
-                nodemodule='CropGeneration',
-                nodeclass='CropGeneration',
-                inputs=[{'interface': IFileStr, 'name': 'txtfile', 'value': None, 'desc': ''}, {'interface': IStr, 'name': 'Plt_Not_Use', 'value': [], 'desc': ''}, {'interface': IBool, 'name': 'filling', 'value': True, 'desc': ''}, {'interface': IFloat, 'name': 'crop_width', 'value': 90.0, 'desc': ''}, {'interface': IFloat, 'name': 'crop_length', 'value': 200.0, 'desc': ''}, {'interface': IFloat, 'name': 'spacing', 'value': 15.0, 'desc': ''}],
-                outputs=[{'interface': IDict, 'name': 'dico_complete', 'desc': ''}, {'interface': ISequence, 'name': 'IDplants', 'desc': ''}],
+                nodemodule='rose_geometry',
+                nodeclass='TaperedFlower',
+                inputs=[{'interface': ISequence, 'name': 'controlPointMatrix', 'value': None, 'desc': 'control points matrix of Vector4'}, {'interface': IInt, 'name': 'uStride', 'value': 8, 'desc': '"U" stride'}, {'interface': IInt, 'name': 'vStride', 'value': 8, 'desc': '"V" stride'}],
+                outputs=[{'interface': IFunction, 'name': 'TaperedFlower', 'desc': 'computes a flower from 2 points and a diameter.'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
