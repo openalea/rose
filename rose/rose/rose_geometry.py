@@ -188,6 +188,28 @@ def budArray():
          Vector2(0.00, 1.00)]
     return pts
 
+def fineBudArray():
+    ''' returns an array of points to feed a revolution object '''
+    #print "Inside pointArray()" 
+    pts=[Vector2(0.00, 0.10),
+         Vector2(0.02, 0.40),
+         Vector2(0.06, 0.50),
+         Vector2(0.10, 0.50),
+         Vector2(0.14, 0.40),
+         Vector2(0.16, 0.40),
+         Vector2(0.18, 0.60),
+         Vector2(0.24, 0.90),
+         Vector2(0.30, 1.00),
+         Vector2(0.34, 1.00),
+         Vector2(0.42, 0.90),
+         Vector2(0.48, 0.70),
+         Vector2(0.60, 0.50),
+         Vector2(0.72, 0.30),
+         Vector2(0.84, 0.25),
+         Vector2(0.96, 0.15),
+         Vector2(1.00, 0.00)]
+    return pts
+
 def revolution(points=None, stride=8):
     ''' returns a revolution volume made from the input points'''
     #lStride = stride
@@ -256,6 +278,14 @@ class BudArray(Node):
                          interface = ISequence )
     def __call__( self, inputs ):
         return budArray()
+  
+class FineBudArray(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'bud_array', 
+                         interface = ISequence )
+    def __call__( self, inputs ):
+        return fineBudArray()
   
 
 class RevolutionFig(Node):
@@ -503,7 +533,11 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None
     #print "controlpointmatrix = %s" % controlpointmatrix
     if controlpointmatrix is None:
         # the return value of ctrlpointMatrix() yields an error. Why ?
-        lControlpointmatrix= [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],[Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],[Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],[Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
+        lControlpointmatrix= [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],
+                              [Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],
+                              [Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],
+                              [Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],
+                              [Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
     #print "lControlpointmatrix = %s" % lControlpointmatrix
     myColorFunc=colorFunc
     if colorFunc is None:
@@ -541,11 +575,11 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None
 
         # compute the pitch angle (flower opening)
         if deltaRay > 0 : # opened flower
-            pitchAngle=math.atan(flowerHeight/(deltaRay))
+            openingAngle=math.atan(flowerHeight/(deltaRay))
         elif deltaRay < 0 : # flower not opened yet
-            pitchAngle=math.pi*0.5+math.atan((-deltaRay)/flowerHeight)
+            openingAngle=math.pi*0.5+math.atan((-deltaRay)/flowerHeight)
         else: # say half opened
-            pitchAngle=math.pi*0.5
+            openingAngle=math.pi*0.5
 
         #ovary=Disc(baseRay ,luStride)
         ovary=Sphere(baseRay ,luStride)
@@ -562,9 +596,9 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None
 
         for iIndex in range(0,5):
             # closing the flower : 
-            petal=AxisRotated((0,1,0),-pitchAngle,petalMesh)
+            petal=AxisRotated((0,1,0),-openingAngle,petalMesh)
             # twisting a bit to limit collisions [Todo in the patch]
-            petal=AxisRotated((1,0,0),pitchAngle*0.05,petal)
+            petal=AxisRotated((1,0,0),openingAngle*0.05,petal)
             angle=iIndex*rad5eTour
             petal=AxisRotated((0,0,1),angle,petal)
             petal=Translated(Vector3(baseRay *math.cos(angle) *0.8,\
@@ -718,20 +752,20 @@ def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8, colorFunc=None):
 
             # compute the pitch angle (flower opening)
             if deltaRay > 0 : # opened flower
-                pitchAngle=math.atan(flowerHeight/(deltaRay))
+                openingAngle=math.atan(flowerHeight/(deltaRay))
             elif deltaRay < 0 : # flower not opened yet
-                pitchAngle=math.pi*0.5+math.atan((-deltaRay)/flowerHeight)
+                openingAngle=math.pi*0.5+math.atan((-deltaRay)/flowerHeight)
             else: # say half opened
-                pitchAngle=math.pi*0.5
+                openingAngle=math.pi*0.5
 
 
             # TODO : compute the closing angle of the petals from height and width
 
             for iIndex in range(0,5):
                 # closing the flower : 
-                petal=AxisRotated((0,1,0),-pitchAngle,localMesh)
+                petal=AxisRotated((0,1,0),-openingAngle,localMesh)
                 # twisting a bit to limit collisions [Todo in the patch]
-                #petal=AxisRotated((1,0,0),pitchAngle*0.05,petal)
+                #petal=AxisRotated((1,0,0),openingAngle*0.05,petal)
                 angle=(iIndex+moreRoll)*rad5eTour
                 petal=AxisRotated((0,0,1),angle,petal)
                 petal=Translated(Vector3(baseRay *math.cos(angle) *0.8,\
@@ -862,7 +896,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
 
         elif n.label in [ 'F1', 'S1' ]:
             if symbol == 'F':
-                turtle.setColor(2) # green
+                turtle.setColor(2) # internode
             else :
                 turtle.setColor(4) # apple green
             
