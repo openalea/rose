@@ -533,6 +533,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None
     #print "controlpointmatrix = %s" % controlpointmatrix
     if controlpointmatrix is None:
         # the return value of ctrlpointMatrix() yields an error. Why ?
+        #lControlpointmatrix = ctrlpointMatrix()
         lControlpointmatrix= [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],
                               [Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],
                               [Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],
@@ -598,7 +599,8 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None
             # closing the flower : 
             petal=AxisRotated((0,1,0),-openingAngle,petalMesh)
             # twisting a bit to limit collisions [Todo in the patch]
-            petal=AxisRotated((1,0,0),openingAngle*0.05,petal)
+            # NOTWIST 4 test petal=AxisRotated((1,0,0),openingAngle*0.05,petal)
+            petal=AxisRotated((1,0,0),openingAngle*0.055, petal)# HALFTWIST 4 test 
             angle=iIndex*rad5eTour
             petal=AxisRotated((0,0,1),angle,petal)
             petal=Translated(Vector3(baseRay *math.cos(angle) *0.8,\
@@ -839,9 +841,15 @@ def ctrlpointMatrix():
     # with a scale factor : seems to cause problems with Translate
     #ctpm = [[Vector4(0,0,0,7.),Vector4(0,0,0,7.)],[Vector4(2,-2,-0.8,7.),Vector4(2,2,-0.8,7.)],[Vector4(4,-4,-1.2,7.),Vector4(4,4,-1.2,7.)],[Vector4(6,-5,-1.5,7.),Vector4(6,5,-0.5,7.)],[Vector4(7,0,0,7.),Vector4(7,0,0,7.)]]
     # the previous, normalized 
-    #ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,-0.13,1),Vector4(0.28,0.38,-0.13,1)],[Vector4(.56,-0.56,-0.17,1),Vector4(.56,0.56,-0.17,1)],[Vector4(0.86,-0.7,-0.21,1),Vector4(.86,.7,-0.01,1)],[Vector4(1,-0.25,0,1),Vector4(1,0.25,0,1)]]
+    #ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],            [Vector4(0.28,-0.38,-0.13,1),Vector4(0.28,0.38,-0.13,1)],            [Vector4(.56,-0.56,-0.17,1),Vector4(.56,0.56,-0.17,1)],            [Vector4(0.86,-0.7,-0.21,1),Vector4(.86,.7,-0.01,1)],            [Vector4(1,-0.25,0,1),Vector4(1,0.25,0,1)]]
     # a new shape
-
+    ctpm=  [[Vector4(0,-0.40,0,1),Vector4(0,0.4,0,1)],
+            [Vector4(0.28,-0.45,0.08,1),Vector4(0.28,0.45,0.08,1)],
+            [Vector4(.56,-0.45,0.31,1),Vector4(.56,0.45,0.31,1)],
+            [Vector4(0.86,-0.45,0.73,1),Vector4(.86,0.45,0.75,1)],
+            [Vector4(0.95,-0.5,0.9,1),Vector4(.96,0.5,0.9,1)],
+            [Vector4(0.98,-0.45,0.96,1),Vector4(.98,.45,0.96,1)],
+            [Vector4(1,-0.10,1,1),Vector4(1,0.10,1,1)]]
     # return outputs
     return ctpm,
 
@@ -853,6 +861,32 @@ class ControlPointsMatrix(Node):
 
     def __call__( self, inputs ):
         return ctrlpointMatrix()
+
+def petalMatrix():
+    '''    control point matrix for a bezier patch close to a petal
+    '''
+    ctpm = None; 
+    # write the node code here.
+    ctpm = [[Vector4(0,-0.12, 0.2, 1), Vector4(0,0,0,1), Vector4(0, 0.12, 0.2, 1)],
+            [Vector4(0.14,-0.13,0.2,1), Vector4(0.14,0,0.0,1), Vector4(0.13,0.3,0.2,1)],
+            [Vector4(.28,-0.20,0.4,1), Vector4(0.28,0,0.02,1), Vector4(.28,0.20,0.4,1)],
+            [Vector4(.42,-0.27,0.55,1), Vector4(0.42,0,0.035,1), Vector4(.42,0.27,0.55,1)],
+            [Vector4(0.56,-0.33,0.6,1), Vector4(0.56,0,0.4,1), Vector4(.56,0.33,0.6,1)],
+            [Vector4(0.7,-0.39,0.6,1), Vector4(0.7,0,0.4,1), Vector4(.7,0.48,0.39,1)],
+            [Vector4(0.84,-0.45,0.65,1), Vector4(0.84,0,0.45,1), Vector4(.84,.45,0.65,1)],
+            [Vector4(0.97,-0.38,0.7,1), Vector4(0.97,0,0.5,1), Vector4(.97,.38,0.7,1)],
+            [Vector4(1,-0.10,1,1), Vector4(1,0,0.95,1), Vector4(1,0.10,1,1)]]
+    # return outputs
+    return ctpm,
+
+class PetalMatrix(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'ctpm', 
+                         interface = IData )
+
+    def __call__( self, inputs ):
+        return petalMatrix()
 
 ########################################
 def position(n):
