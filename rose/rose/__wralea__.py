@@ -1,5 +1,5 @@
 
-# This file has been generated at Wed Nov 23 16:46:57 2011
+# This file has been generated at Fri Nov 25 15:00:35 2011
 
 from openalea.core import *
 
@@ -17,7 +17,7 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['drawLeaflets', 'mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'rose_geometry_computeLeaflet4pts', 'RoseLpy', 'rose_CropGeneration_2011', 'rose_MTG_union', 'rose_geometry_BezierPatchFlower', 'PlantFrame_Rose_PlantFrame_Rose', 'rose_HttpDir2DictOfFiles', '_114439120', 'DigitReconstruction', 'rose_Files2MTGs', 'rose_GetMTG', '_114439824', 'rose_geometry_RawBud', 'rose_geometry_VertexVisitor', 'rose_geometry_PointArray', 'GetLocalFiles', 'PlantReconstruction', 'rose_LocalDir2DictOfFiles', 'PlantPositionning_PlantPositionning', 'rose_geometry_PolygonLeaflet', 'SceneRotation_SceneRotation', 'rose_geometry_PetalMatrix', 'rose_geometry_ReconstructWithTurtle', 'testRevolutionFig', 'CanopyReconstruction2011', 'revolutiontestinonefile_revolutiontestinonefile', 'rose_geometry_BuiltBud', 'drawFlowers', 'rose_GridFile2Dict', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', 'GetWebFiles', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', 'rose_geometry_RevolutionBud', 'rose_geometry_RevolutionFig', 'rose_geometry_ControlPointsMatrix', 'rose_GetOrigin', 'Canopy2011Driver', 'CropGeneration_CropGeneration', '_114440976', 'rose_geometry_BudArray', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', 'rose_colors_ColorFuncs', 'rose_geometry_FineBudArray', 'drawBuds', 'rose_geometry_TaperedFlower']
+__all__ = ['drawLeaflets', 'mesh_roseLeaflet_mesh_roseLeaflet', 'HybridReconstruction', 'rose_geometry_computeLeaflet4pts', 'RoseLpy', 'rose_CropGeneration_2011', 'rose_MTG_union', 'rose_geometry_BezierPatchFlower', 'PlantFrame_Rose_PlantFrame_Rose', 'rose_HttpDir2DictOfFiles', 'DigitReconstruction', 'rose_Files2MTGs', 'rose_GetMTG', 'rose_geometry_RawBud', 'rose_geometry_VertexVisitor', 'rose_geometry_PointArray', 'GetLocalFiles', 'PlantReconstruction', 'rose_LocalDir2DictOfFiles', 'PlantPositionning_PlantPositionning', 'rose_geometry_PolygonLeaflet', 'SceneRotation_SceneRotation', 'rose_geometry_PetalMatrix', 'rose_geometry_ReconstructWithTurtle', 'testRevolutionFig', 'CanopyReconstruction2011', '_84741328', 'revolutiontestinonefile_revolutiontestinonefile', 'rose_geometry_BuiltBud', 'drawFlowers', 'rose_GridFile2Dict', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', 'rose_GetOrigin', 'Leaflet_Orientation_4points_Leaflet_Orientation_4points', '_84741072', 'rose_geometry_RevolutionBud', 'rose_geometry_RevolutionFig', 'rose_geometry_ControlPointsMatrix', 'GetWebFiles', 'Canopy2011Driver', 'CropGeneration_CropGeneration', 'rose_geometry_BudArray', 'leaflet_orientation_leaflet_orientation', 'CanopyReconstruction', '_84739472', 'rose_colors_ColorFuncs', 'testRevolutionFigCompositeNode', 'rose_geometry_FineBudArray', 'drawBuds', 'rose_geometry_TaperedFlower']
 
 
 
@@ -828,13 +828,6 @@ rose_HttpDir2DictOfFiles = Factory(name='HttpDir2DictOfFiles',
 
 
 
-_114439120 = DataFactory(name='21052010_BFV.txt',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
 
 DigitReconstruction = CompositeNodeFactory(name='DigitReconstruction',
                              description='',
@@ -1308,13 +1301,6 @@ rose_GetMTG = Factory(name='GetMTG',
                 widgetclass=None,
                )
 
-
-
-_114439824 = DataFactory(name='rose.drf',
-                    description='dressing file for rose stem',
-                    editors=None,
-                    includes=None,
-                    )
 
 
 
@@ -2468,6 +2454,13 @@ CanopyReconstruction2011 = CompositeNodeFactory(name='CanopyReconstruction2011',
 
 
 
+_84741328 = DataFactory(name='rose.drf',
+                    description='dressing file for rose stem',
+                    editors=None,
+                    includes=None,
+                    )
+
+
 
 revolutiontestinonefile_revolutiontestinonefile = Factory(name='revolutiontestinonefile',
                 authors=' (wralea authors)',
@@ -2513,26 +2506,26 @@ drawFlowers = CompositeNodeFactory(name='drawFlowers',
                              elt_factory={  2: ('Rose', 'BezierPatchFlower'),
    3: ('Rose', 'RawFlower'),
    4: ('Rose', 'NoOrgan'),
-   5: ('openalea.data structure', 'int'),
    6: ('openalea.data structure', 'int'),
    7: ('Rose', 'TaperedFlower'),
    8: ('Rose', 'PetalMatrix')},
-                             elt_connections={  6402776: (8, 0, 2, 0),
-   6402800: (2, 0, '__out__', 0),
-   6402824: (6, 0, 7, 2),
-   6402848: (6, 0, 2, 2),
-   6402872: (7, 0, '__out__', 0),
-   6402896: ('__in__', 0, 3, 0),
-   6402920: (5, 0, 7, 1),
-   6402944: (4, 0, '__out__', 0),
-   6402968: ('__in__', 0, 7, 3),
-   6402992: (3, 0, '__out__', 0),
-   6403016: (5, 0, 2, 1),
-   6403040: ('__in__', 0, 2, 3)},
+                             elt_connections={  6402752: (8, 0, 7, 0),
+   6402776: (7, 0, '__out__', 0),
+   6402800: (6, 0, 2, 1),
+   6402824: (2, 0, '__out__', 0),
+   6402848: (6, 0, 7, 1),
+   6402872: (3, 0, '__out__', 0),
+   6402896: (6, 0, 2, 2),
+   6402920: (8, 0, 2, 0),
+   6402944: ('__in__', 0, 7, 3),
+   6402968: ('__in__', 0, 3, 0),
+   6402992: (6, 0, 7, 2),
+   6403016: ('__in__', 0, 2, 3),
+   6403040: (4, 0, '__out__', 0)},
                              elt_data={  2: {  'block': False,
          'caption': 'BezierPatchFlower',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x6d23290> : "BezierPatchFlower"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x6badf50> : "BezierPatchFlower"',
          'hide': True,
          'id': 2,
          'lazy': True,
@@ -2546,7 +2539,7 @@ drawFlowers = CompositeNodeFactory(name='drawFlowers',
    3: {  'block': False,
          'caption': 'RawFlower',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x6d23910> : "RawFlower"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x6bc25d0> : "RawFlower"',
          'hide': True,
          'id': 3,
          'lazy': True,
@@ -2560,7 +2553,7 @@ drawFlowers = CompositeNodeFactory(name='drawFlowers',
    4: {  'block': False,
          'caption': 'NoOrgan',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x6d23950> : "NoOrgan"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x6bc2610> : "NoOrgan"',
          'hide': True,
          'id': 4,
          'lazy': True,
@@ -2571,30 +2564,16 @@ drawFlowers = CompositeNodeFactory(name='drawFlowers',
          'use_user_color': False,
          'user_application': None,
          'user_color': None},
-   5: {  'block': False,
-         'caption': '8',
-         'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x4825290> : "int"',
-         'hide': True,
-         'id': 5,
-         'lazy': True,
-         'port_hide_changed': set(),
-         'posx': 103.60166285446122,
-         'posy': -121.20294333413273,
-         'priority': 0,
-         'use_user_color': False,
-         'user_application': None,
-         'user_color': None},
    6: {  'block': False,
          'caption': '8',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x4825290> : "int"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x4824610> : "int"',
          'hide': True,
          'id': 6,
          'lazy': True,
          'port_hide_changed': set(),
-         'posx': 131.40342844660594,
-         'posy': -122.57111481776141,
+         'posx': 127.25995386655703,
+         'posy': -63.526602052064462,
          'priority': 0,
          'use_user_color': False,
          'user_application': None,
@@ -2602,7 +2581,7 @@ drawFlowers = CompositeNodeFactory(name='drawFlowers',
    7: {  'block': False,
          'caption': 'TaperedFlower',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x6d23c50> : "TaperedFlower"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x6bc2a10> : "TaperedFlower"',
          'hide': True,
          'id': 7,
          'lazy': True,
@@ -2616,13 +2595,13 @@ drawFlowers = CompositeNodeFactory(name='drawFlowers',
    8: {  'block': False,
          'caption': 'PetalMatrix',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x6d23bd0> : "PetalMatrix"',
+         'factory': '<openalea.core.node.NodeFactory object at 0x6bc23d0> : "PetalMatrix"',
          'hide': True,
          'id': 8,
          'lazy': True,
          'port_hide_changed': set(),
-         'posx': -5.78049227979146,
-         'posy': -119.73876865282323,
+         'posx': 87.447685771308954,
+         'posy': -149.77895935817781,
          'priority': 0,
          'use_user_color': False,
          'user_application': None,
@@ -2634,8 +2613,8 @@ drawFlowers = CompositeNodeFactory(name='drawFlowers',
                 'id': 0,
                 'lazy': True,
                 'port_hide_changed': set(),
-                'posx': 93.735288499344165,
-                'posy': -178.39222376086244,
+                'posx': 5.2918985781704464,
+                'posy': -158.02489319005548,
                 'priority': 0,
                 'use_user_color': False,
                 'user_application': None,
@@ -2647,33 +2626,50 @@ drawFlowers = CompositeNodeFactory(name='drawFlowers',
                  'id': 1,
                  'lazy': True,
                  'port_hide_changed': set(),
-                 'posx': 100.58931763786595,
-                 'posy': 89.412882508502349,
+                 'posx': 18.181796361704443,
+                 'posy': 71.870530772976622,
                  'priority': 0,
                  'use_user_color': False,
                  'user_application': None,
                  'user_color': None}},
-                             elt_value={  2: [],
-   3: [],
+                             elt_value={  2: [(0, 'None')],
+   3: [(0, 'None')],
    4: [],
-   5: [(0, '8')],
-   6: [(0, '8')],
-   7: [(0, 'None')],
+   6: [(0, '10')],
+   7: [],
    8: [],
    '__in__': [],
    '__out__': []},
-                             elt_ad_hoc={  2: {'position': [21.301224556255747, -17.836943972594959], 'userColor': None, 'useUserColor': False},
-   3: {'position': [-58.285370348544177, -18.88808506141196], 'userColor': None, 'useUserColor': False},
-   4: {'position': [-127.8436064851085, -19.308622402272615], 'userColor': None, 'useUserColor': False},
-   5: {'position': [103.60166285446122, -121.20294333413273], 'userColor': None, 'useUserColor': False},
-   6: {'position': [131.40342844660594, -122.57111481776141], 'userColor': None, 'useUserColor': False},
-   7: {'position': [145.81074384585287, -17.232178818146245], 'userColor': None, 'useUserColor': False},
-   8: {'position': [-5.78049227979146, -119.73876865282323], 'userColor': None, 'useUserColor': False},
+                             elt_ad_hoc={  2: {  'position': [21.301224556255747, -17.836943972594959],
+         'useUserColor': False,
+         'userColor': None},
+   3: {  'position': [-58.285370348544177, -18.88808506141196],
+         'useUserColor': False,
+         'userColor': None},
+   4: {  'position': [-127.8436064851085, -19.308622402272615],
+         'useUserColor': False,
+         'userColor': None},
+   5: {  'position': [103.60166285446122, -121.20294333413273],
+         'useUserColor': False,
+         'userColor': None},
+   6: {  'position': [127.25995386655703, -63.526602052064462],
+         'useUserColor': False,
+         'userColor': None},
+   7: {  'position': [145.81074384585287, -17.232178818146245],
+         'useUserColor': False,
+         'userColor': None},
+   8: {  'position': [87.447685771308954, -149.77895935817781],
+         'useUserColor': False,
+         'userColor': None},
    9: {  'position': [-53.156918921739489, -96.013399618634139],
          'useUserColor': False,
          'userColor': None},
-   '__in__': {'position': [93.735288499344165, -178.39222376086244], 'userColor': None, 'useUserColor': False},
-   '__out__': {'position': [100.58931763786595, 89.412882508502349], 'userColor': None, 'useUserColor': False}},
+   '__in__': {  'position': [5.2918985781704464, -158.02489319005548],
+                'useUserColor': False,
+                'userColor': None},
+   '__out__': {  'position': [18.181796361704443, 71.870530772976622],
+                 'useUserColor': False,
+                 'userColor': None}},
                              lazy=True,
                              eval_algo='LambdaEvaluation',
                              )
@@ -2719,6 +2715,88 @@ rose_geometry_NoOrgan = Factory(name='NoOrgan',
                 nodeclass='NoOrgan',
                 inputs=[],
                 outputs=[{'interface': IFunction, 'name': 'PolygonLeaflet', 'desc': 'Makes nothing.'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+rose_GetOrigin = Factory(name='GetOrigin',
+                authors=' (rose authors) ',
+                description='Makes a dictionnary of pairs {plant num : plant position} in a 2D grid of int coordinates',
+                category='data processing',
+                nodemodule='rose',
+                nodeclass='GetOrigin',
+                inputs=[{'interface': IFileStr, 'name': 'OriginFilename', 'value': '', 'desc': 'A file which contains a header line (i.e "x","y","z" and a data line with a 3D origine coordinate.'}],
+                outputs=[{'interface': ISequence, 'name': 'origin', 'desc': 'A vector of 3D coordinates.'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+Leaflet_Orientation_4points_Leaflet_Orientation_4points = Factory(name='Leaflet Orientation 4points',
+                authors=' (wralea authors)',
+                description='',
+                category='Unclassified',
+                nodemodule='Leaflet_Orientation_4points',
+                nodeclass='Leaflet_Orientation_4points',
+                inputs=[{'interface': IData, 'name': 'mtg', 'value': None, 'desc': ''}, {'interface': None, 'name': 'mesh', 'value': None, 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+_84741072 = DataFactory(name='simpleRoseField.lpy',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+
+rose_geometry_RevolutionBud = Factory(name='RevolutionBud',
+                authors=' (rose authors)',
+                description='draws up a bud from a revolution volume.',
+                category='data processing',
+                nodemodule='rose_geometry',
+                nodeclass='RevolutionBud',
+                inputs=[{'interface': IData, 'name': 'revFig', 'value': None, 'desc': 'a revolution volume'}],
+                outputs=[{'interface': IFunction, 'name': 'rev_bud', 'desc': 'A function that draws a bud from a 3D revolution volume.'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+rose_geometry_RevolutionFig = Factory(name='RevolutionFig',
+                authors=' (rose authors)',
+                description='returns a 3D revolution volume.',
+                category='data processing',
+                nodemodule='rose_geometry',
+                nodeclass='RevolutionFig',
+                inputs=[{'interface': ISequence, 'name': 'pointArray', 'value': None, 'desc': 'a 2D points array'}, {'interface': IInt, 'name': 'stride', 'value': 8, 'desc': 'the 3D volume number of revolution slices.'}],
+                outputs=[{'interface': IData, 'name': 'rev_fig', 'desc': 'A 3D revolution volume.'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+rose_geometry_ControlPointsMatrix = Factory(name='ControlPointsMatrix',
+                authors=' (wralea authors)',
+                description='a control matrix points to control a bezier patch',
+                category='data i/o',
+                nodemodule='rose_geometry',
+                nodeclass='ControlPointsMatrix',
+                inputs=[],
+                outputs=[{'interface': IData, 'name': 'cmp', 'desc': 'a control points matrix to set up a bezier patch'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -2856,81 +2934,6 @@ GetWebFiles = CompositeNodeFactory(name='GetWebFiles',
                              lazy=True,
                              eval_algo='LambdaEvaluation',
                              )
-
-
-
-
-Leaflet_Orientation_4points_Leaflet_Orientation_4points = Factory(name='Leaflet Orientation 4points',
-                authors=' (wralea authors)',
-                description='',
-                category='Unclassified',
-                nodemodule='Leaflet_Orientation_4points',
-                nodeclass='Leaflet_Orientation_4points',
-                inputs=[{'interface': IData, 'name': 'mtg', 'value': None, 'desc': ''}, {'interface': None, 'name': 'mesh', 'value': None, 'desc': ''}],
-                outputs=[{'interface': None, 'name': 'scene', 'desc': ''}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
-rose_geometry_RevolutionBud = Factory(name='RevolutionBud',
-                authors=' (rose authors)',
-                description='draws up a bud from a revolution volume.',
-                category='data processing',
-                nodemodule='rose_geometry',
-                nodeclass='RevolutionBud',
-                inputs=[{'interface': IData, 'name': 'revFig', 'value': None, 'desc': 'a revolution volume'}],
-                outputs=[{'interface': IFunction, 'name': 'rev_bud', 'desc': 'A function that draws a bud from a 3D revolution volume.'}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
-rose_geometry_RevolutionFig = Factory(name='RevolutionFig',
-                authors=' (rose authors)',
-                description='returns a 3D revolution volume.',
-                category='data processing',
-                nodemodule='rose_geometry',
-                nodeclass='RevolutionFig',
-                inputs=[{'interface': ISequence, 'name': 'pointArray', 'value': None, 'desc': 'a 2D points array'}, {'interface': IInt, 'name': 'stride', 'value': 8, 'desc': 'the 3D volume number of revolution slices.'}],
-                outputs=[{'interface': IData, 'name': 'rev_fig', 'desc': 'A 3D revolution volume.'}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
-rose_geometry_ControlPointsMatrix = Factory(name='ControlPointsMatrix',
-                authors=' (wralea authors)',
-                description='a control matrix points to control a bezier patch',
-                category='data i/o',
-                nodemodule='rose_geometry',
-                nodeclass='ControlPointsMatrix',
-                inputs=[],
-                outputs=[{'interface': IData, 'name': 'cmp', 'desc': 'a control points matrix to set up a bezier patch'}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
-rose_GetOrigin = Factory(name='GetOrigin',
-                authors=' (rose authors) ',
-                description='Makes a dictionnary of pairs {plant num : plant position} in a 2D grid of int coordinates',
-                category='data processing',
-                nodemodule='rose',
-                nodeclass='GetOrigin',
-                inputs=[{'interface': IFileStr, 'name': 'OriginFilename', 'value': '', 'desc': 'A file which contains a header line (i.e "x","y","z" and a data line with a 3D origine coordinate.'}],
-                outputs=[{'interface': ISequence, 'name': 'origin', 'desc': 'A vector of 3D coordinates.'}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
 
 
 
@@ -3259,13 +3262,6 @@ CropGeneration_CropGeneration = Factory(name='CropGeneration',
                 widgetclass=None,
                )
 
-
-
-_114440976 = DataFactory(name='simpleRoseField.lpy',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
 
 
 
@@ -3716,6 +3712,13 @@ CanopyReconstruction = CompositeNodeFactory(name='CanopyReconstruction',
 
 
 
+_84739472 = DataFactory(name='21052010_BFV.txt',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
 
 rose_colors_ColorFuncs = Factory(name='colorFunc',
                 authors=' (rose authors)',
@@ -3728,6 +3731,81 @@ rose_colors_ColorFuncs = Factory(name='colorFunc',
                 widgetmodule=None,
                 widgetclass=None,
                )
+
+
+
+
+testRevolutionFigCompositeNode = CompositeNodeFactory(name='testRevolutionFigCompositeNode',
+                             description='test for windows',
+                             category='category test',
+                             doc='',
+                             inputs=[],
+                             outputs=[],
+                             elt_factory={  2: ('Rose', 'revolutiontestinonefile'),
+   3: ('vplants.plantgl.visualization', 'plot3D')},
+                             elt_connections={  6403040: (2, 0, 3, 0)},
+                             elt_data={  2: {  'block': False,
+         'caption': 'revolutiontestinonefile',
+         'delay': 0,
+         'factory': '<openalea.core.node.NodeFactory object at 0x3b03250> : "revolutiontestinonefile"',
+         'hide': True,
+         'id': 2,
+         'lazy': True,
+         'port_hide_changed': set(),
+         'posx': 14.885900259467036,
+         'posy': -1.6682480192729798,
+         'priority': 0,
+         'use_user_color': False,
+         'user_application': None,
+         'user_color': None},
+   3: {  'block': False,
+         'caption': 'plot3D',
+         'delay': 0,
+         'factory': '<openalea.core.node.NodeFactory object at 0x475f750> : "plot3D"',
+         'hide': True,
+         'id': 3,
+         'lazy': True,
+         'port_hide_changed': set(),
+         'posx': 61.333499733019607,
+         'posy': 45.421506877755085,
+         'priority': 0,
+         'use_user_color': False,
+         'user_application': None,
+         'user_color': None},
+   '__in__': {  'block': False,
+                'caption': 'In',
+                'delay': 0,
+                'hide': True,
+                'id': 0,
+                'lazy': True,
+                'port_hide_changed': set(),
+                'posx': 0,
+                'posy': 0,
+                'priority': 0,
+                'use_user_color': True,
+                'user_application': None,
+                'user_color': None},
+   '__out__': {  'block': False,
+                 'caption': 'Out',
+                 'delay': 0,
+                 'hide': True,
+                 'id': 1,
+                 'lazy': True,
+                 'port_hide_changed': set(),
+                 'posx': 0,
+                 'posy': 0,
+                 'priority': 0,
+                 'use_user_color': True,
+                 'user_application': None,
+                 'user_color': None}},
+                             elt_value={  2: [], 3: [], '__in__': [], '__out__': []},
+                             elt_ad_hoc={  2: {'position': [14.885900259467036, -1.6682480192729798], 'userColor': None, 'useUserColor': False},
+   3: {'position': [61.333499733019607, 45.421506877755085], 'userColor': None, 'useUserColor': False},
+   '__in__': {'position': [0, 0], 'userColor': None, 'useUserColor': True},
+   '__out__': {'position': [0, 0], 'userColor': None, 'useUserColor': True}},
+                             lazy=True,
+                             eval_algo='LambdaEvaluation',
+                             )
 
 
 

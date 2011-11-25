@@ -119,12 +119,15 @@ def builtBud(stride=10):
         #radiusOfOvary=step /12. 
         #centerOfOvary=botPt + budAxis/12.
         # we prolongate the axis to intersect with the receptacle
+
         turtle.move(botPt + budAxis *step )
         # the ray of the receptacle is increased by 20% to intersect the upper sphere  
         turtle.customGeometry(Sphere(step * 1.2,lStride ), 1)
         # we draw the upper sphere of the bud (the one formd by the sepals)
         turtle.move(botPt +budAxis * step*4)
         turtle.customGeometry(Sphere(step*2, lStride ), 1)
+        
+        
 
         # we move to the center of the 2nd sph plus a half ray, 
         # i.e ray * sin(pi/6) (step *5, say) ajusted to 4.9 because 
@@ -865,17 +868,18 @@ class ControlPointsMatrix(Node):
 def petalMatrix():
     '''    control point matrix for a bezier patch close to a petal
     '''
+    from openalea.mtg.plantframe import Vector4 as V4
     ctpm = None; 
     # write the node code here.
-    ctpm = [[Vector4(0,-0.12, 0.2, 1), Vector4(0,0,0,1), Vector4(0, 0.12, 0.2, 1)],
-            [Vector4(0.14,-0.13,0.2,1), Vector4(0.14,0,0.0,1), Vector4(0.13,0.3,0.2,1)],
-            [Vector4(.28,-0.20,0.4,1), Vector4(0.28,0,0.02,1), Vector4(.28,0.20,0.4,1)],
-            [Vector4(.42,-0.27,0.55,1), Vector4(0.42,0,0.035,1), Vector4(.42,0.27,0.55,1)],
-            [Vector4(0.56,-0.33,0.6,1), Vector4(0.56,0,0.4,1), Vector4(.56,0.33,0.6,1)],
-            [Vector4(0.7,-0.39,0.6,1), Vector4(0.7,0,0.4,1), Vector4(.7,0.48,0.39,1)],
-            [Vector4(0.84,-0.45,0.65,1), Vector4(0.84,0,0.45,1), Vector4(.84,.45,0.65,1)],
-            [Vector4(0.97,-0.38,0.7,1), Vector4(0.97,0,0.5,1), Vector4(.97,.38,0.7,1)],
-            [Vector4(1,-0.10,1,1), Vector4(1,0,0.95,1), Vector4(1,0.10,1,1)]]
+    ctpm = [[V4(0, -0.12, 0.15, 1), V4(0, 0, 0,1), V4(0, 0.12, 0.15, 1)],
+            [V4(0.14, -0.25, 0.2,1), V4(0.14, 0, 0.15,1), V4(0.13, 0.25, 0.2,1)],
+            [V4(.28, -0.25, 0.35 ,1), V4(0.28, 0, 0.2 ,1), V4(.28, 0.25, 0.35 ,1)],
+            [V4(.42, -0.25, 0.55,1), V4(0.42, 0, 0.3, 1), V4(.42, 0.25, 0.55,1)],
+            [V4(0.56, -0.30, 0.6,1), V4(0.56, 0, 0.15,1), V4(.56, 0.3, 0.6,1)],
+            [V4(0.7, -0.33, 0.6,1), V4(0.7, 0, 0.1,1), V4(.7, 0.48, 0.33,1)],
+            [V4(0.84, -0.42, 0.75,1), V4(0.84, 0, 0.4 ,1), V4(.84, .42, 0.75,1)],
+            [V4(0.97, -0.38, 0.8,1), V4(0.97, 0, 0.5,1), V4(.97, .38, 0.8,1)],
+            [V4(1, -0.1, 0.95,1), V4(1, 0, 1,1), V4(1, 0.1, 0.95,1)]]
     # return outputs
     return ctpm,
 
