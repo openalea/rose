@@ -6,20 +6,23 @@ timestep=1.
 nsteps=60
 step=0
 nphy=15 # avec pédoncule 
-ddC=0.
+ddC=0.# on dit qu'elle a lieu bien avant tous les débourrements
 Ddd=10.# pour delta dd (dans un pas de temps du modèle)
 dd1j=20. # nombre de degré jours dans un jour
 
 ddDeb=60. ## c'est plutôt l'éamrgence: changer de notation
 
 ApF=(10,10,10,10,10,10,10,25,60,120,180,240,300,360,420) # à faire dépendre de la plante et à mettre en externe (procédure de fitting sur des données en externe via R); la dernière feuille est virtuelle: celle du pédoncule; en temps thermique depuis débourrement
-LmaxfolA=6. # à faire dépendre du rang et de la plante: à lire dans un tableau
+LmaxfolA=6. #en cm, à modifier en mm; à faire dépendre du rang et de la plante: à lire dans un tableau
+#lmaxfolA=25.
 LmaxEN=3.
+RmaxEN=0.3
 LmaxPed=7. # à mettre avec les EN
 LmaxRachis=8.# à calculer à partir de LmaxfolA
+RmaxRachis=0.05
 DmaxFlo=1.5
 
-cfolA=3.5 # à faire dépendre du rang.
+cfolA=3.5 #  à faire dépendre du rang.
 cEN=5
 cPed=5 # à mettre avec les EN
 cRachis=3.5 # à virer
@@ -38,8 +41,7 @@ def tmaxENFUN(apf):
   tmax=1.37*apf+83.88
   return tmax
 
-# pour simplifier les choses, l'extension des organes suit une linéaire suivie d'un plateau; l'entre-noeud et la feuille grandissent en même temps
-# ultérieurement, rajouter des fonctions spécifiques pour l'entre-noeud et la feuille
+
 # fonction de c (qui dépend du rang),tmax,lengthMax,dd depuis le débourrement: tmax dépend de la date d'apparition de la feuille (chaque plante et chaque rang, y compris le pédoncule). 
 def extend(lengthMax,c,tmax,dd): # la weibull fonctionne dansles positifs: mettre 0.5 ou 1mm au départ de croissance.
   L=lengthMax*(1-exp(-(c-1)/c*(dd/tmax)**c))  
@@ -70,14 +72,14 @@ module leaf(LfolA,Lrachis,dd0,n)
 module EN(L,dd0,n)
 module Flower(D,dd0,n)
 
-Axiom: canopy(24)
+Axiom: canopy(1)
 
 def StartEach():
   global step
   global ddC
   step=step+timestep
   ddC=ddC+Ddd
-
+  
 def EndEach():
   print("   ")
 
@@ -96,39 +98,51 @@ canopy(nplants):
       i=1
     else:
       i=i+1
-    nproduce plant(x,y,z)A(6,nphy,ddDeb)
+    nproduce plant(0,0,0)A(6,nphy,ddDeb)
 # théoriquement faire apparaître les 8 feuilles et EN déjà présents dans le bourgeon  
 
 
 # le rendre plus générique quand pas de temps pas exact
 # mettre valeur plus basse que 0.1: 0.05 cm
-# le rendre plus générique quand pas de temps pas exact
+# attend la troisième itération pour passer dans le module apex: bizarre !! A modifier !!
+# dans la deuxième condition, le 20 correspond au fait qu'on fait apparaître toutes les feuilles néoformées dans la semaine qui suit le débourrement; à modifier car il risque d'y avoir une incompatbilité avec les dates ApF
 A(n,N,dd0):
-  n2do=N-n
   dd=ddC-dd0
-  if dd==dd0-2*dd1j:
+  print ddC
+  #print dd0-2*dd1j
+  if dd>=dd0-2*dd1j and dd<dd0-2*dd1j+Ddd:
     for i in range(n):
-      produce EN(0.1,dd0,i+1)[leaf(0.1,0.1,dd0,i+1)]A(i+1,N,dd0)
-  if dd>=dd0-dd1j:
+      nproduce EN(0.1,dd0,i+1)[leaf(0.1,0.1,dd0,i+1)]A(i+1,N,dd0)
+  elif dd>=dd0-dd1j:
     for p in range(N-n-1):
-      if dd==dd0-2*dd1j+20*(p+1):
-        produce EN(0.1,dd0,n+p+1)[leaf(0.1,0.1,dd0,n+p+1)]A(n+p+1,N,dd0)
+      if dd>=dd0-2*dd1j+20*(p+1) and dd<dd0-2*dd1j+20*(p+1)+Ddd:
+        nproduce EN(0.1,dd0,n+p+1)[leaf(0.1,0.1,dd0,n+p+1)]A(n+p+1,N,dd0)
     produce EN(0.1,dd0,N)A(N,N,dd0)
-  if dd==dd0-2*dd1j+20*(N+1):
+  elif dd>=dd0-2*dd1j+20*(N+1) and dd<dd0-2*dd1j+20*(N+1)+Ddd:
     produce Flower(0.1,dd0,N)
+  else:
+    produce A(n,N,dd0)
 
 
 # attention: proportionnalité du rachis à la foliole
+# mettre un début d'extension un peu vaant débourrement en fait
 leaf(LfolA,Lrachis,dd0,n):
   dd=ddC-dd0
-  tmax=tmaxFolAFUN(ApF[n-1])
-  produce leaf(extend(LmaxfolA,cfolA,tmax,dd),extend(LmaxfolA,cfolA,tmax,dd),dd0,n)
+  #print ddC
+  if dd>=dd0:
+    tmax=tmaxFolAFUN(ApF[n-1])
+    produce leaf(extend(LmaxfolA,cfolA,tmax,dd),extend(LmaxfolA,cfolA,tmax,dd),dd0,n)
+  else:
+    produce leaf(LfolA,Lrachis,dd0,n)
 
 # l'entre-noeud prend l'âge de la feuille
 EN(L,dd0,n):
   dd=ddC-dd0
-  tmax=tmaxENFUN(ApF[n-1])
-  produce EN(extend(LmaxEN,cEN,tmax,dd),dd0,n)
+  if dd>=dd0:
+    tmax=tmaxENFUN(ApF[n-1])
+    produce EN(extend(LmaxEN,cEN,tmax,dd),dd0,n)
+  else:
+    produce EN(L,dd0,n)
 
 Flower(D,dd0,n):
   dd=ddC-dd0
@@ -142,6 +156,8 @@ plant(x,y,z)-->@M(x,y,z)
 # pour l'instant, toutes les folioles d'une feuille ont la même longueur que la foliole A et la forme des folioles est celle prédéfinie dans Lpy
 # je n'ai rien fait d'automatique pour la visualisation en fonction du nombre de folioles
 leaf(LfolA,Lrachis,dd0,n)-->;(2)+(90)/(90)_(0.1)F(2*Lrachis/(nfol+1))+(90)~l(LfolA)-(180)~l(LfolA)+(90)_(0.1)F(2*Lrachis/(nfol+1))+(90)~l(LfolA)-(180)~l(LfolA)+(90)_(0.1)F(2*Lrachis/(nfol+1))~l(LfolA)
+#leaf(LfolA,Lrachis,dd0,n)-->;(2)+(90)/(90)_(0.1)F(2*LmaxRachis/(nfol+1))+(90)~l(LmaxfolA)-(180)~l(LmaxfolA)+(90)_(0.1)F(2*LmaxRachis/(nfol+1))+(90)~l(LmaxfolA)-(180)~l(LmaxfolA)+(90)_(0.1)F(2*LmaxRachis/(nfol+1))~l(LmaxfolA)
+#EN(L,dd0,n)-->/(180)_(0.2)F(LmaxEN)
 EN(L,dd0,n)-->/(180)_(0.2)F(L)
 Flower(D,dd0,n)-->@O(D)
 A(n,N,dd0)-->*
