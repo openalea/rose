@@ -4,8 +4,9 @@
 import os
 import re
 import subprocess
+import sys
 
-ROOT="/mnt/echange/samba/MTG"
+
 
 dicManips={"M1":["M1-PARfort","M1-PARfaible"], "M2":["M2-PARfort","M2-PARfaible"],"M3":["M3-PARfF"]}
 
@@ -13,7 +14,7 @@ dicDirs={"M1-PARfort":"Manip1_C1_PARfort","M1-PARfaible":"Manip1_C2_PARfaible","
 
 dicPrel={"M1-PARfort":3,"M1-PARfaible":3,"M2-PARfort":2,"M2-PARfaible":2,"M3-PARfF":3}
 
-def InstallGrids():
+def InstallGrids(ROOT):
     #print "Todo !"
     sCommande = "ls *.fake" 
     FakesProc=subprocess.Popen(sCommande, stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
@@ -97,7 +98,7 @@ def processLiveness(process):
           print "Erreur inconnue"
 
 
-def makeFakeGrids():
+def makeFakeGrids(ROOT):
     # We list the files by here
     sCommande = "ls *.txt" 
     FichiersExistants=subprocess.Popen(sCommande, stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
@@ -145,11 +146,14 @@ def test():
     print "nothing done !"
     return
 
-def work():
+def work(ROOT):
     print "working !"
-    makeFakeGrids()
-    InstallGrids()
+    makeFakeGrids(ROOT)
+    InstallGrids(ROOT)
 
 if __name__ == "__main__" :
     #test()
-    work()
+    ROOT="/mnt/echange/samba/MTG"
+    if len(sys.argv) > 1:
+        ROOT=sys.argv[1]
+    work(ROOT)

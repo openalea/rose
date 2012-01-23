@@ -178,7 +178,8 @@ def pointArray():
     return pts
 
 def budArray():
-    ''' returns an array of points to feed a revolution object '''
+    ''' returns an array of points to feed a revolution object
+    Values are Vector2(ray, axial position) '''
     #print "Inside pointArray()" 
     pts=[Vector2(0.1, 0.00),
          Vector2(0.50, 0.06),
@@ -192,25 +193,26 @@ def budArray():
     return pts
 
 def fineBudArray():
-    ''' returns an array of points to feed a revolution object '''
+    ''' returns an array of points to feed a revolution object 
+    Values are Vector2(ray, axial position)'''
     #print "Inside pointArray()" 
-    pts=[Vector2(0.00, 0.10),
-         Vector2(0.02, 0.40),
-         Vector2(0.06, 0.50),
-         Vector2(0.10, 0.50),
-         Vector2(0.14, 0.40),
-         Vector2(0.16, 0.40),
-         Vector2(0.18, 0.60),
-         Vector2(0.24, 0.90),
-         Vector2(0.30, 1.00),
-         Vector2(0.34, 1.00),
-         Vector2(0.42, 0.90),
-         Vector2(0.48, 0.70),
-         Vector2(0.60, 0.50),
-         Vector2(0.72, 0.30),
-         Vector2(0.84, 0.25),
-         Vector2(0.96, 0.15),
-         Vector2(1.00, 0.00)]
+    pts=[Vector2( 0.10, 0.00),
+         Vector2( 0.40, 0.02),
+         Vector2( 0.50, 0.06),
+         Vector2( 0.50, 0.10),
+         Vector2( 0.40, 0.14),
+         Vector2( 0.40, 0.16),
+         Vector2( 0.60, 0.18,),
+         Vector2( 0.90, 0.24),
+         Vector2( 1.00, 0.30 ),
+         Vector2( 1.0, 0.34),
+         Vector2( 0.707, 0.42),
+         Vector2( 0.55, 0.48),
+         Vector2( 0.40,0.60 ),
+         Vector2( 0.30, 0.72),
+         Vector2( 0.22, 0.84),
+         Vector2( 0.10, 0.96),
+         Vector2( 0.00,1.00 )]
     return pts
 
 def revolution(points=None, stride=8):
@@ -227,10 +229,11 @@ def revolution(points=None, stride=8):
     rev=Revolution(pl,stride)
     return rev
 
-def revolutionBud(revVol=None):
+def revolutionBud(revVol=None ):
     ''' We return a func that draws a bud from a revolution volume '''
-    if revVol is None:
-        revVol=revolution(budArray())
+    lRevVol=revVol
+    if lRevVol is None:
+        lRevVol=revolution(budArray())
     def drawRevBud(points, turtle=None):
             
         botPt=points[0]
@@ -251,7 +254,7 @@ def revolutionBud(revVol=None):
         # we must orient the turtle before to draw 
         headTo(turtle,budAxis)
 
-        revBud=Scaled(Vector3(length *0.2, length *0.2, length),  revVol)
+        revBud=Scaled(Vector3(length *0.2, length *0.2, length),  lRevVol)
         #revBud=Oriented(upAxis, budAxis, revBud)
         # we are ready to draw the rev'bud
         turtle.customGeometry(revBud,1)
@@ -462,7 +465,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
         turtle.pop() # against 1st push()
         
     # return outputs
-    return meshedLeaflet,
+    return meshedLeaflet
 
 class ComputeLeaflet4pts(Node):
     def __init__(self):
@@ -502,7 +505,7 @@ def polygonLeaflet():
     compute_leaf = None ; 
     # write the node code here.
     # return outputs
-    return rawLeaflet,
+    return rawLeaflet
 # end polygonLeaflet
 
 class PolygonLeaflet(Node):
@@ -666,7 +669,7 @@ def coneFlower(colorFunc=None):
         turtle.pop()
         # end rawFlower
     # return outputs
-    return rawFlower,
+    return rawFlower
 # end coneFlower
 
 class RawFlower(Node):
@@ -809,6 +812,62 @@ class TaperedFlower(Node):
         colorFunc=self.get_input('colorFunc')
         return taperedFlower(controlpointmatrix, ustride, vstride, colorFunc)
 
+######################################## Fruit
+
+def simpleFruit(colorFunc=None):
+    """ default function to draw up a flower 
+    """
+    # write the node code here.
+    myColorFunc=colorFunc
+    if colorFunc is None:
+        myColorFunc=setTurtleOrange # custom 
+        
+    def rawFruit(points, turtle=None):
+        '''    computes a fruit from a pair or positions
+        '''
+        # 
+        turtle.push()
+        # 
+        myColorFunc(turtle)
+        #print "point= %s" % pointsnDiameters
+        
+        turtle.oLineTo(points[0])
+        #turtle.oLineTo(points[1])
+        #turtle.setWidth(10)
+        botPt=points[0]
+        topPt=points[-1]
+        fruitAxis=Vector3(topPt-botPt)
+        fruitSize=norm(fruitAxis)
+        fruitAxis.normalize()
+
+        ## we must orient the turtle before to draw 
+        ## this makes better fitting of the sphere and the paraboloid
+        headTo(turtle, fruitAxis)
+
+        turtle.move(botPt + fruitAxis * 0.5 )
+        fruit=Scaled(Vector3(fruitSize*.66, fruitSize*.66 , fruitSize),  Sphere())
+
+        turtle.customGeometry(fruit, 1)
+
+        turtle.pop()
+        # end rawFruit
+    # return outputs
+    return rawFruit
+# end simpleFruit
+
+class RawFruit(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name='colorFunc', interface=IFunction, value=None)
+        self.add_output( name = 'compute_flower', 
+                         interface = IFunction )
+
+    def __call__( self, inputs ):
+        colorFunc=self.get_input('colorFunc')
+        return simpleFruit(colorFunc)
+
+
+
 ########################################
 
 def noThing(points, turtle=None):
@@ -820,7 +879,7 @@ def makeNoOrgan():
     '''
     # write the node code here.
     # return outputs
-    return noThing,
+    return noThing
 # end makeNoLeaflet
 
 class NoOrgan(Node):
@@ -871,15 +930,15 @@ def petalMatrix():
     from openalea.mtg.plantframe import Vector4 as V4
     ctpm = None; 
     # write the node code here.
-    ctpm = [[V4(0, -0.12, 0.15, 1), V4(0, 0, 0,1), V4(0, 0.12, 0.15, 1)],
-            [V4(0.14, -0.25, 0.2,1), V4(0.14, 0, 0.15,1), V4(0.13, 0.25, 0.2,1)],
-            [V4(.28, -0.25, 0.35 ,1), V4(0.28, 0, 0.2 ,1), V4(.28, 0.25, 0.35 ,1)],
-            [V4(.42, -0.25, 0.55,1), V4(0.42, 0, 0.3, 1), V4(.42, 0.25, 0.55,1)],
-            [V4(0.56, -0.30, 0.6,1), V4(0.56, 0, 0.15,1), V4(.56, 0.3, 0.6,1)],
-            [V4(0.7, -0.33, 0.6,1), V4(0.7, 0, 0.1,1), V4(.7, 0.48, 0.33,1)],
-            [V4(0.84, -0.42, 0.75,1), V4(0.84, 0, 0.4 ,1), V4(.84, .42, 0.75,1)],
-            [V4(0.97, -0.38, 0.8,1), V4(0.97, 0, 0.5,1), V4(.97, .38, 0.8,1)],
-            [V4(1, -0.1, 0.95,1), V4(1, 0, 1,1), V4(1, 0.1, 0.95,1)]]
+    ctpm = [[V4(0,    -0.12,   0.,   1), V4(0,     0, -0,   1),  V4(0,     0.12,  0.,   1)],
+            [V4(0.14, -0.25,  -0.2,  1), V4(0.14,  0, -0.25, 1),  V4(0.13, 0.25, -0.2,  1)],
+            [V4(.28,  -0.25,   0.35, 1), V4(0.28,  0,  0.2 , 1),  V4(.28,  0.25,  0.35, 1)],
+            [V4(.42,  -0.25,   0.55, 1), V4(0.42,  0,  0.3,  1),  V4(.42,  0.25,  0.55, 1)],
+            [V4(0.56, -0.30,   0.6,  1), V4(0.56,  0,  0.15, 1),  V4(.56,  0.3,   0.6,  1)],
+            [V4(0.7,  -0.33,   0.6,  1), V4(0.7,   0,  0.1,  1),  V4(.7,   0.48,  0.33, 1)],
+            [V4(0.84, -0.42,   0.75, 1), V4(0.84,  0,  0.4 , 1),  V4(.84,   .42,  0.75, 1)],
+            [V4(0.97, -0.38,   0.8,  1), V4(0.97,  0,  0.5,  1),  V4(.97,   .38,  0.8,  1)],
+            [V4(0.95, -0.1,    0.95, 1), V4(1, 0,  1,        1),  V4(0.95, 0.1,   0.95, 1)]]
     # return outputs
     return ctpm,
 
@@ -898,7 +957,7 @@ def position(n):
     return Vector3(n.XX, n.YY, n.ZZ)
     
 ########################################
-def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
+def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None, fruit_factory=None ):
     '''    function to visit MTG nodes
     '''
     # write the node code here.   
@@ -909,12 +968,15 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
     if bud_factory is None:
         bud_factory=rawBud
     if flower_factory is None:
-        flower_factory=rawFlower
+        flower_factory=coneFlower() # bug when flower_factory is None
+    if fruit_factory is None:
+        fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None 
 
     def visitor(g, v, turtle, \
                     leaf_computer=leaf_factory, \
                     bud_computer=bud_factory,\
-                    flower_computer=flower_factory):
+                    flower_computer=flower_factory,\
+                    fruit_computer=fruit_factory):
         n = g.node(v)
         pt = position(n)
         symbol = n.label[0]
@@ -958,6 +1020,12 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
             points=[[position(n.parent()),n.parent().Diameter],[pt,n.Diameter]]
             flower_computer (points, turtle)
 
+        elif n.label == "C1" :
+            #turtle.oLineTo(pt) # pt is the top of the flower
+            turtle.setColor(4) # apple green
+            points=[position(n.parent()), pt]
+            fruit_computer (points, turtle)
+
         elif n.label == "T1":
             # The turtle is supposed to be at the top of the previous vertex
             #turtle.stopGC() # not useful anymore
@@ -969,7 +1037,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None ):
         turtle.setColor(currentColor)
 
     # return outputs
-    return visitor,
+    return visitor
 
 class VertexVisitor(Node):
     def __init__(self):
@@ -980,6 +1048,8 @@ class VertexVisitor(Node):
                         interface = IFunction)
         self.add_input( name = 'flower_factory',
                         interface = IFunction)
+        self.add_input( name = 'fruit_factory',
+                        interface = IFunction)
         self.add_output( name = 'VertexVisitor', 
                          interface = IFunction )
 
@@ -987,7 +1057,8 @@ class VertexVisitor(Node):
         leaf_factory=self.get_input('leaf_factory')
         bud_factory=self.get_input('bud_factory')
         flower_factory=self.get_input('flower_factory')
-        return vertexVisitor(leaf_factory,bud_factory,flower_factory)
+        fruit_factory=self.get_input('fruit_factory')
+        return vertexVisitor(leaf_factory,bud_factory,flower_factory,fruit_factory)
 
 
 #################################### ReconstructWithTurtle ##########
@@ -1053,7 +1124,7 @@ def reconstructWithTurtle(mtg, visitor, powerParam):
             diameter[v] = 0.75
 
     drf = DressingData(LeafClass=['F', 'S'], 
-        FlowerClass='O', FruitClass='B',
+        FlowerClass='O', FruitClass='C',
         MinTopDiameter=dict(E=0.5))
     pf = PlantFrame(mtg, TopDiameter='Diameter', 
                     DressingData=drf, 
