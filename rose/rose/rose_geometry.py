@@ -837,7 +837,9 @@ def simpleFruit(colorFunc=None):
         botPt=points[0]
         topPt=points[-1]
         fruitAxis=Vector3(topPt-botPt)
-        fruitSize=norm(fruitAxis)
+        # digit point is on top of etamins
+        # etamins are not represented 
+        fruitSize=norm(fruitAxis) * 0.5 
         fruitAxis.normalize()
 
         ## we must orient the turtle before to draw 
@@ -1021,7 +1023,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None, frui
             flower_computer (points, turtle)
 
         elif n.label == "C1" :
-            #turtle.oLineTo(pt) # pt is the top of the flower
+            #turtle.oLineTo(pt) # pt is the top of the fruit
             turtle.setColor(4) # apple green
             points=[position(n.parent()), pt]
             fruit_computer (points, turtle)
