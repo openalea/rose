@@ -959,7 +959,7 @@ def position(n):
     return Vector3(n.XX, n.YY, n.ZZ)
     
 ########################################
-def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None, fruit_factory=None ):
+def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None ):
     '''    function to visit MTG nodes
     '''
     # write the node code here.   
@@ -969,14 +969,20 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None, frui
         leaf_factory=rawLeaflet
     if bud_factory is None:
         bud_factory=rawBud
+    if sepal_factory is None:
+        sepal_factory=polygonLeaflet() # rawLeaflet
     if flower_factory is None:
         flower_factory=coneFlower() # bug when flower_factory is None
     if fruit_factory is None:
         fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None 
 
+    # to store sepals whila awaiting for flower data
+    lSepalStore=[]
+
     def visitor(g, v, turtle, \
                     leaf_computer=leaf_factory, \
                     bud_computer=bud_factory,\
+                    sepal_computer=sepal_factory,\
                     flower_computer=flower_factory,\
                     fruit_computer=fruit_factory):
         n = g.node(v)
@@ -996,20 +1002,30 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None, frui
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
 
-        elif n.label in [ 'F1', 'S1' ]:
-            if symbol == 'F':
-                turtle.setColor(2) # internode
-            else :
-                turtle.setColor(4) # apple green
-            
+        elif n.label ==  'F1' :
+            turtle.setColor(2) # internode
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
             leaf_computer(points,turtle)
+
+        elif n.label == 'S1' :
+            turtle.setColor(4) # apple green
+            points = [position(n.parent()), pt]
+            while n.nb_children() == 1:
+                n = list(n.children())[0]
+                points.append(position(n))
+            
+            lSepalStore.append(points)
+            #sepal_computer(points,turtle)
 	    
         elif n.label == "B1" :
             turtle.setColor(4) # apple green
+            # process sepals
+            while lSepalStore:
+                sepal_computer(lSepalStore.pop(),turtle)
+
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -1019,15 +1035,25 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, flower_factory=None, frui
         elif n.label == "O1" :
             #turtle.oLineTo(pt) # pt is the top of the flower
             turtle.setColor(4) # apple green
+
+            # process sepals
+            while lSepalStore:
+                sepal_computer(lSepalStore.pop(),turtle)
+
             points=[[position(n.parent()),n.parent().Diameter],[pt,n.Diameter]]
             flower_computer (points, turtle)
 
         elif n.label == "C1" :
-            #turtle.oLineTo(pt) # pt is the top of the fruit
+
             turtle.setColor(4) # apple green
+            # process sepals
+            while lSepalStore:
+                sepal_computer(lSepalStore.pop(),turtle)
+
             points=[position(n.parent()), pt]
             fruit_computer (points, turtle)
 
+            # process sepals
         elif n.label == "T1":
             # The turtle is supposed to be at the top of the previous vertex
             #turtle.stopGC() # not useful anymore
@@ -1048,6 +1074,8 @@ class VertexVisitor(Node):
                         interface = IFunction)
         self.add_input( name = 'bud_factory',
                         interface = IFunction)
+        self.add_input( name = 'sepal_factory',
+                        interface = IFunction)
         self.add_input( name = 'flower_factory',
                         interface = IFunction)
         self.add_input( name = 'fruit_factory',
@@ -1058,9 +1086,10 @@ class VertexVisitor(Node):
     def __call__( self, inputs ):
         leaf_factory=self.get_input('leaf_factory')
         bud_factory=self.get_input('bud_factory')
+        sepal_factory=self.get_input('sepal_factory')
         flower_factory=self.get_input('flower_factory')
         fruit_factory=self.get_input('fruit_factory')
-        return vertexVisitor(leaf_factory,bud_factory,flower_factory,fruit_factory)
+        return vertexVisitor(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory)
 
 
 #################################### ReconstructWithTurtle ##########
