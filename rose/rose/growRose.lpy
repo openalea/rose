@@ -114,12 +114,12 @@ def NbApF(low,up,apfplant):
 
 ######### Le L-system #############################
 
-module canopy(ddcrop)
-module plant(x,y,z)
-module A(plantnum,n,N,dd0,ddcrop)
-module leaf(plantnum,LfolA,Lrachis,dd0,n)
-module EN(plantnum,L,dd0,n)
-module Flower(plantnum,D,dd0,n)
+module canopy(ddcrop):scale=1
+module plant(x,y,z):scale=2
+module A(plantnum,n,N,dd0,ddcrop):scale=3
+module leaf(plantnum,LfolA,Lrachis,dd0,n):scale=3
+module EN(plantnum,L,dd0,n):scale=3
+module Flower(plantnum,D,dd0,n):scale=3
 
 Axiom: canopy(0.)
 
