@@ -66,10 +66,10 @@ setup(
 
 
     include_package_data = True,
-    package_data = {'' : ['*.mtg', '*.drf', '*.txt'],},
+    package_data = {'' : ['*.mtg', '*.drf', '*.txt', '*.csv'],},
 
     # Declare scripts and wralea as entry_points (extensions) of your package 
-    entry_points = {'wralea' : ['rose = alinea.rose',],},
+    entry_points = {'wralea' : ['rose = alinea.rose','rose.mockup = alinea.rose.mockup','rose.growth = alinea.rose.growth'],},
     )
 
 
