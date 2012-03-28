@@ -644,7 +644,71 @@ class BezierPatchFlower(Node):
         return bezierPatchFlower(controlpointmatrix, ustride, vstride, colorFunc)
         #return bezierPatchFlower()
     
-########################################
+################################## PARAMETRIC FLOWER
+def floralDrawing(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
+                lPetalAngles=[], lPetalDims=[], turtle=None ):
+    """ A function to draw floral organs with observed angles or
+    observed stages of evolution in [BFV, CPV, SR, FO, FF]
+    i.e : 
+    - Visible Flower Bud
+    - Visible Petal's Color
+    - Refecting Sepals 
+    - Opened Flower
+    - Faded Flower
+    So the organ can be a button, a flower or a fruit.
+    It takes as input 
+    - the orientation of the flower (its heading vector)
+    - the radius of the flower (orthogonal to the heading)
+    - the height of the flower
+    - the list of angles between each sepal and the heading
+    - the list of length for each sepal (if any)
+    - the list of angles between each petal and the heading
+    - the list of length for each petal (if any)
+    """
+    turtle.push()
+    turtle.pop()
+
+def floralParameters(points, stade=None, PcStade=0):
+    """ returns a serie of parameters to draw flowers """
+    Heading = Vector4(0,0,1,1)
+    height=0
+    Radius = Vector4(0,1,0,1)
+    lSepalAngles= []
+    lSepalDims = []
+    lPetalAngles = []
+    lPetalDims = []
+
+    return(Heading, height, Radius, lSepalAngles, lSepalDims,
+     lPetalAngles, lPetalDims)
+    
+
+def  floralOrgan(points, turtle=None):
+    """ Computes a flower from the vertices included in points """
+    (Heading, height, Radius, lSepalAngles, lSepalDims,
+     lPetalAngles, lPetalDims)=floralParameters(points, stade, PcStade)
+    floralDrawing(Heading, height, Radius, lSepalAngles, lSepalDims,
+                  lPetalAngles,  lPetalDims, turtle)
+
+def drawFloralOrgan(colorFunc=None):
+    """ A function to return the function that draws floral organs
+    """
+    myColorFunc=colorFunc
+    if colorFunc is None:
+        myColorFunc=setTurtlePink # custom 
+    return floralOrgan
+
+class FloralOrgan (Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name='colorFunc', interface=IFunction, value=None)
+        self.add_output( name = 'compute_floralOrgan', 
+                         interface = IFunction )
+
+    def __call__( self, inputs ):
+        colorFunc=self.get_input('colorFunc')
+        return drawFloralOrgan(colorFunc)
+
+######################################## CONE FLOWER
 def coneFlower(colorFunc=None):
     """ default function to draw up a flower 
     """
@@ -902,11 +966,6 @@ def ctrlpointMatrix():
     '''
     #ctpm = None; 
     # write the node code here.
-    # with a scale factor : seems to cause problems with Translate
-    #ctpm = [[Vector4(0,0,0,7.),Vector4(0,0,0,7.)],[Vector4(2,-2,-0.8,7.),Vector4(2,2,-0.8,7.)],[Vector4(4,-4,-1.2,7.),Vector4(4,4,-1.2,7.)],[Vector4(6,-5,-1.5,7.),Vector4(6,5,-0.5,7.)],[Vector4(7,0,0,7.),Vector4(7,0,0,7.)]]
-    # the previous, normalized 
-    #ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],            [Vector4(0.28,-0.38,-0.13,1),Vector4(0.28,0.38,-0.13,1)],            [Vector4(.56,-0.56,-0.17,1),Vector4(.56,0.56,-0.17,1)],            [Vector4(0.86,-0.7,-0.21,1),Vector4(.86,.7,-0.01,1)],            [Vector4(1,-0.25,0,1),Vector4(1,0.25,0,1)]]
-    # a new shape
     ctpm=  [[Vector4(0,-0.40,0,1),Vector4(0,0.4,0,1)],
             [Vector4(0.28,-0.45,0.08,1),Vector4(0.28,0.45,0.08,1)],
             [Vector4(.56,-0.45,0.31,1),Vector4(.56,0.45,0.31,1)],
@@ -976,6 +1035,18 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
     if fruit_factory is None:
         fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None 
 
+    def computeHeadings(points):
+        """ computes the unity vector Hf that points from the 1st to
+        the last vector of the list, and computes their distance lf.
+        returns a pair (Hf, lf)
+        """
+        basePos=points[0]
+        topPos=points[-1]
+        distance=norm(topPos-basePos)
+        axis=topPos-basePos
+        axis.normalize()
+        return (axis, distance)
+
     # to store sepals whila awaiting for flower data
     lSepalStore=[]
 
@@ -1022,14 +1093,17 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
 	    
         elif n.label == "B1" :
             turtle.setColor(4) # apple green
+            points = [position(n.parent()), pt]
+
+            while n.nb_children() == 1:
+                n = list(n.children())[0]
+                points.append(position(n))
+            (Hf,lf) = computeHeadings(points)
+
             # process sepals
             while lSepalStore:
                 sepal_computer(lSepalStore.pop(),turtle)
 
-            points = [position(n.parent()), pt]
-            while n.nb_children() == 1:
-                n = list(n.children())[0]
-                points.append(position(n))
             bud_computer(points,turtle)
 
         elif n.label == "O1" :
