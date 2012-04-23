@@ -13,10 +13,20 @@ from openalea.core.external import *
 from openalea.core.logger  import *
 
 
-def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], n_x=13, n_y=6, s_x=150, s_y=150, origin=(0, 0, 800), DoFill=True, DoRotate=True):
+def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDef=[], origin=(0, 0, 800), DoFill=True, DoRotate=True):
     '''    Generates a dictionnary of filenames associated with one or more position and orientation.
     '''
     plant_mtgs = []; 
+    if gridDef :
+        n_x = int(gridDef[0])
+        n_y = int(gridDef[1])
+        s_x = float(gridDef[2])
+        s_y = float(gridDef[3])
+    else:
+        n_x=13
+        n_y=6
+        s_x=150.
+        s_y=150.
     # write the node code here.
     def Index2Coord(ix,iy=None):
         if isinstance (ix,list):
@@ -105,14 +115,8 @@ class CropGeneration_2011(Node):
                         interface = IDict)
         self.add_input( name = 'excludelist',
                         interface = ISequence )
-        self.add_input( name = 'n_x',
-                        interface = IInt)
-        self.add_input( name = 'n_y',
-                        interface = IInt)
-        self.add_input( name = 's_x',
-                        interface = IInt)
-        self.add_input( name = 's_y',
-                        interface = IInt)
+        self.add_input( name = 'gridDef',
+                        interface = ISequence)
         self.add_input( name = 'origin',
                         interface =  ITuple3)
         self.add_input( name = 'DoFill',
@@ -127,15 +131,12 @@ class CropGeneration_2011(Node):
         plantlist= self.get_input( 'plantlist' )
         existingmtglist= self.get_input( 'existingmtglist' )
         excludelist= self.get_input( 'excludelist' )
-        n_x= self.get_input( 'n_x' )
-        n_y= self.get_input( 'n_y' )
-        s_x= self.get_input( 's_x' )
-        s_y= self.get_input( 's_y' )
+        gridDef= self.get_input( 'gridDef' )
         origin= self.get_input( 'origin' )
         DoFill= self.get_input( 'DoFill' )
         DoRotate= self.get_input( 'DoRotate' )
         return cropGeneration_2011(plantlist, existingmtglist, excludelist, \
-                                  n_x, n_y, s_x, s_y, origin, DoFill, DoRotate)
+                                  gridDef, origin, DoFill, DoRotate)
 
 
 #################################################################
@@ -290,15 +291,23 @@ class GetOrigin(Node):
 #end GetOrigin
 
 #################################################################
-def gridFile2Dict(gridfilename):
+def getGrid(gridfilename):
     '''    Makes a dictionnary from file that contains plants indexes inside a 2D grid.
     '''
     dictofindices = None; 
     # write the node code here.
+    def getGridSpecs(coords_file):
+        """ we read the 1st line of the file and return it as a list """
+        ligne = coords_file.readline()
+        ligne=ligne.split('\n')
+        ligne=ligne[0].split('\t')
+        return ligne
+        
     # Create a dictionnary whose keys are plants ID and values are lists of plant positions
     # From J. Berhteloot's CropGeneration
     coords_file = open(gridfilename, 'r')
     dictofindices={}
+    gridSpecs = getGridSpecs(coords_file)
     for line in coords_file:
         plt=line.split()[0]
         x,y=line.split()[1:]
@@ -306,19 +315,22 @@ def gridFile2Dict(gridfilename):
     coords_file.close()
 
     # return outputs
-    return dictofindices,
+    return dictofindices, gridSpecs
 
-class GridFile2Dict(Node):
+class GetGrid(Node):
     def __init__(self):
         Node.__init__(self)
         self.add_input( name = 'gridFileName',
                         interface=IStr)
         self.add_output(name = 'dictOfPlantNums',
                         interface=IDict)
+        self.add_output(name = 'gridSpecs',
+                        interface=ISequence)
 
     def __call__( self, inputs ):
         gridFileName= self.get_input( 'gridFileName' )
-        return gridFile2Dict(gridFileName)
+        (dico, liste)=getGrid(gridFileName)
+        return (dico, liste)
 #end GrifFile2dict
 
 #################################################################

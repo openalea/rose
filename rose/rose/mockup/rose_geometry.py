@@ -36,7 +36,9 @@ def computeUpAxis(front,side):
     return Up
 # end computeUpAxis
 
-def headTo(turtle, direction):
+def faceTo(turtle, direction):
+    """ This routine makes the turtle point its face to direction,
+    with a local up vector orthogonal to direction """
     direction.normalize()
     upAxis=computeUpAxis(direction, Vector3(1,0,0))
     # ifever the direction  goes along the x axis :
@@ -53,11 +55,15 @@ def rawBud():
     ''' returns a function to draw 'raw' buds wiht a sphere and a cone'''
     
     def computeRawBud(points, turtle=None):
+        ''' draws a but by using a sphere and a cone :
+        puts the sphere at the bottom using the "haut1" point
+        and then draws the cone from the bottom to the top "haut2".
+        '''
         #print "points= %s" %  points
         turtle.push()
-
-        oldPt=points[0]
-        radiusOfBud=(points[1]-oldPt)*0.5
+        
+        oldPt=points[0][0]
+        radiusOfBud=(points[1][0]-oldPt)*0.5 
         centerOfBud=oldPt + radiusOfBud
         turtle.oLineTo(centerOfBud)
         turtle.push()
@@ -68,9 +74,9 @@ def rawBud():
         turtle.customGeometry(geometry, 1)
         turtle.pop()
         turtle.setWidth(radius*.8)
-        if len(points) >2: # i.e top not forgotten
-            turtle.oLineTo(points[2])
-            turtle.setWidth(0.01)	    
+        # top not forgotten
+        turtle.oLineTo(points[2][0])
+        turtle.setWidth(0.01)	    
         turtle.pop()
     # end computeRawBud
 
@@ -90,7 +96,9 @@ def builtBud(stride=10):
     ''' returns a function to draw buds'''
     
     def computeBuiltBud(points, turtle=None):
-        '''draw a bud with 2 spheres and a paraboloid '''
+        '''draw a bud with 2 spheres and a paraboloid 
+        we just use the bottom point "ped" and the top point "haut2"
+        '''
         # TODO1 : adjust the paraboloid onto the upper sphere
         # TODO2 : parametrize and simplify that stuff of variables
 
@@ -99,8 +107,8 @@ def builtBud(stride=10):
         if lStride < 5:
             lStride = 5
             
-        botPt=points[0]
-        topPt=points[-1]
+        botPt=points[0][0]
+        topPt=points[2][0]
         budAxis=Vector3(topPt-botPt)
         # ray of the floral receptacle
         step=norm(budAxis) /12.
@@ -110,11 +118,11 @@ def builtBud(stride=10):
 
         turtle.push() #
         # prolongation of ped
-        turtle.oLineTo(points[0])
-        #turtle.setColor(4) # 
+        turtle.oLineTo(points[0][0])
+        turtle.setColor(4) # 
         ## we must orient the turtle before to draw 
         ## this makes better fitting of the sphere and the paraboloid
-        headTo(turtle,budAxis)
+        faceTo(turtle,budAxis)
 
         #radiusOfOvary=step /12. 
         #centerOfOvary=botPt + budAxis/12.
@@ -174,7 +182,7 @@ def pointArray():
          Vector2(0.90, 0.42),
          Vector2(0.50, 0.60),
          Vector2(0.30, 0.84),
-         Vector2(1.00, 1.00)] # to be edited
+         Vector2(1.00, 1.00)] 
     return pts
 
 def budArray():
@@ -216,7 +224,8 @@ def fineBudArray():
     return pts
 
 def revolution(points=None, stride=8):
-    ''' returns a revolution volume made from the input points'''
+    ''' returns a revolution volume made from the input points
+    stride  '''
     #lStride = stride
     if stride < 5:
         stride = 5
@@ -236,23 +245,22 @@ def revolutionBud(revVol=None ):
         lRevVol=revolution(budArray())
     def drawRevBud(points, turtle=None):
             
-        botPt=points[0]
-        topPt=points[-1]
+        botPt=points[0][0]
+        topPt=points[2][0]
         budAxis=Vector3(topPt-botPt)
         lengthVector=budAxis
         length=norm(lengthVector)
         budAxis.normalize() # necessary ?
 
-        turtle.push() #
         # prolongation of ped
-        turtle.oLineTo(points[0])
+        #turtle.oLineTo(points[0])
         #turtle.push()
-        turtle.oLineTo(points[0]+budAxis*4) # + 4 units (mm)
-        #turtle.pop()
-        #turtle.setColor(4) # 
-       
+        turtle.oLineTo(points[0][0]+budAxis*4) # + 4 units (mm)
+        turtle.push() #
+        turtle.setColor(4) # apple green
+        
         # we must orient the turtle before to draw 
-        headTo(turtle,budAxis)
+        faceTo(turtle,budAxis)
 
         revBud=Scaled(Vector3(length *0.2, length *0.2, length),  lRevVol)
         #revBud=Oriented(upAxis, budAxis, revBud)
@@ -378,9 +386,8 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
         sideLength=norm(side)
         side.normalize()
         normAxis=computeUpAxis(Axis,side)
-        # dbg
         if abs(norm(normAxis)) < 0.001 :
-            print "Z.bug= %s" % points[0][2]
+            print "Z.bug= %s" % points[0][2] # dbg
         
         # 2nd : compute the width of this half leaflet (sideLength * sin(angle))
         halfWidth =  sideLength * norm(Axis^side)
@@ -563,11 +570,11 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None
             lvStride = 5
         #ustride=5 
         #vstride=5 
-
+        # pointsNdiamters is : [[base_pos, base_diam], [None,None], [top_pos, top_diam], [...]]
         basePos=pointsnDiameters[0][0]
-        topPos=pointsnDiameters[1][0]
+        topPos=pointsnDiameters[2][0]
         pedDiam=pointsnDiameters[0][1]
-        flowerRay=pointsnDiameters[1][1] * 0.5
+        flowerRay=pointsnDiameters[2][1] * 0.5
         flowerHeight=norm(topPos-basePos)
         baseRay=max(flowerRay *0.2, flowerHeight*0.2) # arbitrarily
         deltaRay=flowerRay-baseRay
@@ -595,7 +602,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None
 
         #  orient the turtle 
         flowerAxis=topPos-basePos
-        headTo(turtle,flowerAxis)
+        faceTo(turtle,flowerAxis)
         #turtle.setColor(4) # kind of yellow-green
         turtle.customGeometry(ovary, 1) # 
 
@@ -684,6 +691,8 @@ def floralParameters(points, stade=None, PcStade=0):
 
 def  floralOrgan(points, turtle=None):
     """ Computes a flower from the vertices included in points """
+    stade=None
+    PcStade=0
     (Heading, height, Radius, lSepalAngles, lSepalDims,
      lPetalAngles, lPetalDims)=floralParameters(points, stade, PcStade)
     floralDrawing(Heading, height, Radius, lSepalAngles, lSepalDims,
@@ -727,8 +736,8 @@ def coneFlower(colorFunc=None):
         #print "point= %s" % pointsnDiameters
         
         turtle.oLineTo(pointsnDiameters[0][0])
-        Diameter=pointsnDiameters[1][1]
-        turtle.oLineTo(pointsnDiameters[1][0])
+        Diameter=pointsnDiameters[2][1]
+        turtle.oLineTo(pointsnDiameters[2][0]) 
         turtle.setWidth(Diameter*.5)
         turtle.pop()
         # end rawFlower
@@ -783,9 +792,9 @@ def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8, colorFunc=None):
         #ustride=5 
         #vstride=5 
         basePos=pointsnDiameters[0][0]
-        topPos=pointsnDiameters[1][0]
+        topPos=pointsnDiameters[2][0]
         pedDiam=pointsnDiameters[0][1]
-        flowerRay=pointsnDiameters[1][1] * 0.5
+        flowerRay=pointsnDiameters[2][1] * 0.5
         flowerHeight=norm(topPos-basePos)
         baseRay=max(flowerRay *0.2, flowerHeight*0.2) # arbitrarily
         #deltaRay=flowerRay-baseRay
@@ -799,7 +808,7 @@ def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8, colorFunc=None):
 
         #  orient the turtle 
         flowerAxis=topPos-basePos
-        headTo(turtle,flowerAxis)
+        faceTo(turtle,flowerAxis)
 
         #ovary=Disc(baseRay ,luStride)
         ovary=Sphere(baseRay ,luStride)
@@ -895,11 +904,11 @@ def simpleFruit(colorFunc=None):
         myColorFunc(turtle)
         #print "point= %s" % pointsnDiameters
         
-        turtle.oLineTo(points[0])
+        turtle.oLineTo(points[0][0])
         #turtle.oLineTo(points[1])
         #turtle.setWidth(10)
-        botPt=points[0]
-        topPt=points[-1]
+        botPt=points[0][0]
+        topPt=points[2][0]
         fruitAxis=Vector3(topPt-botPt)
         # digit point is on top of etamins
         # etamins are not represented 
@@ -908,7 +917,7 @@ def simpleFruit(colorFunc=None):
 
         ## we must orient the turtle before to draw 
         ## this makes better fitting of the sphere and the paraboloid
-        headTo(turtle, fruitAxis)
+        faceTo(turtle, fruitAxis)
 
         turtle.move(botPt + fruitAxis * 0.5 )
         fruit=Scaled(Vector3(fruitSize*.66, fruitSize*.66 , fruitSize),  Sphere())
@@ -1040,8 +1049,8 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
         the last vector of the list, and computes their distance lf.
         returns a pair (Hf, lf)
         """
-        basePos=points[0]
-        topPos=points[-1]
+        basePos=points[0][0]
+        topPos=points[2][0]
         distance=norm(topPos-basePos)
         axis=topPos-basePos
         axis.normalize()
@@ -1064,11 +1073,11 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
 
         if symbol in ['E', 'R']:
             if n.Diameter is None:
-                print 'ERROR: vertex %d (name: %s, line around %d)'%(v,n.label,n._line)
-                n.Diameter = 0.75
+                logging.error('ERROR: vertex %d (name: %s, line around %d)'%(v,n.label,n._line))
+                n.Diameter = 0.75 
 
-            if n.edge_type() == '+'  or not n.parent():
-                turtle.setWidth(n.Diameter / 2.)
+            #if n.edge_type() == '+'  or not n.parent():
+            #    turtle.setWidth(n.Diameter / 2.)
 
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
@@ -1092,19 +1101,18 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             #sepal_computer(points,turtle)
 	    
         elif n.label == "B1" :
-            turtle.setColor(4) # apple green
-            points = [position(n.parent()), pt]
-
+            # we create a list of pairs [Vector4, diameter], 
+            # to put in a parametrized func ?
+            points = [[position(n.parent()),n.parent().Diameter], [pt,None]]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
-                points.append(position(n))
-            (Hf,lf) = computeHeadings(points)
+                points.append([position(n),None])
+            #(Hf,lf) = computeHeadings(points)
 
+            bud_computer(points,turtle)
             # process sepals
             while lSepalStore:
                 sepal_computer(lSepalStore.pop(),turtle)
-
-            bud_computer(points,turtle)
 
         elif n.label == "O1" :
             #turtle.oLineTo(pt) # pt is the top of the flower
@@ -1112,9 +1120,9 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
 
             # process sepals
             while lSepalStore:
-                sepal_computer(lSepalStore.pop(),turtle)
+               sepal_computer(lSepalStore.pop(),turtle)
 
-            points=[[position(n.parent()),n.parent().Diameter],[pt,n.Diameter]]
+            points=[[position(n.parent()),n.parent().Diameter], [None,None],[pt,n.Diameter]]
             flower_computer (points, turtle)
 
         elif n.label == "C1" :
@@ -1124,22 +1132,27 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             while lSepalStore:
                 sepal_computer(lSepalStore.pop(),turtle)
 
-            points=[position(n.parent()), pt]
+            points=[[position(n.parent()),n.parent().Diameter], [None,None], [pt, None]]
             fruit_computer (points, turtle)
 
-            # process sepals
+            # process terminator
         elif n.label == "T1":
             # The turtle is supposed to be at the top of the previous vertex
             #turtle.stopGC() # not useful anymore
             turtle.setColor(2) # green
             #turtle.startGC()
             turtle.oLineTo(pt)
-            turtle.setWidth(0.01)
+            turtle.setWidth(0.01) 
+
+        elif symbol == 'H' : # hidden vertex
+            pass
+
 
         turtle.setColor(currentColor)
 
     # return outputs
     return visitor
+    # end VertexVisitor
 
 class VertexVisitor(Node):
     def __init__(self):
@@ -1226,14 +1239,18 @@ def reconstructWithTurtle(mtg, visitor, powerParam):
     diameter = mtg.property('Diameter')
     for v in mtg:
         if mtg.class_name(v) == 'R':
-            diameter[v] = 0.75
+            diameter[v] = 0.75 
+        elif mtg.class_name(v) == 'B':
+            diameter[v] = 1.75
+        elif mtg.class_name(v) in ['O','C']:
+            diameter[v] = 2.
 
     drf = DressingData(LeafClass=['F', 'S'], 
         FlowerClass='O', FruitClass='C',
         MinTopDiameter=dict(E=0.5))
     pf = PlantFrame(mtg, TopDiameter='Diameter', 
                     DressingData=drf, 
-                    Exclude = 'F S O B T'.split())
+                    Exclude = 'F S T'.split()) 
     #diameter = pf.algo_diameter(power=powerParam)
     #mtg.properties()['Diameter'] = diameter 
     #test : 
