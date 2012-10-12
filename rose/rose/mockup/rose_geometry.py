@@ -1225,7 +1225,7 @@ def TurtleFrame(g, visitor):
         origin = pgl.Vector3(plant_node.XX, plant_node.YY, plant_node.ZZ)
         turtle.move(origin)
 
-        vid =  g.component_roots_at_scale(plant_id, scale=n).next()
+        vid =  g.component_roots_at_scale_iter(plant_id, scale=n).next()
         traverse_with_turtle(g, vid, visitor, turtle)
     return turtle.getScene()
 
