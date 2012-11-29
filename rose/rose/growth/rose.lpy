@@ -159,7 +159,7 @@ class ThermalTimeParameter(ParameterSet):
   def __init__( self, **params):
     """ 
       Parameters: 
-        - dd       : thermal time of the plant since bud break
+        - dd       : thermal time of the plant since organ initiation
     """
     ParameterSet.__init__(self,dd=0,**params)
 
@@ -186,6 +186,10 @@ class AxisParameter (ThermalTimeParameter):
     """
     ThermalTimeParameter.__init__(self, plant=plant, N=N, order = order, dda = dda, nbPhytomer=0)
   
+  def rdd(self) : 
+    """ dd since dda. Should be active """
+    if self.dda is None or self.dda > self.dd : return None
+    return self.dd - self.dda
 
 class ApexParameter (ParameterSet):
   def __init__(self, axis):
@@ -369,9 +373,9 @@ Internode(ddcrop,plantnum,dd0,N,n,L):
   #else:
   #  produce EN(ddcrop,plantnum,dd0,N,n,L)
 
-Flower(ddcrop,plantnum,dd0,N,D):
+Flower(flowerp):
   ddcrop=ddC
-  print 'flower','temps thermique:', ddcrop
+  print 'flower','temps thermique:', flowerp.axis.dd
   plantpos=plantnums.index(plantnum)
   dd=ddcrop-dd0
   apFN=ApF[plantpos][nphy[plantpos]-1]
