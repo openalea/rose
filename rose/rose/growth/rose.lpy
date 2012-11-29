@@ -1,0 +1,394 @@
+from numpy import *
+
+########### TIME of the model and the crop (A externaliser) ###############
+# initialization:a ne pas externaliser
+# ddC=Thermal Time of the crop; ATTENTION: a etablir bien avant tous les debourrements
+ddC=0. 
+step=0
+# Steps
+timestep=1.
+Ddd=10.# Timestep of the model in degree days
+nsteps=100 # number of model steps
+
+
+########### Model paramaters (A laisser dans le code) #############
+# Curvature parameters for Weibull extension functions: ici exprimes en rang relatif
+# c expressed in absolute or inverse value is valid only for a maximum number of phytomers of 16 (peduncle comprised)
+cUnit="rang relatif"
+nrel=[0.,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0]
+# c values estimated by spline
+#cfolArel=[1.62,1.65,1.68,1.71,1.75,1.79,1.84,1.92,2.07,2.29,2.60,2.97,3.41,3.89,4.38,4.87,5.32,5.73,6.11,6.48] # pas de valeur pour nrel=1
+#cENrel=[1.96,2.02,2.07,2.13,2.22,2.34,2.49,2.69,2.97,3.38,3.95,4.63,5.40,6.22,7.03,7.78,8.36,8.71,8.91,9.06,6.69] # for internodes and the peduncle
+#cfolAinv=[0.,6.22,5.58,4.86,4.09,3.34,2.69,2.20,1.89,1.70,1.53,1.37,1.20,1.04,0.87,0.71]# 0. value is for the virtual leaf (not used in the code)
+#cENinv=[6.69,9.01,8.48,7.62,6.51,5.28,4.11,3.22,2.69,2.35,2.08,1.84,1.60,1.36,1.12,0.88]
+#cfolAabs=[1.51,1.62,1.74,1.87,2.02,2.28,2.70,3.30,4.03,4.76,5.33,5.69,5.90,6.06,6.21]# pas de valeur pour la feuille virtuelle
+#cENabs=[1.58,1.84,2.12,2.46,2.88,3.41,4.11,5.06,6.18,7.32,8.21,8.72,8.88,8.84,8.71,6.69] # last value is for the peduncle
+# c values estimated by the loess function of R
+cfolArel=[1.84,1.84,1.84,1.84,1.85,1.86,1.87,1.90,2.04,2.26,2.57,2.90,3.34,3.85,4.29,4.79,5.31,5.73,6.03,6.23] # pas de valeur pour nrel=1
+cENrel=[1.81,1.81,1.84,1.97,2.08,2.21,2.43,2.54,2.90,3.30,3.83,4.54,5.34,6.25,6.91,7.63,8.30,8.69,8.51,8.38,6.77] # for internodes and the peduncle
+cfolAinv=[0.,6.16,5.67,4.83,4.11,3.28,2.69,2.14,1.88,1.76,1.62,1.62,1.62,1.62,1.62,1.62] # 0. value is for the virtual leaf (not used in the code)
+cENinv=[6.77,8.28,8.56,7.68,6.45,5.22,4.08,3.07,2.67,2.27,1.87,1.47,1.47,1.47,1.47,1.47]
+cfolAabs=[1.72,1.72,1.82,1.92,2.04,2.24,2.65,3.24,3.95,4.78,5.28,5.63,5.81,5.99,6.17] # pas de valeur pour la feuille virtuelle
+cENabs=[1.68,1.68,2.01,2.38,2.85,3.36,3.89,4.89,5.96,7.29,8.03,8.43,8.69,8.69,8.62,6.77] # last value is for the peduncle
+
+Fola2Rachis=(0.9,0.1) # coefficients -slope and intercept- of the linear relationship between leaflet A length and rachis length; il faut encore trouver la bonne relation 
+
+
+########### Input variables (A externaliser)#####################################
+# At the canopy scale
+nplants=2
+# At the plant scale
+ddEM=[199.8,199.8] ## emergence date of the plants; il faut que 10 (Ddd)-ddEM soit antérieur à la date d'apparition des premieres feuilles !
+nphy=[16,10] # phytomers number plus one corresponding to the peduncle (bearing a virtual leaf)
+plantnums=[2,28]
+plantid = 0
+#Stages=[(460.,570.,760.,860.),(210.,380.,470.,570.)] #stages of floral development: BFV,CPV,FO,FF
+DmaxFlo=50.
+DminFlo=1.
+# At the leaf scale
+ApF=[(31.9187169, 33.8468667, 35.7750165, 37.703166299999999, 39.631316099999999, 41.559465889999998, 50.139252679999998, 92.497518459999995, 134.85578430000001, 177.21404999999999, 219.57231580000001, 261.93058159999998, 304.28884740000001, 346.64711319999998, 389.005379, 431.36364479999997),(0.0, 0.0, 0.0, 0.0, 0.0, 4.1733644779999999, 47.83551585, 91.497667210000003, 135.15981859999999, 178.82196999999999)]
+LmaxfolA=[(0.0, 0.0, 0.0, 12.21919274, 36.144714780000001, 51.781817510000003, 47.161323799999998, 47.878200380000003, 52.121564970000001, 60.452758350000003, 60.187551470000002, 63.600457980000002, 65.458066669999994, 58.095660649999999, 50.530889569999999, 0.0), (0.0, 0.0, 0.0, 0.0, 31.60014601, 54.400271259999997, 61.134985720000003, 62.218311419999999, 76.495903870000006, 0.0)]
+LmaxEN=[(1.0, 2.0, 7.0, 7.0, 10.276169149999999, 12.1021774, 14.63757296, 18.333811709999999, 19.750325029999999, 29.59766329, 31.381721429999999, 29.201288819999998, 26.937320629999999, 22.197394039999999, 20.0, 43.360002880000003),(1.0, 1.0, 3.0, 11.270428839999999, 12.52623015, 19.476321389999999, 22.281030380000001, 36.93544971, 22.59415808, 62.787773350000002)]
+
+# ATTENTION: Modifier la suite:
+RmaxRachis=0.5
+nfol=5 ## pour l'instant ne sert pas
+RmaxEN=3
+
+
+######### Functions used for the calculations ###################
+
+# a et b sont des tuple de 2 coord x et y
+def linearInterpol(x,a,b):
+  return a[1]+(b[1]-a[1])/(b[0]-a[0])*(x-a[0])
+
+# Calcul du c relatif:
+# attention: verifier qu'on a pas de probleme quand on est au dessus de 0.95
+# je mets 0 pour cfolA quand n=N: de toute facon, cette valeur n'est pas utilisee
+def c(n,N):
+  if cUnit=="rang absolu":
+    if n==N:
+      cest=(0.,cENabs[len(cENabs)-1])
+    else:
+      cest=(cfolAabs[n-1],cENabs[n-1])
+  elif cUnit=="rang inverse":
+    #print n
+    if n==N:
+      cest=(0.,cENinv[0])
+    else:
+      cest=(cfolAinv[N-n],cENinv[N-n])
+    #print cest
+  else:
+    if n==N:
+      cest=(0.,cENrel[len(cENrel)-1])
+    else:
+      rrel=float(n-1)/float(N-1)
+      irrel=-1
+      i=-1
+      while irrel==-1:
+        i=i+1
+        if rrel==nrel[i]:
+          irrel=i
+          cest=(cfolArel[irrel],cENrel[irrel])
+        else:
+          if rrel<nrel[i]:
+            irrel=(i-1,i)
+            cest=(linearInterpol(rrel,(nrel[irrel[0]],cfolArel[irrel[0]]),(nrel[irrel[1]],cfolArel[irrel[1]])),linearInterpol(rrel,(nrel[irrel[0]],cENrel[irrel[0]]),(nrel[irrel[1]],cENrel[irrel[1]])))
+  return cest
+
+
+# Calculation of the rachis length as a function of the terminal leaflet length
+def Lrachis(lfola,fola2rachis):
+  return lfola*fola2rachis[0]+fola2rachis[1]
+
+# Calculation of the tmax parameters of the extension function from the thermal time of leaf appearance
+# Parameters obtained on all datasets
+#def tmaxFolAFUN(apf):
+#  tmax=1.37*apf+71.62
+#  return tmax
+#def tmaxENFUN(apf):
+#  tmax=1.37*apf+83.88
+#  return tmax
+# Parameters obtained on two datasets
+def tmaxFolAFUN(apf):
+  tmax=1.89632*apf-0.00161*apf*apf+41.51360
+  return tmax
+def tmaxENFUN(apf):
+  tmax=1.38797*apf+77.73904
+  return tmax
+
+# Weibull extension function for leaves and internodes, with as parameters, the final length of the organ, c and tmax parameters, and the thermal time since plant emergence (careful:weibull does not work for negative values)
+def extend(lengthMax,c,tmax,dd): # leaf and internode
+  """ extension for leaf and internode """
+  L=lengthMax*(1-exp(-(c-1)/c*(dd/tmax)**c))  
+  if L>=lengthMax*0.999:
+    L=lengthMax
+  return L
+
+# Flower opening
+def extendFlower(stage,dmax,dd):
+  if dd>=stage[3]:
+    D=dmax
+  else:
+    slope=(dmax-DminFlo)/(stage[3]-stage[0])
+    intercept=dmax-slope*stage[3]
+    D=slope*dd+intercept
+  return D
+
+# Calculation of the number of leaves appearing in a time step defined by its lower and upper limits
+def NbApF(low,up,apfplant):
+  nb=0
+  for i in apfplant:
+    if low <= i <up:
+       nb=nb+1
+  return nb
+
+# Calculation of the stages of floral development (BFV,CPV,FO,FF) from the date of the last appearing leaf (virtual leaf): still to improve
+def Stages(apf):
+  bfv=apf[-1]+30.
+  cpv=bfv+110.
+  fo=cpv+90.
+  ff=fo+100.
+  return (bfv,cpv,fo,ff)
+
+
+
+######### Le L-system #############################
+
+class ThermalTimeParameter(ParameterSet):
+  def __init__( self, **params):
+    """ 
+      Parameters: 
+        - dd       : thermal time of the plant since bud break
+    """
+    ParameterSet.__init__(self,dd=0,**params)
+
+class PlantParameter (ThermalTimeParameter):
+  def __init__( self, plantid, plantnum, N, position = (0,0,0)):
+    """ 
+      Parameters: 
+        - plantid  : plant id
+        - plantnum : plant label
+        - N        : total number of phytomers on the primary axis
+        - position : position of the plant on the ground
+    """
+    ThermalTimeParameter.__init__(self, plantid = plantid, plantnum=plantnum, N=N,position=position)
+
+
+class AxisParameter (ThermalTimeParameter):
+  def __init__(self, plant, N, order = 0, dda = None):
+    """ 
+      Parameters: 
+        - plant    : link to parameter of the plant
+        - N        : total number of phytomers on the axis
+        - dda      : value of dd at transition to active state
+        - order    : order of the axis
+    """
+    ThermalTimeParameter.__init__(self, plant=plant, N=N, order = order, dda = dda, nbPhytomer=0)
+  
+
+class ApexParameter (ParameterSet):
+  def __init__(self, axis):
+    """ 
+      Parameters: 
+        - axis     : link to parameter of the axis
+        - nbPhytomer : number of phytomers already produced 
+    """
+    ParameterSet.__init__(self, axis=axis, nbPhytomer=0)
+  
+  @property
+  def active(self): 
+    if self.axis.dda is None: return False
+    return self.axis.dda > self.axis.dd
+  
+  def activate(self):
+    self.axis.dda = self.axis.dd
+
+
+class LeafParameter (ThermalTimeParameter):
+  def __init__(self, axis , rank, nbLeaflet=5):
+    """ 
+      Parameters: 
+        - axis          : link to parameter of the axis
+        - rank           : rank of the leaf along the axis
+        - length         : current length of the terminal leaflet
+        - rachislength   : current length of the segment between leaflets
+    """
+    ThermalTimeParameter.__init__(self, axis = axis, rank=rank, length = 0, rachislength = 0, nbLeaflet=nbLeaflet)
+
+class InternodeParameter (ThermalTimeParameter):
+  
+  DEFAULT_INITIAL_DIAMETER = 0.5
+  DEFAULT_INITIAL_LENGTH   = 0
+  def __init__(self, axis , rank, length = DEFAULT_INITIAL_LENGTH, diameter = DEFAULT_INITIAL_DIAMETER):
+    """ 
+      Parameters: 
+        - axis           : link to parameter of the axis
+        - rank           : rank of the internode along the axis
+        - length         : current length
+        - diameter       : diameter of the internode
+    """
+    ThermalTimeParameter.__init__(self, axis=axis, rank=rank, length = length, diameter = diameter)
+
+class FlowerParameter (ThermalTimeParameter):
+  DEFAULT_INITIAL_DIAMETER = 0.5
+  def __init__(self, axis, diameter = DEFAULT_INITIAL_DIAMETER):
+    """ 
+      Parameters: 
+        - axis           : link to parameter of the axis
+        - diameter       : diameter of the flower
+    """
+    ThermalTimeParameter.__init__(self, axis=axis, diameter = diameter)
+
+
+
+
+module Plant(p) : scale=1
+module Axis(p) : scale=2
+module Apex(p) : scale=3
+module Leaf(p) : scale=3
+module Internode(p) : scale=3
+module Flower(p) : scale=3
+
+Axiom:
+   pp = PlantParameter(plantid, plantnums[plantid], nphy[plantid])   
+   axisp = AxisParameter(pp,nphy[plantid],dda=ddEM[plantid])
+   apxp = Apex(axisp)
+   produce Plant(pp) Axis(ap) Apex(apxp)
+
+
+# bizarre: sous visualea, on ne passe pas dans le end
+
+def End():
+  print "end"
+  print(" ")
+
+def StartEach():
+  global step
+  global ddC
+  step=step+timestep
+  #print "starteach0",ddC
+  #ddC=ddC+Ddd
+  print "starteach",ddC
+  
+def EndEach():
+  #print "endeach"
+  global ddC
+  ddC=ddC+Ddd
+  print("   ")
+
+derivation length: nsteps
+production:
+
+
+
+# theoriquement faire apparaître les 8 feuilles et EN deja presents dans le bourgeon
+# la condition dd<0 est necessaire car Weibull donne une fonction décroissante pour les valeurs negatives
+# attention: verifier ce qu'on fait avant l'emergence de la plante: il faudrait integrer la vraie longueur si on y a acces
+A(ddcrop,plantnum,dd0,N,n):
+  plantpos=plantnums.index(plantnum)
+  ddcrop=ddC
+  dd=ddcrop-dd0
+  #print 'apex'
+  print 'temps thermique:', ddcrop
+  nF2do=N-1-n
+  print 'temps thermique:', ddcrop,"; plante",plantnum,";",nF2do,"feuilles"
+  if nF2do>0: # nb of leaf to produce is positive
+    print "ok"
+    if dd < 0 and dd>=ApF[plantpos][n] and dd<ApF[plantpos][n]+Ddd:
+      # for preexisting leaf. With current data, do not happen
+      nbAp=NbApF(ApF[plantpos][n],(ApF[plantpos][n]+Ddd),ApF[plantpos])
+      print "ok1"
+      for i in range(nbAp-1):
+        n=n+1
+        nproduce EN(ddcrop,plantnum,dd0,N,n,0.05)[leaf(ddcrop,plantnum,dd0,N,n,0.05,0.05)]
+      n=n+1
+      produce EN(ddcrop,plantnum,dd0,N,n,0.05)[leaf(ddcrop,plantnum,dd0,N,n,0.05,0.05)]A(ddcrop,plantnum,dd0,N,n)
+    elif dd>=0 and dd>=ApF[plantpos][n] and dd<ApF[plantpos][n]+Ddd:
+      
+      nbAp=NbApF(ApF[plantpos][n],ApF[plantpos][n]+Ddd,ApF[plantpos])
+      print "ok2",nbAp
+      for i in range(nbAp-1):
+        n=n+1
+        tmaxEN=tmaxENFUN(ApF[plantpos][n-1])
+        tmaxFolA=tmaxFolAFUN(ApF[plantpos][n-1])
+        len=extend(LmaxEN[plantpos][n-1],c(n,N)[1],tmaxEN,dd)
+        #print "LEN",len,"c ",c(n,N),"n=",n
+        lengthfola=extend(LmaxfolA[plantpos][n-1],c(n,N)[0],tmaxFolA,dd)
+        lrachis=lengthfola*Fola2Rachis[0]+Fola2Rachis[1]
+        #print "LfolA n°",n,lengthfola
+        nproduce EN(ddcrop,plantnum,dd0,N,n,len)[leaf(ddcrop,plantnum,dd0,N,n,lengthfola,lrachis)]
+      n=n+1
+      tmaxEN=tmaxENFUN(ApF[plantpos][n-1])
+      tmaxFolA=tmaxFolAFUN(ApF[plantpos][n-1])
+      len=extend(LmaxEN[plantpos][n-1],c(n,N)[1],tmaxEN,dd)
+      #print "LEN",len,"c ",c(n,N),"n=",n
+      lengthfola=extend(LmaxfolA[plantpos][n-1],c(n,N)[0],tmaxFolA,dd)
+      lrachis=lengthfola*Fola2Rachis[0]+Fola2Rachis[1]
+      #print "LfolA n°",n,lengthfola
+      produce EN(ddcrop,plantnum,dd0,N,n,len)[leaf(ddcrop,plantnum,dd0,N,n,lengthfola,lrachis)]A(ddcrop,plantnum,dd0,N,n)
+    else:
+      print "ok3"
+      produce A(ddcrop,plantnum,dd0,N,n)
+  elif n==N-1: # last internode do not carry leaf (pedoncule)
+    if dd>=ApF[plantpos][n] and dd<ApF[plantpos][n]+Ddd:
+      produce EN(ddcrop,plantnum,dd0,N,N,0.05)A(ddcrop,plantnum,dd0,N,N)
+    else:
+      produce A(ddcrop,plantnum,dd0,N,n)
+  else: # at last production of flower according to stage timing
+    if dd<Stages(ApF[plantpos])[0]:
+      produce A(ddcrop,plantnum,dd0,N,n)
+    else:
+      produce Flower(ddcrop,plantnum,dd0,N,DminFlo)
+    
+
+leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis):
+  ddcrop=ddC
+  plantpos=plantnums.index(plantnum)
+  dd=ddcrop-dd0
+  #print "ddEM",dd
+  if ddcrop>=dd0:
+    tmax=tmaxFolAFUN(ApF[plantpos][n-1])
+    lengthfola=extend(LmaxfolA[plantpos][n-1],c(n,nphy[plantpos])[0],tmax,dd)
+    #print "LfolA",lengthfola
+    lrachis=lengthfola*Fola2Rachis[0]+Fola2Rachis[1]
+    produce leaf(ddcrop,plantnum,dd0,N,n,lengthfola,lrachis)
+  else:
+    produce leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis)
+
+# l'entre-noeud prend l'age de la feuille
+EN(ddcrop,plantnum,dd0,N,n,L):
+  ddcrop=ddC
+  plantpos=plantnums.index(plantnum)
+  dd=ddcrop-dd0
+  assert ddcrop>=dd0
+  tmax=tmaxENFUN(ApF[plantpos][n-1])
+  #print "n=",n
+  #print "LEN",extend(LmaxEN[plantpos][n-1],c(n,nphy[plantpos])[1],tmax,dd),"c ",c(n,nphy[plantpos])[1]
+  produce EN(ddcrop,plantnum,dd0,N,n,extend(LmaxEN[plantpos][n-1],c(n,nphy[plantpos])[1],tmax,dd))
+  #else:
+  #  produce EN(ddcrop,plantnum,dd0,N,n,L)
+
+Flower(ddcrop,plantnum,dd0,N,D):
+  ddcrop=ddC
+  print 'flower','temps thermique:', ddcrop
+  plantpos=plantnums.index(plantnum)
+  dd=ddcrop-dd0
+  apFN=ApF[plantpos][nphy[plantpos]-1]
+  produce Flower(ddcrop,plantnum,dd0,N,extendFlower(Stages(ApF[plantpos]),DmaxFlo,dd))
+
+
+################### GEOMETRIC INTERPRETATION (A externaliser) ############################
+
+interpretation:
+plant(ddcrop,plantnum,dd0,N,x,y,z)-->@M(x,y,z)
+# attention: il tourne les plantes les unes par rapport aux autres
+# pour l'instant, toutes les folioles d'une feuille ont la même longueur que la foliole A et la forme des folioles est celle prédéfinie dans Lpy
+# je n'ai rien fait d'automatique pour la visualisation en fonction du nombre de folioles
+leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis)-->;(2)+(70)/(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))~l(L)
+EN(ddcrop,plantnum,dd0,N,n,L)-->;(1)/(180)_(2)F(L)
+Flower(ddcrop,plantnum,dd0,N,D)-->;(3)@O(D)
+A(ddcrop,plantnum,dd0,N,n)-->*
+canopy(ddcrop)-->*
+
+endlsystem
