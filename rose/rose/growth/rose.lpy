@@ -389,10 +389,12 @@ Plant(p)-->@M(p.position)
 # attention: il tourne les plantes les unes par rapport aux autres
 # pour l'instant, toutes les folioles d'une feuille ont la même longueur que la foliole A et la forme des folioles est celle prédéfinie dans Lpy
 # je n'ai rien fait d'automatique pour la visualisation en fonction du nombre de folioles
-Leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis)-->;(2)+(70)/(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))~l(L)
-EN(ddcrop,plantnum,dd0,N,n,L)-->;(1)/(180)_(2)F(L)
-Flower(ddcrop,plantnum,dd0,N,D)-->;(3)@O(D)
-A(ddcrop,plantnum,dd0,N,n)-->*
-canopy(ddcrop)-->*
-
+<<<<<<< .mine
+#Leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis)-->;(2)+(70)/(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))~l(L)
+Leaf(p)-->;(2)+(70)/(90)_(1)F(2*p.rachislength/(p.nbLeaflet+1))+(90)~l(p.length)-(180)~l(L)+(90)_(1)F(2*p.rachislength/(p.nbLeaflet+1))+(90)~l(p.length)-(180)~l(L)+(90)_(1)F(2*p.rachislength/(p.nbLeaflet+1))~l(p.length)
+#Internode(ddcrop,plantnum,dd0,N,n,L)-->;(1)/(180)_(2)F(L)
+Internode(p)-->;(1)/(180)_(2)F(p.length)
+#Flower(ddcrop,plantnum,dd0,N,D)-->;(3)@O(D)
+Flower(p)-->;(3)@O(p.diameter)
+Apex(p)-->*
 endlsystem
