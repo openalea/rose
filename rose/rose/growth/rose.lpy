@@ -285,7 +285,7 @@ production:
 # theoriquement faire apparaître les 8 feuilles et EN deja presents dans le bourgeon
 # la condition dd<0 est necessaire car Weibull donne une fonction décroissante pour les valeurs negatives
 # attention: verifier ce qu'on fait avant l'emergence de la plante: il faudrait integrer la vraie longueur si on y a acces
-A(ddcrop,plantnum,dd0,N,n):
+Axis(ddcrop,plantnum,dd0,N,n):
   plantpos=plantnums.index(plantnum)
   ddcrop=ddC
   dd=ddcrop-dd0
@@ -342,7 +342,7 @@ A(ddcrop,plantnum,dd0,N,n):
       produce Flower(ddcrop,plantnum,dd0,N,DminFlo)
     
 
-leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis):
+Leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis):
   ddcrop=ddC
   plantpos=plantnums.index(plantnum)
   dd=ddcrop-dd0
@@ -357,7 +357,7 @@ leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis):
     produce leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis)
 
 # l'entre-noeud prend l'age de la feuille
-EN(ddcrop,plantnum,dd0,N,n,L):
+Internode(ddcrop,plantnum,dd0,N,n,L):
   ddcrop=ddC
   plantpos=plantnums.index(plantnum)
   dd=ddcrop-dd0
@@ -381,11 +381,11 @@ Flower(ddcrop,plantnum,dd0,N,D):
 ################### GEOMETRIC INTERPRETATION (A externaliser) ############################
 
 interpretation:
-plant(ddcrop,plantnum,dd0,N,x,y,z)-->@M(x,y,z)
+Plant(p)-->@M(p.position)
 # attention: il tourne les plantes les unes par rapport aux autres
 # pour l'instant, toutes les folioles d'une feuille ont la même longueur que la foliole A et la forme des folioles est celle prédéfinie dans Lpy
 # je n'ai rien fait d'automatique pour la visualisation en fonction du nombre de folioles
-leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis)-->;(2)+(70)/(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))~l(L)
+Leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis)-->;(2)+(70)/(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))~l(L)
 EN(ddcrop,plantnum,dd0,N,n,L)-->;(1)/(180)_(2)F(L)
 Flower(ddcrop,plantnum,dd0,N,D)-->;(3)@O(D)
 A(ddcrop,plantnum,dd0,N,n)-->*
