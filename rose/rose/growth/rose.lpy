@@ -43,7 +43,7 @@ nphy=[16,10] # phytomers number plus one corresponding to the peduncle (bearing 
 plantnums=[2,28]
 plantid = 0
 #Stages=[(460.,570.,760.,860.),(210.,380.,470.,570.)] #stages of floral development: BFV,CPV,FO,FF
-flowerMaxDiam=50.
+flowerMaxDiam=30.
 flowerMinDiam=1.
 # At the leaf scale
 LeafAppearingTime=[(31.9187169, 33.8468667, 35.7750165, 37.703166299999999, 39.631316099999999, 41.559465889999998, 50.139252679999998, 92.497518459999995, 134.85578430000001, 177.21404999999999, 219.57231580000001, 261.93058159999998, 304.28884740000001, 346.64711319999998, 389.005379, 431.36364479999997),(0.0, 0.0, 0.0, 0.0, 0.0, 4.1733644779999999, 47.83551585, 91.497667210000003, 135.15981859999999, 178.82196999999999)]
@@ -220,15 +220,15 @@ class OrganParameter (ThermalTimeParameter):
     return (self.rank - 1) / float(self.axis.N - 1)
  
 class LeafParameter (OrganParameter):
-  def __init__(self, axis, rank, length = 0, rachislength = 0, nbLeaflet=5):
+  def __init__(self, axis, rank, length = 0, rachisLength = 0, nbLeaflet=5):
     """ 
       Parameters: 
         - axis          : link to parameter of the axis
         - rank           : rank of the leaf along the axis. Start at 1.
         - length         : current length of the terminal leaflet
-        - rachislength   : current length of the segment between leaflets
+        - rachisLength   : current length of the segment between leaflets
     """
-    OrganParameter.__init__(self, axis = axis, rank=rank, length = length, rachislength = rachislength, nbLeaflet=nbLeaflet)
+    OrganParameter.__init__(self, axis = axis, rank=rank, length = length, rachisLength = rachisLength, nbLeaflet=nbLeaflet)
 
  
 class InternodeParameter (OrganParameter):
@@ -253,7 +253,7 @@ class FlowerParameter (OrganParameter):
         - axis           : link to parameter of the axis
         - diameter       : diameter of the flower
     """
-    OrganParameter.__init__(self, axis=axis, appearingrdd = axis.rdd, diameter = diameter, maxDiameter = flowerMaxDiam)
+    OrganParameter.__init__(self, axis=axis, rank = 0, appearingrdd = axis.rdd, diameter = diameter, maxDiameter = flowerMaxDiam)
   
   def flowerStageTimes(self):
     """ Calculation of the stages of floral development (BFV,CPV,FO,FF) 
@@ -265,18 +265,19 @@ class FlowerParameter (OrganParameter):
     ff=fo+100.
     return (bfv,cpv,fo,ff)
   
-  def estimateDiameter():
+  def estimateDiameter(self):
     """ Compute the diameter of a flower according to its dd, a max diameter and the stages """
-    dd     = self.rdd 
+    rdd     = self.rdd 
     dmax   = self.maxDiameter
     stages = self.flowerStageTimes()
     # Flower opening
-    if dd >= stages[3]:
+    if rdd >= stages[3]:
       D=dmax
     else:
       slope=(dmax-flowerMinDiam)/(stages[3]-stages[0])
       intercept=dmax-slope*stages[3]
-      D=slope*dd+intercept
+      D = slope*rdd+ intercept
+      print 'updateDiameter', rdd, D, slope, intercept
     return D
   
   def updateDiameter(self):
@@ -359,7 +360,7 @@ Apex(apexp):
         lrachis = lengthfola*Fola2Rachis[0]+Fola2Rachis[1]
         
         nproduce Internode(InternodeParameter(apexp.axis, n, length=lengthinternode))
-        nproduce [Leaf(LeafParameter(apexp.axis, n, length = lengthfola, rachislength=lrachis))]
+        nproduce [Leaf(LeafParameter(apexp.axis, n, length = lengthfola, rachisLength=lrachis))]
         
       apexp.nbPhytomer = n
       apexp.increaseDD()
@@ -371,15 +372,17 @@ Apex(apexp):
     # last internode do not carry leaf (pedoncule)
     nextleafappearingtime = LeafAppearingTime[plantid][nbPhytomer]    
     if nextleafappearingtime  <= rdd < nextleafappearingtime + Ddd:
-      produce Internode(InternodeParameter(apexp.axis, maxrank-1))
+      nproduce Internode(InternodeParameter(apexp.axis, maxrank-1))
+      apexp.nbPhytomer += 1
       apexp.increaseDD()
       produce Apex(apexp)
     else:
       apexp.increaseDD()
       produce Apex(apexp)
   else: 
+    print 
     # at last production of flower according to stage timing
-    if rdd < LeafAppearingTime[plantpos][0] + 30: # TODO
+    if rdd < LeafAppearingTime[plantid][0] + 30: # TODO
       apexp.increaseDD()
       produce Apex(apexp)
     else:
@@ -419,6 +422,7 @@ Internode(internodep):
 
 Flower(flowerp):
   flowerp.increaseDD()
+  flowerp.axis.increaseDD()
   flowerp.updateDiameter()  
   produce Flower(flowerp)
 
@@ -432,13 +436,13 @@ Plant(p)-->@M(p.position)
 # je n'ai rien fait d'automatique pour la visualisation en fonction du nombre de folioles
 
 #Leaf(ddcrop,plantnum,dd0,N,n,L,Lrachis)-->;(2)+(70)/(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))+(90)~l(L)-(180)~l(L)+(90)_(1)F(2*Lrachis/(nfol+1))~l(L)
-Leaf(p)-->;(2)+(70)/(90)_(1)F(2*p.rachislength/(p.nbLeaflet+1))+(90)~l(p.length)-(180)~l(p.length)+(90)_(1)F(2*p.rachislength/(p.nbLeaflet+1))+(90)~l(p.length)-(180)~l(p.length)+(90)_(1)F(2*p.rachislength/(p.nbLeaflet+1))~l(p.length)
+Leaf(p)-->;(2)+(70)/(90)_(1)F(2*p.rachisLength/(p.nbLeaflet+1))+(90)~l(p.length)-(180)~l(p.length)+(90)_(1)F(2*p.rachisLength/(p.nbLeaflet+1))+(90)~l(p.length)-(180)~l(p.length)+(90)_(1)F(2*p.rachisLength/(p.nbLeaflet+1))~l(p.length)
 
 #Internode(ddcrop,plantnum,dd0,N,n,L)-->;(1)/(180)_(2)F(L)
 Internode(p)-->;(1)/(180)_(2)F(p.length)
 
 #Flower(ddcrop,plantnum,dd0,N,D)-->;(3)@O(D)
-Flower(p)-->;(3)@O(p.diameter)
+Flower(p)-->;(3) f(p.diameter) @O(p.diameter)
 
 endlsystem
 ###### INITIALISATION ######
