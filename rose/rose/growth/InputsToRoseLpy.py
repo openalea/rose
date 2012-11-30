@@ -2,11 +2,23 @@ import csv
 
 def InputsToRoseLpy(inputsperphyto, inputsperplant, cType, plantnum):
     '''  Convert the growRose input tables into a dictionnary  
+
+    Parameters
+    ==========
+	- cUnit
+	- nplants : nb plants: use to generate the axiom
+	- plt: plantnums
+	- nphy
+	- ddEM
+
+	- Phyto
+	- LeafAppearingTime : LeafAppearingTime
+	- internodeMaxLength: internodeMaxLength
+	- LmaxfolA
     '''
     inputsdict = {}
    
-    # write the node code here.
-
+    
     
     #inputsperplant=csv.reader(open("D:/SurSamba/ModelKO/dataSabine/Inputs/inputsperplant.csv",'r'),delimiter=',')
     #inputsperplant=csv.reader(open("D:/SurSamba/ModelKO/dataSabine/Inputs/inputsperplant2plt.csv",'r'),delimiter=',')
@@ -21,12 +33,12 @@ def InputsToRoseLpy(inputsperphyto, inputsperplant, cType, plantnum):
         #plt.append(int(row[0].split(';')[0]))
         #nphy.append(int(row[0].split(';')[1]))
         if plantnum==None:
-            inputsdict.setdefault('plt',[]).append(int(row[0].split(';')[0]))
+            inputsdict.setdefault('plantnums',[]).append(int(row[0].split(';')[0]))
             inputsdict.setdefault('nphy',[]).append(int(row[0].split(';')[1]))
             inputsdict.setdefault('ddEM',[]).append(float(row[0].split(';')[2]))
         else:
             if int(row[0].split(';')[0])==plantnum:
-                inputsdict.setdefault('plt',[]).append(int(row[0].split(';')[0]))
+                inputsdict.setdefault('plantnums',[]).append(int(row[0].split(';')[0]))
                 inputsdict.setdefault('nphy',[]).append(int(row[0].split(';')[1]))
                 inputsdict.setdefault('ddEM',[]).append(float(row[0].split(';')[2]))
     
@@ -48,26 +60,26 @@ def InputsToRoseLpy(inputsperphyto, inputsperplant, cType, plantnum):
         else:
             if p==plantnum:
                 #inputsdict.setdefault('Phyto',[]).append(int(line[0].split(';')[1]))
-                #inputsdict.setdefault('ApF',[]).append(float(line[0].split(';')[5]))
-                #inputsdict.setdefault('LmaxEN',[]).append(float(line[0].split(';')[3]))
+                #inputsdict.setdefault('LeafAppearingTime',[]).append(float(line[0].split(';')[5]))
+                #inputsdict.setdefault('internodeMaxLength',[]).append(float(line[0].split(';')[3]))
                 #inputsdict.setdefault('LmaxfolA',[]).append(float(line[0].split(';')[4]))
                 phyto.setdefault(p,[]).append(int(line[0].split(';')[1]))
                 apf.setdefault(p,[]).append(float(line[0].split(';')[5]))
                 lmaxen.setdefault(p,[]).append(float(line[0].split(';')[3]))
                 lmaxfola.setdefault(p,[]).append(float(line[0].split(';')[4]))
 
-    for p in inputsdict['plt']:
+    for p in inputsdict['plantnums']:
         #print tuple(apf[p])
         # prendre le nombre de phytos max dans fichier ech plante et verifier si on a le bon compte !
         inputsdict.setdefault('Phyto',[]).append(tuple(phyto[p]))
-        inputsdict.setdefault('ApF',[]).append(tuple(apf[p]))
-        inputsdict.setdefault('LmaxEN',[]).append(tuple(lmaxen[p]))
+        inputsdict.setdefault('LeafAppearingTime',[]).append(tuple(apf[p]))
+        inputsdict.setdefault('internodeMaxLength',[]).append(tuple(lmaxen[p]))
         inputsdict.setdefault('LmaxfolA',[]).append(tuple(lmaxfola[p]))
 
     inputsdict['cUnit']=cType
     
     if plantnum==None:
-        inputsdict['nplants']=len(inputsdict['plt'])
+        inputsdict['nplants']=len(inputsdict['plantnums'])
     else:
         inputsdict['nplants']=1
     

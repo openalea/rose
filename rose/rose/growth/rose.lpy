@@ -56,6 +56,9 @@ nfol=5 ## pour l'instant ne sert pas
 RmaxEN=3
 
 
+#test visualea
+#LeafAppearingTime=[]
+#internodeMaxLength=[]
 ######### Functions used for the calculations ###################
 
 # a et b sont des tuple de 2 coord x et y
