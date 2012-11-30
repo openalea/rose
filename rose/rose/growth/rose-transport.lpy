@@ -1,0 +1,211 @@
+transport_speed = 1/2.
+
+nbEntity = 10
+
+min_level = 0.01
+max_level = 10
+
+active_transport_coef = 1.
+diffusion_coef = 1.
+auxin_synth_coef = 1.
+auxin_degrad_coef = 1.
+dt = 1.
+
+def h(flux) :
+  h_coef = 1.
+  return h_coef * (flux**2)
+
+def g(auxin):
+  g_coef = 1.
+  return g_coef * auxin
+
+def txt(val):
+    return str(round(val,2))[:5]
+
+class OrganParameter(ParameterSet):
+  def __init__(self, auxin, sugar):
+#    """ State variable of a compartment.
+#    
+#    Parameters
+#    ==========
+#      - auxin : auxin concentration
+#      - sugar : sugar concentration
+#      - pin: PIN concentration in the organ not affected to the membranes
+#      -pin_up = 0, # PIN surfacic concentration on upward membrane
+#      - pin_down =0, # PIN surfacic concentration on downard membrane
+#      pin_lat=0 # PIN surfacic concentration on lateral membrane
+#      flux_up = 0 # flux coming from upward membrane (positive if entering the cell)
+#      flux_down =0, # flux coming from downard membrane
+#      flux_lat=0 # flux coming from lateral membrane
+#    """
+#    
+    pin=0 # PIN concentration in the organ not affected to the membranes
+    pin_up = 0 # PIN surfacic concentration on upward membrane
+    pin_down =0 # PIN surfacic concentration on downard membrane
+    pin_lat=0 # PIN surfacic concentration on lateral membrane
+    flux_up = 0 # flux coming from upward membrane (positive if entering the cell)
+    flux_down =0 # flux coming from downard membrane
+    flux_lat=0 # flux coming from lateral membrane
+    
+    ParameterSet.__init__(self, auxin=auxin, sugar=sugar, pin=pin, pin_up=pin_up, pin_down=pin_down, pin_lat=pin_lat,flux_up=flux_up, flux_down=flux_down, flux_lat=flux_lat)
+
+
+module Apex(p) 
+
+Axiom: _(2)Apex(nbEntity)
+
+derivation length: 200
+ignore: +-
+production:
+
+
+I(pd) < I(p) > I(pu) :
+  a, au, ad = p.auxin, pu.auxin, pd.auxin
+  fu, fd = p.flux_up, p.flux_down
+  pin, pinu, pind = p.pin, p.pin_up, p.pin_down
+  
+  #  p.auxin = a + (au+ad-2*a)*transport_speed
+  p.flux_up = active_transport_coef * (pu.pin_down * au - p.pin_up*a) + \
+              diffusion_coef * (au - a)
+  p.flux_down = active_transport_coef * (pd.pin_up*ad - p.pin_down * a) + \
+              diffusion_coef * (ad - a)
+              
+  net_flux = p.flux_up + p.flux_down
+  
+  # rate of change of auxin
+  ra = auxin_synth_coef # auxin synthesis
+  ra += - auxin_degrad_coef * a # auxin degradation
+  ra += net_flux # sum phi_ji sij / vi
+  
+  p.auxin += ra*dt 
+  
+  # dPiu/dt, dPid/dt => rpinu, rpind
+  rpinu = h(fu) 
+  rpind = h(fd) 
+  p.pin_up += rpinu*dt
+  p.pin_down += rpind*dt
+  
+  # dPi / dt : No limit for produced pin for the moment
+  
+  
+  produce I(p)
+
+I(p) > I(pu):
+  a, au = p.auxin, pu.auxin
+  fu = p.flux_up
+  pin, pinu = p.pin, p.pin_up
+
+  #  p.auxin = a+ (au-a)*transport_speed
+  
+  p.flux_up = active_transport_coef * (pu.pin_down * au - p.pin_up*a) + \
+              diffusion_coef * (au - a)
+
+
+  net_flux = p.flux_up
+  
+  # TODO this part is always the same for each rule: factorize
+  # rate of change of auxin
+  # auxin synthesis
+  ra = auxin_synth_coef 
+  ra += - auxin_degrad_coef * a # auxin degradation
+  ra += net_flux # sum phi_ji sij / vi
+  
+  p.auxin += ra*dt
+
+  # dPiu/dt => rpinu
+  rpinu = h(fu) 
+  p.pin_up += rpinu*dt
+
+  produce I(p)
+
+I(pd) < I(p) :
+  a, ad = p.auxin, pd.auxin
+  fd = p.flux_down
+  pin, pind = p.pin, p.pin_down
+
+  p.flux_down = active_transport_coef * (pd.pin_up*ad - p.pin_down * a) + \
+              diffusion_coef * (ad - p.auxin)
+
+  net_flux = p.flux_down
+  
+  # TODO this part is always the same for each rule: factorize
+  # rate of change of auxin
+  ra = auxin_synth_coef # auxin synthesis
+  ra += - auxin_degrad_coef * a # auxin degradation
+  ra += net_flux # sum phi_ji sij / vi
+  
+  p.auxin += ra*dt
+  
+  # dPid/dt => rpind
+  rpind = h(fd) 
+  p.pin_down += rpind*dt
+
+  produce I(p)
+
+decomposition:
+maximum depth: nbEntity+1
+
+Apex(0) --> Apex(0)
+Apex(x) :
+
+  if x == 1:
+    auxin = max_level
+    sugar = 0.
+  else:
+    auxin = min_level
+    sugar = 0.
+  p = OrganParameter(auxin, sugar)
+  produce I(p)Apex(x-1)
+
+
+interpretation:
+
+I(p) :
+   a = p.auxin
+   col = int(10*(a-min_level)/(max_level-min_level))
+   a += 0.1
+   produce ;(col)F(3)[-(90)f(5);(3)@L(txt(a-0.1))f(4);(col)_(1)F(a)]F(3)
+
+endlsystem
+###### INITIALISATION ######
+
+__lpy_code_version__ = 1.1
+
+def __initialiseContext__(context):
+	import openalea.plantgl.all as pgl
+	Color_0 = pgl.Material("Color_0" , ambient = (39,0,0) , diffuse = 4.61538 , )
+	Color_0.name = "Color_0"
+	context.turtle.setMaterial(0,Color_0)
+	Color_1 = pgl.Material("Color_1" , ambient = (40,5,0) , diffuse = 4.518 , )
+	Color_1.name = "Color_1"
+	context.turtle.setMaterial(1,Color_1)
+	Color_2 = pgl.Material("Color_2" , ambient = (41,10,0) , diffuse = 4.42061 , )
+	Color_2.name = "Color_2"
+	context.turtle.setMaterial(2,Color_2)
+	Color_3 = pgl.Material("Color_3" , ambient = (43,15,0) , diffuse = 4.32322 , )
+	Color_3.name = "Color_3"
+	context.turtle.setMaterial(3,Color_3)
+	Color_4 = pgl.Material("Color_4" , ambient = (44,21,0) , diffuse = 4.22583 , )
+	Color_4.name = "Color_4"
+	context.turtle.setMaterial(4,Color_4)
+	Color_5 = pgl.Material("Color_5" , ambient = (46,26,0) , diffuse = 4.12845 , )
+	Color_5.name = "Color_5"
+	context.turtle.setMaterial(5,Color_5)
+	Color_6 = pgl.Material("Color_6" , ambient = (47,31,0) , diffuse = 4.03106 , )
+	Color_6.name = "Color_6"
+	context.turtle.setMaterial(6,Color_6)
+	Color_7 = pgl.Material("Color_7" , ambient = (48,37,0) , diffuse = 3.93367 , )
+	Color_7.name = "Color_7"
+	context.turtle.setMaterial(7,Color_7)
+	Color_8 = pgl.Material("Color_8" , ambient = (50,42,0) , diffuse = 3.83628 , )
+	Color_8.name = "Color_8"
+	context.turtle.setMaterial(8,Color_8)
+	Color_9 = pgl.Material("Color_9" , ambient = (51,47,0) , diffuse = 3.7389 , )
+	Color_9.name = "Color_9"
+	context.turtle.setMaterial(9,Color_9)
+	Color_10 = pgl.Material("Color_10" , ambient = (53,53,0) , diffuse = 3.64151 , )
+	Color_10.name = "Color_10"
+	context.turtle.setMaterial(10,Color_10)
+__copyright__ = 'open-source GPL'
+__institutes__ = 'INRIA - CIRAD Virtual Plants'
+__authors__ = 'F. Boudon, C. Godin'
