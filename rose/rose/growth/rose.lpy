@@ -1,4 +1,5 @@
 from numpy import *
+from openalea.lpy.parameterset import ParameterSet
 
 ########### TIME of the model and the crop (A externaliser) ###############
 # initialization:a ne pas externaliser
@@ -433,7 +434,7 @@ Flower(flowerp):
 ################### GEOMETRIC INTERPRETATION (A externaliser) ############################
 
 interpretation:
-Plant(p)-->@M(p.position)
+Plant(p)-->@M(*p.position)
 # attention: il tourne les plantes les unes par rapport aux autres
 # pour l'instant, toutes les folioles d'une feuille ont la même longueur que la foliole A et la forme des folioles est celle prédéfinie dans Lpy
 # je n'ai rien fait d'automatique pour la visualisation en fonction du nombre de folioles
