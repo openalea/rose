@@ -1,6 +1,14 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 
+"""
+.. module:: rose
+   :platform: Unix, Windows
+   :synopsis: A useful module indeed.
+
+.. moduleauthor:: Andrew Carter <andrew@invalid.com>
+"""
+
 from openalea.mtg.aml import MTG
 import math
 import random

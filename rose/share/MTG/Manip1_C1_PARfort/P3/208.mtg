@@ -7,6 +7,7 @@ C	2	CONNECTED	FREE	EXPLICIT
 E	2	CONNECTED	FREE	EXPLICIT
 F	2	CONNECTED	FREE	EXPLICIT
 H	2	CONNECTED	FREE	EXPLICIT
+J	2	CONNECTED	FREE	EXPLICIT
 O	2	CONNECTED	FREE	EXPLICIT
 P	1	CONNECTED	FREE	EXPLICIT
 R	2	CONNECTED	FREE	EXPLICIT
@@ -16,9 +17,10 @@ DESCRIPTION:
 LEFT	RIGHT	RELTYPE	MAX
 P	P	+	?
 P	P	<	?
-E	E,R,H,T	+	?
+E	E,J,R,H,T	+	?
 E	E,B,H,O,T,C	<	?
-R	S,F	+	?
+J	S	+	?
+R	F	+	?
 B	B	<	?
 R	R	<	?
 F	F	<	?
@@ -355,7 +357,6 @@ ENTITY-CODE					XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStad
 			^<F2		118.0	32.735	404.861									
 			^<F3		123.0	42.574	401.473									
 	^<T1				128.0	45.498	381.244									
-	^<T2				126.0	55.808	401.899									
 ^<E13					157.0	51.141	302.53						5			
 	+R1				151.0	62.531	312.757						3.1			
 		+F1			145.0	60.29	327.338									
@@ -444,8 +445,6 @@ ENTITY-CODE					XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStad
 				^<F2	181.0	133.9269	446.434									
 				^<F3	177.0	127.3717	447.954									
 		^<T1			178.0	117.6816	439.881									
-		^<T2			178.0	124.2456	447.476									
-		^<T3			88.0	262.5371	215.697									
 	^<E6				187.0	132.3752	449.621						1			
 		+R1			196.0	147.0403	445.403						1.0			
 			+F1		205.0	160.7252	418.114									
@@ -487,7 +486,6 @@ ENTITY-CODE					XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStad
 		^<E3			174.0	131.2924	463.42									
 		^<B1			173.0	130.0282	474.802									
 		^<B2			174.0	130.887	483.894									
-		^<E3			-307.0	78.0369	235.635									
 	^<E7				200.0	131.7002	448.327						1			
 		+R1			209.0	124.8217	464.292						1.0			
 			+F1		203.0	127.0869	452.897									
@@ -560,16 +558,13 @@ ENTITY-CODE					XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStad
 	^<E5				227.0	128.4622	396.164							2.6		
 	^<B1				227.0	135.8571	424.119									
 	^<B2				234.0	139.1322	440.093									
-	^<E3				63.0	266.8739	215.708									
 ^<E15					196.0	75.0	376.121							3.4		
-	+R1				198.0	71.812	394.933						1.0			
+	+J1				198.0	71.812	394.933									
 		+S1			181.0	66.82	353.308									
 		^<S2			161.0	58.771	340.953									
 		^<S3			175.0	60.523	367.41									
-	+R1				187.0	85.15	382.587						1.0			
+	+J1				187.0	85.15	382.587									
 		+S1			186.0	83.816	355.886									
 		^<S2			190.0	82.939	328.515									
 		^<S3			196.0	84.732	352.781									
-^<E17					197.0	74.887	372.896									
 ^<O1					212.0	88.339	420.647							75		
-^<E2					212.0	86.049	420.611									

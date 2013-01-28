@@ -7,6 +7,7 @@ C	2	CONNECTED	FREE	EXPLICIT
 E	2	CONNECTED	FREE	EXPLICIT
 F	2	CONNECTED	FREE	EXPLICIT
 H	2	CONNECTED	FREE	EXPLICIT
+J	2	CONNECTED	FREE	EXPLICIT
 O	2	CONNECTED	FREE	EXPLICIT
 P	1	CONNECTED	FREE	EXPLICIT
 R	2	CONNECTED	FREE	EXPLICIT
@@ -16,9 +17,10 @@ DESCRIPTION:
 LEFT	RIGHT	RELTYPE	MAX
 P	P	+	?
 P	P	<	?
-E	E,R,H,T	+	?
+E	E,J,R,H,T	+	?
 E	E,B,H,O,T,C	<	?
-R	S,F	+	?
+J	S	+	?
+R	F	+	?
 B	B	<	?
 R	R	<	?
 F	F	<	?
@@ -256,7 +258,6 @@ ENTITY-CODE				XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 			^<F2	28.0	39.6334	313.096									
 			^<F3	34.0	52.0476	312.405									
 	^<T1			34.0	53.1061	313.431									
-	^<T2			34.75	40.4396	329.0									
 ^<E13				21.0	74.7934	313.432						4			
 	+R1			12.0	75.9918	327.018						3.1			
 		+F1		9.0	69.4993	339.859									
@@ -290,8 +291,6 @@ ENTITY-CODE				XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 			^<F2	15.0	70.4713	361.02									
 			^<F3	14.0	60.0767	362.26									
 	^<T1			17.0	67.0624	343.068									
-	^<T2			5.0	57.4776	355.444									
-	^<T3			6.0	56.5527	354.43									
 ^<E14				25.0	71.4367	329.251						2	3.1		
 	+R1			29.0	63.5403	345.928						2.2			
 		+F1		12.0	52.7456	354.608									
@@ -304,4 +303,3 @@ ENTITY-CODE				XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 ^<E15				25.0	71.308	351.828									
 ^<B1				25.0	68.3351	359.082									
 ^<B2				37.0	58.169	397.661									
-^<E3				105.0	6.275	353.324									

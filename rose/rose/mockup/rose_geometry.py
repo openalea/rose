@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+"""
+.. module rose_geometry 
+.. moduleauthor:: H. Autret <hautret@angers.inra.fr>
+"""
 
 from openalea.mtg.aml import MTG
 import math
@@ -10,25 +14,101 @@ from openalea.core.logger  import *
 
 # for TurtleFrame
 import openalea.plantgl.all as pgl
+
+# walk through MTG trees
 from openalea.mtg.turtle import pre_order2_with_filter
-#from openalea.mtg.plantframe import *
 from openalea.mtg.traversal import pre_order2_with_filter
 
 from rose_colors import *
+import rose_time
+
+deg2rad = math.pi / 180.  # convert degrees to radians
+
+## G E N E R A L functions
+def computeHeading(points):
+    """ computes the unity vector Hf that points from the 1st to
+    the last point of the list, and computes their distance lf.
+    returns a pair (Hf, lf)
+
+    :param points: a list of points
+    :return: a pair (Hf, lf)
+    """
+
+    #print "computeHeading:POINTS= %s" % points
+
+    basePos=points[0]
+
+    #print "BASEPOS = %s " % basePos
+
+    topPos=points[-1]
+    axis=topPos-basePos
+    distance=norm(axis)
+    axis.normalize()
+    
+    #print "computeHeading:DISTANCE = %s" % distance
+    return (axis, distance)
+
 
 def computeLateralAxis(front, up):
-    """ Computes and returns a vector that is
-    - normal to front 
-    - in the <front,side> plan
-    - such as lateral is by the other side from front than side """
+    """ 
+    Computes and returns a *Lateral* normalized vector that is:
+      - normal to the <front,up> plane
+      - such as (front, Lateral, up) is a direct mark
+
+    :param front: front vector (say **x**)
+    :param up: up vector (say **z**)
+    :return: a vector pointing in the left side direction (say **y**)
+    :note: The parameters and the return value are supposed to be openalea.mtg.plantframe::Vector3
+    """
     Lateral=front^up
     Lateral.normalize()
     return Lateral
 # end computeLateralAxis
 
+def computeFacingFromUp(Up): 
+    """ 
+    Computes and returns a *Facing* normalized vector (say the local *i*) that is:
+      - normal to Up
+      - such as Up ^ Facing is horizontal and is the local *y*
+
+     To do so, it does compute an horizontal direction Yo such as : Yo . Up = 0.
+     Because Yo is horizontal and it exists by construction, so Facing = Yo cross Up
+
+    :param up: local up vector (the local **z**)
+    :return: a vector pointing in the front direction (the local **x**)
+    :note: The parameter and the return value are supposed to be openalea.mtg.plantframe::Vector3
+   """
+    epsilon=1E-4
+    Up.normalize()
+    Ux=Up[0]
+    Uy=Up[1]
+    if abs(Ux) <= epsilon:
+        Hy=0
+        Hx=-Uy
+    elif abs(Uy) <= epsilon:
+        Hx=0
+        Hy=-Ux
+    else :
+        Hx=1
+        Hy= - Ux/Uy
+    Horiz = Vector3([Hx,Hy,0])
+    Horiz.normalize()
+    
+    # Now, let's compute Facing
+    Facing= cross(Horiz,Up)
+    return Facing
+# end computeLateralAxis
+
 def computeUpAxis(front,side):
     """ Computes and returns a vector that is normal to front and
-    supposed to point upside the half leaflet
+    supposed to point upside the half leaflet.
+
+    :param front: a vector pointing in the front direction (say **x**)
+    :param side: a vector pointing in the left side direction (say **y**)
+    :return: the heading (up) direction (say **z**)
+
+    :note: The parameters and the return value are supposed to be openalea.mtg.plantframe::Vector3
+
     """
     #Up=side^front
     Up=front^side
@@ -36,29 +116,85 @@ def computeUpAxis(front,side):
     return Up
 # end computeUpAxis
 
-def faceTo(turtle, direction):
-    """ This routine makes the turtle point its face to direction,
-    with a local up vector orthogonal to direction """
-    direction.normalize()
-    upAxis=computeUpAxis(direction, Vector3(1,0,0))
+def faceTo(turtle, facingDirection):
+    """ This routine makes the turtle point its face to facingDirection,
+    with a local up vector orthogonal to that direction. The lateral direction will be horizontal. 
+    
+    :param turtle: an openalea.plantgl.all::PglTurtle object that is to be oriented 
+    :param direction: an openalea.mtg.plantframe::Vector3 object that points to the future **x** direction.
+    :note: the new heading of the turtle might be not as vertical as possible. 
+
+    To do so, it should take to compute :
+ 
+    - Lo = facingDirection cross (0,0,1) so that Lo is horizontal or very small.
+        - if Lo is horizontal, so Head=Lo cross facingDirection,
+        - else Head=(1,0,0) or so because facingDirection is about vertical, so there !
+    """
+    facingDirection.normalize()
+    upAxis=computeUpAxis(facingDirection, Vector3(1,0,0))
     # ifever the direction  goes along the x axis :
     if abs(norm(upAxis)) < 0.001 :
-        upAxis=computeUpAxis(direction, Vector3(0,1,0))
-    turtle.setHead(direction,upAxis)
+        upAxis=computeUpAxis(facingDirection, Vector3(0,1,0))
+    turtle.setHead(facingDirection,upAxis)
+
+def getSiCo(angle):
+    """ Computes sine and cosine of the angle in radians 
+    
+    :param angle: the angle to process
+    :return: a pair (sin(angle), cos(angle))
+    """
+    return (math.sin(angle), math.cos(angle))
+
 
 def printPoints(points):
-    """ debug info """
+    """ prints the z coordinate of the points
+    
+    :param points: unchecked list of 4 Vector3 (or Vector4 as well).
+    :note: this a debugging purpose routine.
+    """
     print "Zs : %7.3f  %7.3f %7.3f %7.3f"%(points[0][2],points[1][2],points[2][2],points[3][2])
+
+def inSector(candidat, center, marge) :
+    """ We check if candidat is in the neighborhood of center modulo 2.Pi
+    I.e if candidat belongs to [center-marge, center+marge[
+
+    :param candidat: the value to be tested
+    :param center: the center of a left-closed and right opened interval
+    :param marge: the half-width of the interval
+    return: True if candidat belongs to the interval
+    """
+    # get center inside the 1st tour
+    while center > 2*math.pi:
+        center -= 2*math.pi
+    while center < 0:
+        center += 2*math.pi
+
+    if candidat >=  center-marge and candidat <  center+marge:
+        #print "%f belongs to [%f - %f[" % (candidat , center-marge, center+marge)
+        return True
+    #print "%f does NOT belong to [%f - %f[" % (candidat , center-marge, center+marge)
+    return False
+    # end inSector
+    
 
 ################################################ BUD
 def rawBud():
-    ''' returns a function to draw 'raw' buds wiht a sphere and a cone'''
+    """ We define here a function (computeRawBud) that draws a raw bud
+      with a sphere and a cone.
+
+     :returns: the function computeRawBud
+     """
     
+
     def computeRawBud(points, turtle=None):
-        ''' draws a but by using a sphere and a cone :
+        """ draws a but by using a sphere and a cone :
         puts the sphere at the bottom using the "haut1" point
         and then draws the cone from the bottom to the top "haut2".
-        '''
+
+        :param points: a list of 3 Vector3
+        :param turtle: an openalea.plantgl.all::PglTurtle object to draw objects on
+        :note: this rather a test routine.
+        """
         #print "points= %s" %  points
         turtle.push()
         
@@ -91,15 +227,23 @@ class RawBud(Node):
     def __call__( self, inputs ):
         return rawBud()
 
-################################################ BUD
+################################################ BILTBUD
 def builtBud(stride=10):
-    ''' returns a function to draw buds'''
+    """
+    we define here a nested function (computeBuiltBud) to draw buds with a sphere and a Paraboloid. 
+    The paraboloid is imported from openalea.mtg.plantframe 
+
+    :param stride: the stride of the paraboloid
+    :returns: the computeBuiltBud function  
+    """
     
     def computeBuiltBud(points, turtle=None):
-        '''draw a bud with 2 spheres and a paraboloid 
-        we just use the bottom point "ped" and the top point "haut2"
-        '''
-        # TODO1 : adjust the paraboloid onto the upper sphere
+        """draw a bud with 2 spheres and a paraboloid 
+
+        :param points: a list of coordinates in Vector3 (openalea.mtg.plantframe::Vector3)
+        :note: we use the bottom point "ped" and the top point "haut2"
+        :todo: adjust the paraboloid onto the upper sphere
+        """
         # TODO2 : parametrize and simplify that stuff of variables
 
         # fineness of drawing definition
@@ -160,6 +304,7 @@ def builtBud(stride=10):
     return computeBuiltBud
     # end builtBud
 
+
 class BuiltBud(Node):
     def __init__(self):
         Node.__init__(self)
@@ -169,10 +314,52 @@ class BuiltBud(Node):
     def __call__( self, inputs ):
         stride=self.get_input('stride')
         return builtBud(stride)
-   
+
+############################################# Generic _BUD_
+
+
+def flower(points, turtle=None, lSepales=[], diameter=None):
+    """
+    We compute the angles of the sepals, if some are deployed
+    and we draw the bud.
+    
+    :param points:  points of the bud in the MTG object,
+    :param turtle: the turtle to draw the bud in.
+    """
+    ## variables
+    Heading=Vector3(0,0,1)
+    height=30 
+    Radius = Vector3(0,1,0) 
+    lSepalAngles=[80,90]
+    lSepalDims=[20,30]
+    lPetalAngles=[20,30]
+    lPetalDims=20
+    
+    stade=None
+    PcStade=0
+
+    #print "bud:POINTS = %s" % points
+    #print "bud:DIAMETER = %s" % diameter
+
+    (Heading, height, Radius, lSepalAngles, lSepalDims, 
+     lPetalAngles, lPetalDims,lNoSepals)=flowerParameters(points, stade, PcStade, lSepales, diameter)
+
+    # All the angles are known, now we draw the thing.
+    floralOrgan(Heading, height, Radius, lSepalAngles, lSepalDims,
+                  lPetalAngles,  lPetalDims, turtle, lNoSepals)
+
+class Flower(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'compute_bud', 
+                         interface = IFunction )
+    def __call__( self, inputs ):
+        return flower
+
 ###################################### Revolution Bud
 def pointArray():
-    ''' returns an array of points to feed a revolution object '''
+    """ 
+    :returns: an array of points to feed a revolution object """
     #print "Inside pointArray()" 
     pts=[Vector2(0.10, 0.00),
          Vector2(0.50, 0.06),
@@ -186,8 +373,14 @@ def pointArray():
     return pts
 
 def budArray():
-    ''' returns an array of points to feed a revolution object
-    Values are Vector2(ray, axial position) '''
+    """ We define a list of points to feed a revolution object.
+    The values are openalea.mtg.plantframe::Vector2 which contain :
+    
+    - ray
+    - axial coordinate
+
+    :return: the list  of points
+    """
     #print "Inside pointArray()" 
     pts=[Vector2(0.1, 0.00),
          Vector2(0.50, 0.06),
@@ -201,8 +394,11 @@ def budArray():
     return pts
 
 def fineBudArray():
-    ''' returns an array of points to feed a revolution object 
-    Values are Vector2(ray, axial position)'''
+    """ We define an array of 17 points to feed a revolution object 
+    Values are pairs of (ray, axial position) coordinates in a cylindrical mark.
+
+    :returns: this array
+"""
     #print "Inside pointArray()" 
     pts=[Vector2( 0.10, 0.00),
          Vector2( 0.40, 0.02),
@@ -224,8 +420,13 @@ def fineBudArray():
     return pts
 
 def revolution(points=None, stride=8):
-    ''' returns a revolution volume made from the input points
-    stride  '''
+    """ 
+    We build here a revolution volume (openalea.mtg.plantframe::Revolution) from the input points stride 
+    
+    :param points: a list of (ray, position). Must be of type openalea.mtg.plantframe::Vector2
+    :param stride: the stride of the revolution figure (nr of interpolated points along a tour of rotation. 
+    :returns: the  revolution figure  
+    """
     #lStride = stride
     if stride < 5:
         stride = 5
@@ -239,11 +440,21 @@ def revolution(points=None, stride=8):
     return rev
 
 def revolutionBud(revVol=None ):
-    ''' We return a func that draws a bud from a revolution volume '''
+    """ We define a nested function (drawRevBud) that returns a function that draws a bud from a revolution volume 
+
+    :param revVol: a revolution volume that will be scaled and oriented 
+    :return: the drawRevBud function
+    """
     lRevVol=revVol
     if lRevVol is None:
         lRevVol=revolution(budArray())
     def drawRevBud(points, turtle=None):
+        """ 
+        This function draws a revolution bud
+
+        :param points: coordinates of the bud (bottom to top) 
+        :param turtle: openalea.plantgl.all::PglTurtle to draw the bud in
+        """
             
         botPt=points[0][0]
         topPt=points[2][0]
@@ -274,7 +485,6 @@ def revolutionBud(revVol=None ):
         ## end test # SUCCESSFUL @ 20111019
 
         turtle.pop()
-
     return drawRevBud
 
 class PointArray(Node):
@@ -332,25 +542,36 @@ class drawBuds(Node):
                          interface = ISequence )
 
     def __call__( self, inputs ):
-        return (noThing, rawBud(), builtBud(), revolutionBud() )
+        return (noThing, rawBud(), builtBud(), revolutionBud(), bud )
     
 
 ################################################ LEAFLET
 def  displayNormalVector(turtle,points,color):
+    """ displays a nail (or something sharp) to show up the normal direction of a surface
+
+    :param turtle: the openalea.plantgl.all::PglTurtle object to draw onto
+    :param points: set of points
+    :param color: the index of the color to use for the nail
+    """
     turtle.push()
     turtle.move(points[0] +(points[2]-points[0]) *.5)
     turtle.setColor(color)
     turtle.customGeometry(Cone(2,13), 1)
     turtle.pop()
 
-def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],yMesh=[0.81, 0.92, 0.94, 0]):
-    '''    compute leaflet geometry from 4 points
-    '''
+def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1], 
+                       yMesh=[0.81, 0.92 , 0.94, 0]):
+    """  We define here a nested function (meshedLeaflet) that computes a meshed leaflet geometry from 4 points.
+
+    :param xMesh: the mesh coordinates along the axis of the leaf, as percent of the leaflet length.
+    :param yMesh: the width of the leaf at the previous points,, in percent of the leaf width.
+    :return: the meshedLeaflet function
+    """
     meshedLeaflet = None ; 
     # write the node code here.
     def meshedLeaflet(points, turtle=None):
-        '''    compute leaflet geometry from 4 points
-        '''
+        """    compute leaflet geometry from 4 points
+        """
         geometry = None; 
 
         #print "1:",printPoints(points)
@@ -491,8 +712,11 @@ class ComputeLeaflet4pts(Node):
 
 #########################################
 def rawLeaflet(points, turtle=None):
-    '''    compute leaflet geometry from 4 points
-    '''
+    """    computes a leaflet geometry from 4 points
+
+    :param points: a set of coordinates of 4 points that are supposed to be the edge of the leaflet, turning anticlockwise.
+    :param turtle: an openalea.plantgl.all::PglTurtle object to draw objects onto
+    """
     turtle.push()
     turtle.startPolygon()
     for pt in points[1:]:
@@ -502,16 +726,14 @@ def rawLeaflet(points, turtle=None):
     turtle.pop()
 # end rawleaflet
 
-########################################""
+########################################
 def polygonLeaflet():
-    """ default function to draw up a leaflet 
-    NOTE : without the turtle.push() and turtle.pop(),
-    it hangs the viewer up with a message to the father shell :
-        *** glibc detected *** /usr/bin/python: double free or corruption (out): 0x0000000004bfebd0 ***
+    """ 
+    default function to draw up a leaflet 
+    
+    :return: a function that draws a raw leaflet.
     """
-    compute_leaf = None ; 
-    # write the node code here.
-    # return outputs
+    #compute_leaf = None ; 
     return rawLeaflet
 # end polygonLeaflet
 
@@ -536,8 +758,23 @@ class drawLeaves(Node):
     
 
 ######################################## FLOWER
-def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None):
-    ''' interface to return bpFlower ''' 
+def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None):
+    """ 
+    This is a function that returns a bpFlower function  with in its closure :
+
+    - the control points matrix, as a list of lists, wich defines a mesh (it can be seen as a 2D set with an altitude for each point) :
+
+        - every inner list contains a set of control points that defines a bezier curve in a direction of the mesh
+        - all the N-th points of the inner lists defines the N-th bezier curve in the other direction of the mesh
+
+    - the u and v strides
+    - the coloring fuction
+
+    :param controlpointmatrix: a list of lists of points of type openalea.mtg.plantframe::Vector4 
+    :param ustride: the number of points to us to discretize the surface along the 1st direction
+    :param vstride: the number of points to us to discretize the surface along the 2nd direction
+    :param colorFunc: a function that sets the color of the turtle
+    """ 
     bpFlower=None
     #print "BezierPatchFlower called ; uStride is %s" % ustride
     # write the node code here.
@@ -558,10 +795,10 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None
         myColorFunc=setTurtlePink # custom 
         
     def bpFlower(pointsnDiameters, turtle=None,):
-        ''' computes a flower from two points and the diameters associated to 
+        """ computes a flower from two points and the diameters associated to 
         the flower.
         @param points : list of pairs[Vector3, scalar] resp. (position;diameter)
-        '''
+        """
         luStride=ustride
         lvStride=vstride
         if luStride < 5:
@@ -627,13 +864,11 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=8,vstride=8,colorFunc=None
         #turtle.setColor(0)
         #turtle.customGeometry(Sphere(flowerHeight/10.), 1)
         ## successful @20111003 : sphere in flower axis
-
         turtle.pop()
-
     return bpFlower
 
 class BezierPatchFlower(Node):
-    ''' '''
+    ## This function sets up the BezierPatchFlower node within OpenAlea
     def __init__(self):
         Node.__init__(self)
         self.add_input( name='controlpointmatrix', interface=ISequence, value=None)
@@ -651,32 +886,172 @@ class BezierPatchFlower(Node):
         return bezierPatchFlower(controlpointmatrix, ustride, vstride, colorFunc)
         #return bezierPatchFlower()
     
-################################## PARAMETRIC FLOWER
-def floralDrawing(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
-                lPetalAngles=[], lPetalDims=[], turtle=None ):
-    """ A function to draw floral organs with observed angles or
-    observed stages of evolution in [BFV, CPV, SR, FO, FF]
-    i.e : 
-    - Visible Flower Bud
-    - Visible Petal's Color
-    - Refecting Sepals 
-    - Opened Flower
-    - Faded Flower
-    So the organ can be a button, a flower or a fruit.
-    It takes as input 
-    - the orientation of the flower (its heading vector)
-    - the radius of the flower (orthogonal to the heading)
-    - the height of the flower
-    - the list of angles between each sepal and the heading
-    - the list of length for each sepal (if any)
-    - the list of angles between each petal and the heading
-    - the list of length for each petal (if any)
-    """
-    turtle.push()
-    turtle.pop()
+################################## GENERIC _FLOWER_
 
-def floralParameters(points, stade=None, PcStade=0):
-    """ returns a serie of parameters to draw flowers """
+def getValuesFromSepals(lSepales, mainAxis):
+    """ 
+    We compute the angles between the sepals and the axis of the organ, and the length of the sepals.
+    
+      - a list containing the angle of the most opened sepal and the less opened sepal
+      - a list containing respectively the length of the sepals
+      - the front direction to orient the turtle's mark
+
+    :param lSepales: a list of 3D points representing a sepal
+    :param mainAxis: a Vector3 that contains the main direction of the organ
+    :return: the lists of : (directions, dimensions) of sepals and the Front direction
+    """
+    #print "getValuesFromSepals:RUN"
+    angles=[]
+    lengthes=[]
+    Front=Vector3([1,0,0])
+    if lSepales:
+        testSepales=[]
+        # avant-der (pointe) - premier (insertion rachis)
+        vein=lSepales[0][-2]-lSepales[0][0]
+        side=cross(mainAxis,vein)
+        side.normalize()
+        Front=cross(side,mainAxis)
+        Front.normalize()
+
+        for sepale in lSepales:
+            vein=sepale[-2]-sepale[0]
+            veinlength= norm(vein)
+            vein.normalize() 
+
+             # one of both (debug)
+            sine = norm(cross(mainAxis,vein))
+            cosine = dot(mainAxis,vein)
+            #sine = norm(cross(vein,mainAxis)) 
+            #cosine = dot(vein,mainAxis)
+
+            angle = math.atan2(sine, cosine)
+            angles.append(angle/deg2rad)
+            lengthes.append(veinlength)
+
+        ## lSepales is used to display real sepals
+        #lSepales[:]=[] # lSepales=[] does not run
+
+        #print "angles,lengthes = (%s, %s)" % (angles,lengthes)
+        
+        return (angles, lengthes, Front)
+    else:
+        return ([0], [30])
+# end getValuesFromSepals
+
+def notation2flowerAngles(stade, PcStade):
+    """ 
+    Computes flower angles (**in degrees**) from stage notations, i.e :
+      - the sepal angles list:
+          - the most opend sepal
+          - the less opened sepal
+      - the petal angles list:
+          - the most opend petal
+          - the less opened petal
+
+    :param stade: a stage of flowering in "BFV ... FF"
+    :param PcStade: the percent of evolution within the stage "stade"
+    :return: a list of two lists containing the angles described above
+    """
+    return ([0,0],[0,0])
+# end notation2flowerAngles
+
+def flowerParameters(points, stade=None, PcStade=0, lSepales=[], flowerDiameter=None):
+    """ Computes a set of parameters to draw flowerbuds, that is:
+
+      - the head direction of the flower (the local vertical in some sort)
+      - the height of this organ
+      - Radius : the direction that the bud would be looking to if it was an elf (a local x vector)
+      - lSepalAngles : the opening angles of the sepals if any
+      - lSepalDims : the length of the seapls  if any
+      - lPetalAngles : the opening angles of petals (if any)
+      - lPetalDims : the dimension of petals (if any)
+    
+    :param points: a list of MTG nodes we get information from
+    :param stade: todo : extract directly from points
+    :param PcStade: todo : extract directly from points
+    :param lSepales: list of 4 Vector3 points represinting 0, 1 or 2 sepals 
+    :return: (Heading, height, Radius, lSepalAngles, lSepalDims, lPetalAngles, lPetalDims)
+
+"""
+
+    Heading = Vector4(0,0,1,1)
+    height=0
+    Radius = Vector4(0,1,0,1)
+    lSepalAngles= []
+    lSepalDims = []
+    lRealSepalsAzimuts = [] # digitized sepals angles
+    lPetalAngles = []
+    lPetalDims = []
+
+    # we extract the positions of distant points
+    ped=position(points[0])
+    top=position(points[-1]) # Vu haut1 avec Sabine, en fait haut2
+
+    #print "flowerParameters:PED = %s" % ped
+    # we compute the heading and size of the bud
+    (Heading,height) = computeHeading([ped, top]) 
+
+    # we check for sepals and compute their angles if any, 
+    if lSepales :
+        (lSepalAngles,lSepalDims,Radius ) = getValuesFromSepals(lSepales, Heading)
+        lRealSepalsAzimuts=getSepalsAzimuts(lSepales, Heading, Radius) 
+    else :
+        # if no sepals, we check for "stade" notations
+        Radius=computeFacingFromUp(Heading)
+        
+    #print "lSepalAngles: %s" % lSepalAngles
+
+    # mimick an opening bud if only one sepal is opened :
+    if len(lSepalAngles) ==1 :
+        if flowerDiameter:
+            lSepalAngles.append(lSepalAngles[0])
+        else:
+            lSepalAngles.append(0)
+        lSepalDims.append(lSepalDims[0]) # so that the length is the same for all
+
+    if flowerDiameter:
+        if flowerDiameter > 0: # real flower
+            flowerRay=  flowerDiameter*0.5
+
+            #print "flowerParameters::flowerRay= %s" % flowerRay
+            # we compute the angle(s)
+            lPetalAngles.append (math.atan2(flowerRay, height)) # todo : height/0.9 ?
+            #lPetalDims.append(height / math.cos(lPetalAngles[0]))
+            lPetalDims.append(math.sqrt(height*height + flowerRay*flowerRay) )
+
+            lPetalAngles[0] /= deg2rad 
+            lPetalAngles.append(lPetalAngles[0]*0.8)
+            lPetalDims.append(lPetalDims[0])
+            #print "flowerParameters::lPetalDims= %s" % lPetalDims
+
+        else: # faded flower
+            print "flowerParameters:faded flower"
+            #height *= 3
+            lPetalAngles[:]=[]
+            lPetalAngles.append(180)
+            lPetalAngles.append(180)            
+
+    elif lSepalAngles:
+        budTime=rose_time.invertInnerSepalAngle( min([i for i in lSepalAngles]) )
+        lPetalAngles.append(rose_time.outerPetalAngle(budTime))
+        lPetalAngles.append(rose_time.innerPetalAngle(budTime))
+        lPetalDims.append(height)
+        lPetalDims.append(height)
+        #print "BUDTIME= %s" % budTime
+        #print "Computed PetalAngles : %s" % (lPetalAngles)
+    elif stade: # may check for only BVF and CPV here (SR ?)
+        lSepalAngles,lDummyDims = notation2flowerAngles(stade, PcStade)
+        
+
+    # check petal angles from sepal ones
+
+    return(Heading, height, Radius, lSepalAngles, lSepalDims,
+     lPetalAngles, lPetalDims,lRealSepalsAzimuts)
+# end flowerParameters  
+
+
+def fruitParameters(points, stade=None, PcStade=0):
+    """ returns a serie of parameters to draw fruits """
     Heading = Vector4(0,0,1,1)
     height=0
     Radius = Vector4(0,1,0,1)
@@ -685,21 +1060,402 @@ def floralParameters(points, stade=None, PcStade=0):
     lPetalAngles = []
     lPetalDims = []
 
+    # we extract the positions of distant points
+    ped=position(points[0])
+    top=position(points[-1]) 
+
+    #print "fruitParameters:PED = %s" % ped
+    # we compute the heading and size of the bud
+    (Heading,height) = computeHeading([ped, top]) 
+
+    # we check for sepals and compute their angles if any, 
+    if lSepales :
+        (lSepalAngles,lSepalDims,Radius) = getValuesFromSepals(lSepales, Heading)
+    else :
+        Radius=computeFacingFromUp(Heading)
+        # if no sepals, we check for "stade" notations
+
+        if stade: # may check for only SR, FO and FF here
+            lSepalAngles,lDummyDims = notation2flowerAngles(stade, PcStade)
+
+    # we get the diameter
+    flowerRay=  mtg.property('Diameter')[top]*0.5
+    # we compute the angle(s)
+    lPetalAngles[0]= math.atan2(height,flowerRay) # todo : height/0.9 ?
+    lPetalDims[0]=height / math.cos(lPetalAngles[0])
+
+    lPetalAngles[0] /= deg2rad 
+    llPetalAngles.apend(lPetalAngles[0]*0.8)
+    lPetalDims.append(lPetalDims[0])
+
     return(Heading, height, Radius, lSepalAngles, lSepalDims,
      lPetalAngles, lPetalDims)
+    # end fruitParameters
     
 
-def  floralOrgan(points, turtle=None):
-    """ Computes a flower from the vertices included in points """
-    stade=None
-    PcStade=0
-    (Heading, height, Radius, lSepalAngles, lSepalDims,
-     lPetalAngles, lPetalDims)=floralParameters(points, stade, PcStade)
-    floralDrawing(Heading, height, Radius, lSepalAngles, lSepalDims,
-                  lPetalAngles,  lPetalDims, turtle)
+def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
+                lPetalAngles=[], lPetalDims=[], turtle=None, lNoSepals=[] ):
+    """
+    A function to draw floral organs with observed angles or observed stages of evolution in [BFV, CPV, SR, FO, FF], i.e : 
+
+    - Visible Flower Bud
+    - Visible Petal's Color
+    - Refecting Sepals 
+    - Opened Flower
+    - Faded Flower
+    
+    :param Heading: a list of 3 Vector3
+    :param height: the height of the organ
+    :param Radius: the  radius  of the organ
+    :param lSepalAngles: the angles of the most and the less opened sepal, taken between the Heading direction and the axle of the sepal
+    :param lSepalDims: the dimensions of opened sepals
+    :param lPetalAngles: the angles of the most and the less opened petal, taken between the Heading direction and the axle of the petal
+    :param petalDim: the dimensions of opened petals
+    :param turtle: the turtle to draw onto.
+    :todo: add a param with the direction of existing sepals in the local mark, if any
+    """
+
+    from openalea.mtg.plantframe import Vector4 as V4
+
+    numSepals=5. # number of sepals
+    numPetals=10. # number of petals
+
+    sepalmatrix2 = [
+        [V4(0,   -0.,   0.,   1), V4(0,    0, -0,   1),  V4(0,   0. ,  0.,   1)],
+        [V4(-0.2,-0.16, 0.0,  1), V4(-0.25, 0,  0., 1),  V4(-0.2,  0.16, 0.0,  1)],
+        [V4(-.2, -0.12, 0.2,  1), V4(-0.25, 0,  0.2, 1), V4(-0.2,  0.12,  0.2, 1)],
+        [V4(0.,  -0.05, 0.4,  1), V4(-0.1,  0,  0.4, 1), V4(0.0,  0.05,  0.4, 1)],
+        [V4(0.0, -0.0,  1.0,  1), V4(.0,  0,  1.,  1),   V4(0.0,  0.0,  1.0,  1)]
+        ]
+
+    petalmatrix2 = [
+       [V4(0.,0.0, 0.0,1),V4(-0.0, 0.0, 0.0,1),V4(-0.0,0, 0.0, 1),V4(-0.0,-0.0, 0.0, 1),V4(0.,-0.0,0.,1)],
+       [V4(0.,0.12, 0.1,1),V4(-0.15,0.1, 0.1,1),V4(-0.25,0, 0.1, 1),V4(-0.15,-0.1, 0.1, 1),V4(0.,-0.12,0.1,1)],
+       [V4(0.,0.25, 0.2,1),V4(-0.,0.17, 0.2,1),V4(-0.2,0, 0.2, 1),V4(-0.1,-0.17, 0.2, 1),V4(0.,-0.25,0.1,1)],
+       [V4(0.06,0.4, 0.6,1),V4(0.05,0.27, 0.6,1),V4(0.05,0, 0.6, 1),V4(0.05,-0.27, 0.6, 1),V4(0.045,-0.4,0.6,1)],
+       [V4(0.04,0.35, 0.75,1),V4(0.05,0.25,1.0,1),V4(0.04,0, 0.95,1),V4(0.04,-0.25, 1.0,1),V4(0.03,-0.35,0.75,1)]
+       ]
+
+
+    def TransformSepal(sepalMatrix, angleExt, angleInt, numero=0):
+        """ this procedure will curve the sepal according to the stage """
+        """ We assume that sepalMatrix contains a vertical "impulse" profil 
+        i.e the  z draw a _||_
+        we rotate the 3rd point and followings around the origin and the y axis, 
+        by a value of 2pi/3 * stage 
+        :param sepalMatrix: a matrix of Vector4 points
+        :param angleExt: the angle of the outer sepal
+        :param angleInt: the angle of the inner sepal
+        :param numero: the number of the sepal, that defines their position around the main axis
+        :warning: the 1st point is supposed to be at [0,0,0] 
+        """
+        
+        newSepalMatrix=[[]]
+        # the opening angle of each sepal is computed accordingly to
+        # the observations on a rose bud.  
+        # see fitting curves in ~/manips/rose/boutons/chronogramme.ods
+        # convert degrees to radians
+        firstSepalAngle= angleExt * deg2rad
+        lastSepalAngle= angleInt * deg2rad
+
+        # rotate around the main axis proportionally to the sepal number :
+        angle=firstSepalAngle + (lastSepalAngle-firstSepalAngle)* \
+            numero / numSepals
+        (sina,cosa) = getSiCo(angle)
+
+        # we copy sepalMatrix
+        for coords in  sepalMatrix:
+            newCoord=[]
+            for point in coords:
+                newCoord.append(point)
+            newSepalMatrix.append(newCoord)
+
+        ################ we rotate the last groups of points
+        # by unstacking and restacking the matrix
+        # we get the points of sepalMatrix
+        # from the forelast line (what did I mean ?)
+        lignes = [newSepalMatrix.pop()]
+        lignes.append(newSepalMatrix.pop())
+        lignes.reverse()
+        # we rotate these points
+        for points in lignes :
+            newPoints=[]
+            for point in points:
+                newx = point[0]*cosa - point[2]*sina
+                newz = point[0]*sina + point[2]*cosa
+                newPoint=V4(newx, point[1], newz , point[3])
+                newPoints.append(newPoint)
+            newSepalMatrix.append(newPoints)
+          
+        newSepalMatrix.remove([])
+        return newSepalMatrix
+    # end TransformSepal
+
+    def TransformPetal(petalMatrix, angleExt, angleInt, numero=0):
+        """ this procedure will curve the sepal according to the stage 
+         We suppose that sepalMatrix contains a vertical crenel-like profile of a sepal  :
+        i.e the  z form a _||_
+        we rotate the 3rd point and followings around the origin and the y axis, 
+        by a value of 2pi/3 * stage 
+        :param sepalMatrix: a matrix of Vector4 points
+        :param angleExt: the angle of the outer sepal
+        :param angleInt: the angle of the inner sepal
+        :param numero: the number of the sepal, that defines their position around the main axis
+        :warning: the 1st point is supposed to be at [0,0,0] 
+        """
+
+        #(sina,cosa) = (0,1)
+        # say stage is supposed to be inside [3/4 - 1]
+        #stage = checkIfIn(0,1,stage)
+        newPetalMatrix =  [[]]
+        # TODO  if 0 <= stage < 0.3 : return a fine cone     
+        # TODO shift the sigmoid rather than interpolate to get quick moves
+        # TODO NOW fold petals as cones
+ 
+        # the opening angle of each crown of petals is computed accordingly to
+        # the observations on a rose bud.  
+        # see fitting curves in ~/manips/rose/boutons/chronogramme.ods
+
+        # fit by estimated MEAN values
+        angle = angleInt
+        if index / int(numSepals) < 1:
+            angle = angleExt
+        petalFactor = angle /90. 
+        angle *= deg2rad
+        
+        # angle according to the number of the petal "crown" :
+        facteur = petalFactor  
+        (sina,cosa) = getSiCo(angle)
+        anglePlus=angle * 1.2
+        (sinPlus,cosPlus) = getSiCo(anglePlus) # to wave the petal
+        #print "stage= %f" % stage, print " angle= %f" % angle
+
+        #facteur = min(max(angle/0.2, 0.2),1)
+        facteur = math.sqrt(facteur)
+
+        #if angle > 0.1 : # opening petals
+            # recopie de la matrice
+        for line in petalMatrix:
+            newLine=[]
+            for point in line:
+                newLine.append(point)
+            newPetalMatrix.append(newLine)
+        newPetalMatrix.remove([]) # python
+        ################ pivoter les derniers groupes de points pour ouvrir la fleur
+        # N O T E Visuellement ça plonge plus que le sépale 
+        # pour le même angle => on limite l'angle à 90°
+        # On dépile la matrice, on modifie les points 
+        # de la derniere rangée et l'antépénultième
+        # avec 1 angle différent pour "onduler" le pétale
+        # puis on rempile la matrice
+        lignes=[]
+        for numRang in range(2):
+            ligne=newPetalMatrix.pop()
+            if numRang % 2 :
+                (sinus,cosinus) = (sinPlus,cosPlus)
+            else:
+                (sinus,cosinus) = (sina,cosa)
+            newPoints=[]
+            for point in ligne:
+                newx = point[0]*cosinus - point[2]*sinus
+                newz = point[0]*sinus + point[2]*cosinus
+                newPoint=V4(newx, point[1]*facteur, newz , point[3])
+                newPoints.append(newPoint)
+            lignes.append(newPoints)
+        #lignes.append(newPetalMatrix.pop())
+
+        lignes.reverse()
+
+        for points in lignes :
+            newPetalMatrix.append(points)
+          
+        return newPetalMatrix
+    # fin TransformPetal
+
+
+    # P R O C E S S I N G
+    turtle.push()
+    turtle.setHead(Heading, Radius) # -Radius ?
+    taille = height / 9.0
+    #print "floralOrgan:TAILLE = %s" % taille
+    # ready to draw 
+
+    # we prolongate the ped along the heading direction : 
+    turtle.push()
+    turtle.oLineRel(Heading *taille  ) 
+    turtle.pop()
+    #setTurtleOrange(turtle)
+    #turtle.setColor(4) 
+
+    anglePetExt =anglePetInt =0 
+    if lPetalAngles :
+        anglePetExt=lPetalAngles[0]
+        anglePetInt=lPetalAngles[-1]
+    receptacle= Sphere( 1  )
+    if anglePetExt > 90. and anglePetExt == anglePetInt: # Faded flower
+        setTurtleOrange(turtle)
+        receptacle=Scaled(Vector3( taille , taille , taille * 1.5 ),receptacle )         
+    else:
+        turtle.setColor(4) 
+        receptacle=Scaled(Vector3( taille , taille , taille ),receptacle ) 
+
+    receptacle= Translated(0,0,taille,receptacle) 
+    turtle.customGeometry(receptacle,1) #
+
+    ############################ S E P A L S
+    ustride = 10 # the U resolution of the patch (along z)
+    vstride = 8 # the V resolution of the patch (around the axle)
+    angle72=math.pi/2.5 # the 1/5th of a tour
+
+    angleSepInt=angleSepExt=0 # the outer /inner sepal angles
+    if lSepalAngles :
+        angleSepExt=lSepalAngles[0]
+        angleSepInt=lSepalAngles[-1]
+
+    groupe=Group([])
+    thisHeight= height
+    heightInc=0
+    if lSepalDims:
+        thisHeight=lSepalDims[0]
+        heightInc=(lSepalDims[0]-lSepalDims[-1])/ (numSepals-1)
+    for index in xrange(0,int(numSepals)):
+        rotationAngle=angle72*index *2 #ici
+        turtle.setColor(index)
+        # has this sepal been digitized ?
+        Go=True 
+        if lNoSepals:
+            # T O D O : process here  Sabine's idea
+            # gap = lNoSepals[-1] # note : won't run if+than 2 sepals
+            # if gap > 4* angle72 ... 
+              # design, please...
+            for az in lNoSepals:
+                if inSector(rotationAngle,az, angle72*.5) :
+                    Go = False
+                    lNoSepals.remove(az)
+        if Go : # the sepal was not digitized
+            sepalMatrix=TransformSepal(sepalmatrix2, angleSepExt, angleSepInt, index)        
+            thisSepal=BezierPatch(sepalMatrix, ustride, vstride)
+            #localHeight = thisHeight * (index+1) #*index 4 DBG
+            #thisSepal=Scaled(Vector3(localHeight,localHeight,localHeight), thisSepal) 
+            thisSepal=Scaled(Vector3(thisHeight,thisHeight,thisHeight), thisSepal) 
+            # répartition tous les 144° : aspect ouverture 1 peu aléatoire
+            newSepal=AxisRotated((0,0,1),rotationAngle+math.pi,thisSepal) # test (0,0,1)
+            groupe.geometryList.append(newSepal)
+        #else:           print "turtle.customGeometry( Cone(),1)"
+        # Debug
+        if False:        #if lSepalAngles:
+            turtle.push()
+
+            turtle.setColor(0)
+            turtle.setHead(Radius, Heading) # DBG
+            turtle.customGeometry( Cone(3,100),1) 
+
+            turtle.setColor(index)
+            #rayon=cross(Heading,Radius)
+            rayon=Vector3([x for x in Radius]) 
+            #turtle.setHead(rayon, Heading) # DBG
+            (leSin,leCos)=getSiCo(rotationAngle)
+            print "getSiCo(%s) = (%s,%s)" % (rotationAngle, leSin, leCos)
+            rayon=Vector3(rayon[0]*leCos -rayon[1]*leSin, rayon[1]*leCos+rayon[0]*leSin, 0)
+            turtle.setHead(rayon, Heading) # DBG
+            #cone= AxisRotated(cross(Heading,Radius ), math.pi *0.5 ,cone)
+            #cone= AxisRotated(Heading, rotationAngle,cone)
+            turtle.customGeometry( Cone(3,100),1) 
+            turtle.pop()
+                
+        thisHeight -= heightInc
+
+    groupe=Translated(Vector3(0,0,taille * 1.86), groupe)
+    turtle.customGeometry( groupe,1) 
+
+    # stage zero : No petal to build (invisible...) 
+    if angleSepExt <= 0.001:
+        #print "No petals drawn"
+        turtle.pop()
+        return 
+
+    # check for FF stage
+    # WARNING : digitization errors may lead to this case
+    if  anglePetExt == anglePetInt and anglePetExt > 80. :
+        print "FleurFannee"
+        turtle.pop()
+        return
+    
+    ############################ P E T A L S
+    angleRepartition = angle72 * 2.1
+    setTurtleKoPink(turtle)
+
+    #turtle.pop() ; return #DEBUG 
+
+    #print "floralOrgan::lPetalDims= %s" % lPetalDims
+    #print "floralOrgan::lSepalDims= %s" % lSepalDims
+    thisLength=lPetalDims[0]
+    thisInc=(lPetalDims[0]-lPetalDims[-1])/ (numPetals -1)
+    for index in xrange(int(numPetals)):
+        petalMatrix= TransformPetal(petalmatrix2, anglePetExt, anglePetInt, index)
+        petal=BezierPatch(petalMatrix, ustride, vstride)
+        petal=Scaled(Vector3(thisLength,thisLength,thisLength), petal) 
+        thisLength -= thisInc
+        ##newPetal=petal
+        #couleur= 5 +  index # pour repérer les pétales par numéro
+        # A  P A R A M E T R E R
+        thisAngle=angleRepartition* index
+        (thisSin, thisCos)= getSiCo(thisAngle)
+        thisPetal=AxisRotated((0,0,1), thisAngle, petal) # orientation
+        thisPetal=Translated(-0.33 *taille *thisCos, -0.33 *taille *thisSin, taille*2., thisPetal) # placement
+        #thisPetal=AxisRotated((thisCos,thisSin,0), 0.1* stage, thisPetal) # twist
+        #turtle.setColor(couleur)
+    #groupe.geometryList.append(newPetal)
+        turtle.customGeometry( thisPetal,1)
+
+    turtle.pop()
+    #end floralOrgan
+
+def getSepalsAzimuts(lSepales, Heading, Radius):
+    """ We compute the azimut in the local coordinate system of the sepals that has been digitized.
+
+    The sepal axles coordinates are projected on the local "horizontal" plane, then
+    we compute the angle they do with the local x axis.
+    To compute the projection V' of a vector V on the local horizontal plane, 
+    we compute it's projection H' it onto the vertical axis H,  then we substract H' from V
+    
+
+    :param lSepales: the list of sepals described by 4 points
+    :param Heading: the Up (or local z) direction of the floral organ.
+    :param Radius: the Front (or local x) direction of the floral organ.
+    :return: the list of angles.
+    """
+    ##angles=[]
+    angles=[0]   # 1st angle is null by construction (checked)
+    
+    #print "getSepalsAzimuts::Heading = %s" % Heading
+    #print "getSepalsAzimuts::Radius = %s" % Radius
+
+    for sepale in lSepales[1:]:
+        #print "len(sepale) = %d " % len(sepale)
+        sepalAxle= sepale[-2]-sepale[0]
+        sepalAxle.normalize()
+        #print "getSepalsAzimuts::sepalAxle = %s" % sepalAxle
+        hPrime = Heading * dot(sepalAxle, Heading)
+        sepalAxle= sepalAxle - hPrime
+        sepalAxle.normalize()
+
+        sinAngle= norm(cross (Radius,sepalAxle)) 
+        cosAngle= dot(Radius, sepalAxle)
+        angle= math.atan2(sinAngle, cosAngle) 
+        # put it all in the same tour 
+        if angle <0:
+            angle += 2* math.pi
+        angles.append(angle)
+
+        #print "getSepalsAzimuts::angles= %s" % angles
+    return angles
+    # end getSepalsAzimuts
 
 def drawFloralOrgan(colorFunc=None):
     """ A function to return the function that draws floral organs
+    
+    :param colorFunc: the index of the color to use for the flower
     """
     myColorFunc=colorFunc
     if colorFunc is None:
@@ -707,6 +1463,7 @@ def drawFloralOrgan(colorFunc=None):
     return floralOrgan
 
 class FloralOrgan (Node):
+    """ FIXME : inside implemantation not to be shown """
     def __init__(self):
         Node.__init__(self)
         self.add_input( name='colorFunc', interface=IFunction, value=None)
@@ -719,7 +1476,9 @@ class FloralOrgan (Node):
 
 ######################################## CONE FLOWER
 def coneFlower(colorFunc=None):
-    """ default function to draw up a flower 
+    """ We define here a function (rawFlower) that draws up a raw flower. 
+
+    :return: the function rawFlower
     """
     # write the node code here.
     myColorFunc=colorFunc
@@ -727,8 +1486,8 @@ def coneFlower(colorFunc=None):
         myColorFunc=setTurtlePink # custom 
         
     def rawFlower(pointsnDiameters, turtle=None):
-        '''    computes a flower from 2 pairs [position, diameter]
-        '''
+        """    computes a flower from 2 pairs [position, diameter]
+        """
         # 
         turtle.push()
         # 
@@ -756,139 +1515,14 @@ class RawFlower(Node):
         colorFunc=self.get_input('colorFunc')
         return coneFlower(colorFunc)
 
-def taperedFlower(ctrlPntMatrix=None,ustride=8,vstride=8, colorFunc=None):
-    ''' interface to return bpFlower ''' 
-    bpFlower=None
-    #print "BezierPatchFlower called ; uStride is %s" % ustride
-    # write the node code here.
-    lCtrlPntMatrix=ctrlPntMatrix
-
-    #print "ctrlPntMatrix = %s" % ctrlPntMatrix
-    if ctrlPntMatrix is None:
-        # the return value of ctrlpointMatrix() yields an error. Why ?
-        lCtrlPntMatrix= [[Vector4(0,-0.40,0,1),Vector4(0,0.4,0,1)],
-                         [Vector4(0.28,-0.45,0.08,1),Vector4(0.28,0.45,0.08,1)],
-                         [Vector4(.56,-0.45,0.31,1),Vector4(.56,0.45,0.31,1)],
-                         [Vector4(0.86,-0.45,0.73,1),Vector4(.86,0.45,0.75,1)],
-                         [Vector4(0.95,-0.5,0.9,1),Vector4(.96,0.5,0.9,1)],
-                         [Vector4(0.98,-0.45,0.96,1),Vector4(.98,.45,0.96,1)],
-                         [Vector4(1,-0.10,1,1),Vector4(1,0.10,1,1)]]
-    #print "lCtrlPntMatrix = %s" % lCtrlPntMatrix
-    myColorFunc=colorFunc
-    if colorFunc is None:
-        myColorFunc=setTurtlePink # custom 
-       
-    def tpFlower(pointsnDiameters, turtle=None,):
-        ''' computes a flower from two points and the diameters associated to 
-        the flower.
-        @param pointsnDiameters : list of pairs[Vector3, scalar] resp. (position;diameter)
-        '''
-        luStride=ustride
-        lvStride=vstride
-        if luStride < 5:
-            luStride = 5
-        if lvStride < 5:
-            lvStride = 5
-        #ustride=5 
-        #vstride=5 
-        basePos=pointsnDiameters[0][0]
-        topPos=pointsnDiameters[2][0]
-        pedDiam=pointsnDiameters[0][1]
-        flowerRay=pointsnDiameters[2][1] * 0.5
-        flowerHeight=norm(topPos-basePos)
-        baseRay=max(flowerRay *0.2, flowerHeight*0.2) # arbitrarily
-        #deltaRay=flowerRay-baseRay
-        #petalLength=math.sqrt(flowerHeight*flowerHeight + deltaRay*deltaRay)
-        rad5eTour=math.pi/2.5 # a fifth of a tour
-
-        # we build the generic patch
-        petalMesh=BezierPatch(lCtrlPntMatrix,luStride, lvStride)
-
-        turtle.push()
-
-        #  orient the turtle 
-        flowerAxis=topPos-basePos
-        faceTo(turtle,flowerAxis)
-
-        #ovary=Disc(baseRay ,luStride)
-        ovary=Sphere(baseRay ,luStride)
-        #turtle.setColor(4) # kind of yellow-green
-        turtle.customGeometry(ovary, 1) #  we draw the ovary now
-
-        myColorFunc(turtle) 
-        
-        # we shall draw two rows of petals
-        moreRoll=0.
-        for row in range(0,2):
-            
-            baseRay=max(flowerRay *0.2, flowerHeight*0.2) # arbitrarily
-            deltaRay=flowerRay-baseRay
-            petalLength=math.sqrt(flowerHeight*flowerHeight + deltaRay*deltaRay)
-            localMesh=Tapered(baseRay/flowerRay,1,petalMesh)
-            # patch is scaled according to the global flower dimensions
-            localMesh=Scaled(Vector3(petalLength,
-                                     max(baseRay,flowerRay)*1.1,
-                                     baseRay),
-                             localMesh)
-
-            # compute the pitch angle (flower opening)
-            if deltaRay > 0 : # opened flower
-                openingAngle=math.atan(flowerHeight/(deltaRay))
-            elif deltaRay < 0 : # flower not opened yet
-                openingAngle=math.pi*0.5+math.atan((-deltaRay)/flowerHeight)
-            else: # say half opened
-                openingAngle=math.pi*0.5
-
-
-            # TODO : compute the closing angle of the petals from height and width
-
-            for iIndex in range(0,5):
-                # closing the flower : 
-                petal=AxisRotated((0,1,0),-openingAngle,localMesh)
-                # twisting a bit to limit collisions [Todo in the patch]
-                #petal=AxisRotated((1,0,0),openingAngle*0.05,petal)
-                angle=(iIndex+moreRoll)*rad5eTour
-                petal=AxisRotated((0,0,1),angle,petal)
-                petal=Translated(Vector3(baseRay *math.cos(angle) *0.8,\
-                                             baseRay *math.sin(angle) *0.8,\
-                                             0),\
-                                     petal)
-                turtle.customGeometry(petal, 1) #flowerHeight) #  
-            moreRoll=0.5
-            flowerRay *= 0.8
-
-        ## visual control test 
-        #turtle.move(topPos)
-        #turtle.setColor(0)
-        #turtle.customGeometry(Sphere(flowerHeight/10.), 1)
-        ## successful @20111003 : sphere in flower axis
-
-        turtle.pop()
-
-
-    return tpFlower
-
-class TaperedFlower(Node):
-    def __init__(self):
-        Node.__init__(self)
-        self.add_input( name='controlpointmatrix', interface=ISequence, value=None)
-        self.add_input(name='ustride', interface=IInt, value=5 )
-        self.add_input(name='vstride', interface=IInt, value=5 )
-        self.add_input( name='colorFunc', interface=IFunction, value=None)
-        self.add_output( name = 'compute_flower', 
-                         interface = IFunction )
-
-    def __call__( self, inputs ):
-        controlpointmatrix=self.get_input('controlpointmatrix')
-        ustride=self.get_input('ustride')
-        vstride=self.get_input('vstride')
-        colorFunc=self.get_input('colorFunc')
-        return taperedFlower(controlpointmatrix, ustride, vstride, colorFunc)
 
 ######################################## Fruit
 
 def simpleFruit(colorFunc=None):
-    """ default function to draw up a flower 
+    """ We define here a function "rawFruit" to draw up a raw fruit
+
+       :param colorFunc: a function that sets the color of the turtle
+       :return: the rawFruit function
     """
     # write the node code here.
     myColorFunc=colorFunc
@@ -896,8 +1530,8 @@ def simpleFruit(colorFunc=None):
         myColorFunc=setTurtleOrange # custom 
         
     def rawFruit(points, turtle=None):
-        '''    computes a fruit from a pair or positions
-        '''
+        """    computes a fruit from a pair or positions
+        """
         # 
         turtle.push()
         # 
@@ -946,12 +1580,19 @@ class RawFruit(Node):
 ########################################
 
 def noThing(points, turtle=None):
-    """ """
+    """ A function that makes nothing 
+
+    :param points: unused
+    :param turtle: unused
+    """
     pass
 
 def makeNoOrgan():
-    '''    make no change to the turtle, so we can watch otherwise hidden details.
-    '''
+    """  
+    makes nothing, so we can see details that are hidden otherwise.
+
+    :returns: the function noThing that makes no change to the turtle.
+    """
     # write the node code here.
     # return outputs
     return noThing
@@ -968,13 +1609,22 @@ class NoOrgan(Node):
 
 ########################################
 
-ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],[Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],[Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],[Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],[Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
+## a raw control point matrix for testing bezier patches
+ctpm = [[Vector4(0,-0.2,0,1),Vector4(0,0.2,0,1)],
+        [Vector4(0.28,-0.38,0.13,1),Vector4(0.28,0.38,0.13,1)],
+        [Vector4(.56,-0.56,0.17,1),Vector4(.56,0.56,0.17,1)],
+        [Vector4(0.86,-0.7,0.21,1),Vector4(.86,.7,0.5,1)],
+        [Vector4(1,-0.25,1,1),Vector4(1,0.25,1,1)]]
 
 def ctrlpointMatrix():
-    '''    control point matrix for bezier patches
-    '''
+    """  We define here a control point matrix for a bezier 
+    patch with 2 columns and 7 rows that draws a raw petal.
+
+    :returns: the control point matrix
+    """
     #ctpm = None; 
     # write the node code here.
+    # did I mean "global" ?
     ctpm=  [[Vector4(0,-0.40,0,1),Vector4(0,0.4,0,1)],
             [Vector4(0.28,-0.45,0.08,1),Vector4(0.28,0.45,0.08,1)],
             [Vector4(.56,-0.45,0.31,1),Vector4(.56,0.45,0.31,1)],
@@ -995,11 +1645,14 @@ class ControlPointsMatrix(Node):
         return ctrlpointMatrix()
 
 def petalMatrix():
-    '''    control point matrix for a bezier patch close to a petal
-    '''
+    """  
+    We define here a control points matrix with 3 columns and 9 rows for a bezier patch to draw a petal.
+
+    :returns: the control points matrix 
+    """
     from openalea.mtg.plantframe import Vector4 as V4
     ctpm = None; 
-    # write the node code here.
+    # code 
     ctpm = [[V4(0,    -0.12,   0.,   1), V4(0,     0, -0,   1),  V4(0,     0.12,  0.,   1)],
             [V4(0.14, -0.25,  -0.2,  1), V4(0.14,  0, -0.25, 1),  V4(0.13, 0.25, -0.2,  1)],
             [V4(.28,  -0.25,   0.35, 1), V4(0.28,  0,  0.2 , 1),  V4(.28,  0.25,  0.35, 1)],
@@ -1023,15 +1676,28 @@ class PetalMatrix(Node):
 
 ########################################
 def position(n):
-    """ returns the position of the node in a Vector3 data """
+    """ We compute the position of an MTG node in a openalea.mtg.plantframe::Vector3
+
+    :param n: the MTG node  
+    :returns: the position
+    """
     return Vector3(n.XX, n.YY, n.ZZ)
     
 ########################################
 def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None ):
-    '''    function to visit MTG nodes
-    '''
+    """ We define here a function (visitor) that is used visit MTG nodes.
+
+    :param leaf_factory: the function that draws the leaves
+    :param bud_factory: the function that draws the buds
+    :param sepal_factory: the function that draws the sepals
+    :param flower_factory: the function that draws the flowers
+    :param fruit_factory: the function that draws the fruits
+    :return: the visitor function
+    :todo: check the arity of all the versions of bud_factory
+    """  
     # write the node code here.   
     visitor = None; 
+    lSepalStore=[]
 
     if leaf_factory is None:
         leaf_factory=rawLeaflet
@@ -1044,20 +1710,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
     if fruit_factory is None:
         fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None 
 
-    def computeHeadings(points):
-        """ computes the unity vector Hf that points from the 1st to
-        the last vector of the list, and computes their distance lf.
-        returns a pair (Hf, lf)
-        """
-        basePos=points[0][0]
-        topPos=points[2][0]
-        distance=norm(topPos-basePos)
-        axis=topPos-basePos
-        axis.normalize()
-        return (axis, distance)
-
-    # to store sepals whila awaiting for flower data
-    lSepalStore=[]
 
     def visitor(g, v, turtle, \
                     leaf_computer=leaf_factory, \
@@ -1065,11 +1717,14 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
                     sepal_computer=sepal_factory,\
                     flower_computer=flower_factory,\
                     fruit_computer=fruit_factory):
+        """ a function that analyses the code of a vertex then takes decisions about the ways to display it
+        """
         n = g.node(v)
         pt = position(n)
         symbol = n.label[0]
         turtle.setId(v)
         currentColor=turtle.getColor()
+        
 
         if symbol in ['E', 'R']:
             if n.Diameter is None:
@@ -1090,50 +1745,57 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
                 points.append(position(n))
             leaf_computer(points,turtle)
 
-        elif n.label == 'S1' :
-            turtle.setColor(4) # apple green
+        elif n.label == 'J1' :
+            #turtle.setColor(4) # apple green
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
             
             lSepalStore.append(points)
+            #print "lSepalStore.APPEND"
             #sepal_computer(points,turtle)
 	    
         elif n.label == "B1" :
-            # we create a list of pairs [Vector4, diameter], 
-            # to put in a parametrized func ?
-            points = [[position(n.parent()),n.parent().Diameter], [pt,None]]
+            #print "list(n.children())[0].Diameter=%s" % list(n.children())[0].Diameter
+            points = [n.parent(), n]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
-                points.append([position(n),None])
-            #(Hf,lf) = computeHeadings(points)
+                points.append(n)
+            bud_computer(points,turtle,lSepalStore) 
 
-            bud_computer(points,turtle)
-            # process sepals
-            while lSepalStore:
-                sepal_computer(lSepalStore.pop(),turtle)
-
-        elif n.label == "O1" :
-            #turtle.oLineTo(pt) # pt is the top of the flower
+            # process digitized sepals 
             turtle.setColor(4) # apple green
-
-            # process sepals
             while lSepalStore:
                sepal_computer(lSepalStore.pop(),turtle)
 
-            points=[[position(n.parent()),n.parent().Diameter], [None,None],[pt,n.Diameter]]
-            flower_computer (points, turtle)
-
-        elif n.label == "C1" :
-
+        elif n.label == "O1" :
             turtle.setColor(4) # apple green
-            # process sepals
+
+            points=[n.parent(),n]
+            #print "n.Diameter=%s" % n.Diameter
+            flower_computer (points, turtle, lSepalStore, n.Diameter)
+
+            # process digitized sepals (if any)
+            #turtle.setColor(len(lSepalStore)) # apple green ici
+            turtle.setColor(4) # apple green ici
             while lSepalStore:
+                #turtle.setColor(couleur)
+                #couleur +=1
+                #turtle.decColor()
+                #sepale=lSepalStore.pop()      # 2 clear data (requested)
+                #sepal_computer(sepale,turtle) # 2 draw sepal
                 sepal_computer(lSepalStore.pop(),turtle)
 
-            points=[[position(n.parent()),n.parent().Diameter], [None,None], [pt, None]]
-            fruit_computer (points, turtle)
+        elif n.label == "C1" :
+            turtle.setColor(4) # apple green
+            # process sepals
+            #points=[[position(n.parent()),n.parent().Diameter], [None,None], [pt, None]] # old way
+            points=[n.parent(),n]
+            fruit_computer (points, turtle, lSepalStore, -1)
+            while lSepalStore:
+                sepal_computer(lSepalStore.pop(),turtle)
+                print "lSepalStore:USED in FRUIT"
 
             # process terminator
         elif n.label == "T1":
@@ -1146,7 +1808,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
 
         elif symbol == 'H' : # hidden vertex
             pass
-
 
         turtle.setColor(currentColor)
 
@@ -1183,6 +1844,15 @@ class VertexVisitor(Node):
 
 #### Copy from mtg.turtle ###
 def traverse_with_turtle(g, vid, visitor, turtle=None):
+    """ 
+    This function is called from within TurtleFrame. It explores the part of a MTG tree being under the node number "vid". It walks through that sub-MTG using the pre_order2_with_filter algorithm.
+    
+    :param g: the MTG object we are working on
+    :param vid: the vertex ID inside the MTG
+    :param visitor: the function that visits the nodes of the sub-MTG
+    :see: openalea/mtg/traversal.py
+    :note: this function was copied from OpenAlea.Mtg-0.9.5-py2.6.egg/openalea/mtg/turtle.py 
+"""
     if turtle is None:
         turtle = PglTurtle()
 
@@ -1213,6 +1883,14 @@ def traverse_with_turtle(g, vid, visitor, turtle=None):
  
 ######################################################
 def TurtleFrame(g, visitor):
+    """ The function that sets the turtle up and calls the function traverse_with_turtle that walks through the MTG tree, with  "visitor" as a parameter.
+
+    :param g: an MTG object to explore.
+    :param visitor: the function to be called at every node of the "g" MTG.
+    :calls: pgl.PglTurtle that makes a brand new turtle. 
+    :calls: the traverse_with_turtle function, with the turtle as an argument
+    :return: the scene collected by the turtle during the walkthrough.
+    """
     n = g.max_scale()
     turtle = pgl.PglTurtle()
     ## we want to change the default color
@@ -1230,27 +1908,34 @@ def TurtleFrame(g, visitor):
     return turtle.getScene()
 
 def reconstructWithTurtle(mtg, visitor, powerParam):
-    '''    builds a scene from "4pts leaflet" MTGs
+    """ Builds a scene from an MTG object using a « vertex visitor »
+    function and a number to help compute the diameter of the nodes of the trunk.
     
-    .. todo:: Add some constant in the arguments
-    '''
+    :param mtg: an MTG object
+    :param visitor: The visitor function  walks through the nodes of the MTG and checks for the symbols of the nodes to call the display function that fits this organ
+    :param powerParam: The numerical exponent helps to compute the diameters where they have not been measured, using a pipe model.
+    :calls: the TurtleFrame function
+    :return: the 3D scene that was collected by TurtleFrame during the walk through the MTG.
+    :todo: Add some constant in the arguments
+    """
     # Compute the radius with pipe model
     theScene=None
     diameter = mtg.property('Diameter')
     for v in mtg:
         if mtg.class_name(v) == 'R':
             diameter[v] = 0.75 
+        # done in msd2MTG 
         elif mtg.class_name(v) == 'B':
-            diameter[v] = 1.75
+            diameter[mtg.parent(v)] = 1.75 
         elif mtg.class_name(v) in ['O','C']:
-            diameter[v] = 2.
+            diameter[mtg.parent(v)] = 2.
 
     drf = DressingData(LeafClass=['F', 'S'], 
         FlowerClass='O', FruitClass='C',
         MinTopDiameter=dict(E=0.5))
     pf = PlantFrame(mtg, TopDiameter='Diameter', 
                     DressingData=drf, 
-                    Exclude = 'F S T'.split()) 
+                    Exclude = 'F S T O B C'.split()) 
     #diameter = pf.algo_diameter(power=powerParam)
     #mtg.properties()['Diameter'] = diameter 
     #test : 
@@ -1274,3 +1959,6 @@ class ReconstructWithTurtle(Node):
         powerParam = self.get_input( 'powerParam' )
         return reconstructWithTurtle(g, Visitor, powerParam)
 #end ReconstructWithTurtle
+
+#if __name__ == '__main__' :
+#    print inSector(2.4999999999,2.0,0.5)
