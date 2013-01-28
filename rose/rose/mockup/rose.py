@@ -214,7 +214,7 @@ def files2MTGs(cropdict):
             (ox,oy)= BaseOfPlant(noeud)
             
             PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
-            for vtx in mtg.vertices_iter(scale=2): # the rest of the plant
+            for vtx in mtg.vertices(scale=2): # the rest of the plant
                 noeud = mtg.node(vtx)
                 PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
             listofmtgs += [mtg] 
