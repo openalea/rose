@@ -168,6 +168,11 @@ def inSector(candidat, center, marge) :
         center -= 2*math.pi
     while center < 0:
         center += 2*math.pi
+    # get candidat inside the 1st tour
+    while candidat > 2*math.pi:
+        candidat -= 2*math.pi
+    while candidat < 0:
+        candidat += 2*math.pi
 
     if candidat >=  center-marge and candidat <  center+marge:
         #print "%f belongs to [%f - %f[" % (candidat , center-marge, center+marge)
@@ -344,6 +349,8 @@ def flower(points, turtle=None, lSepales=[], diameter=None):
     (Heading, height, Radius, lSepalAngles, lSepalDims, 
      lPetalAngles, lPetalDims,lNoSepals)=flowerParameters(points, stade, PcStade, lSepales, diameter)
 
+    #print "lNoSepals = %s" % lNoSepals
+    #test    lNoSepals=[]
     # All the angles are known, now we draw the thing.
     floralOrgan(Heading, height, Radius, lSepalAngles, lSepalDims,
                   lPetalAngles,  lPetalDims, turtle, lNoSepals)
@@ -1025,7 +1032,7 @@ def flowerParameters(points, stade=None, PcStade=0, lSepales=[], flowerDiameter=
             #print "flowerParameters::lPetalDims= %s" % lPetalDims
 
         else: # faded flower
-            print "flowerParameters:faded flower"
+            #print "flowerParameters:faded flower"
             #height *= 3
             lPetalAngles[:]=[]
             lPetalAngles.append(180)
@@ -1112,6 +1119,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     :param lPetalAngles: the angles of the most and the less opened petal, taken between the Heading direction and the axle of the petal
     :param petalDim: the dimensions of opened petals
     :param turtle: the turtle to draw onto.
+    :param lNoSepals: azimuts of real sepals (already drawn, so not to be created)
     :todo: add a param with the direction of existing sepals in the local mark, if any
     """
 
@@ -1327,7 +1335,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
             # T O D O : process here  Sabine's idea
             # gap = lNoSepals[-1] # note : won't run if+than 2 sepals
             # if gap > 4* angle72 ... 
-              # design, please...
+            # design, please...
             for az in lNoSepals:
                 if inSector(rotationAngle,az, angle72*.5) :
                     Go = False
@@ -1365,8 +1373,10 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
                 
         thisHeight -= heightInc
 
-    groupe=Translated(Vector3(0,0,taille * 1.86), groupe)
-    turtle.customGeometry( groupe,1) 
+    # DBG
+    if groupe.geometryList :
+        groupe=Translated(Vector3(0,0,taille * 1.86), groupe)
+        turtle.customGeometry( groupe,1) 
 
     # stage zero : No petal to build (invisible...) 
     if angleSepExt <= 0.001:
@@ -1377,7 +1387,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     # check for FF stage
     # WARNING : digitization errors may lead to this case
     if  anglePetExt == anglePetInt and anglePetExt > 80. :
-        print "FleurFannee"
+        #print "FleurFannee"
         turtle.pop()
         return
     
@@ -1431,22 +1441,28 @@ def getSepalsAzimuts(lSepales, Heading, Radius):
     #print "getSepalsAzimuts::Heading = %s" % Heading
     #print "getSepalsAzimuts::Radius = %s" % Radius
 
-    for sepale in lSepales[1:]:
+    # if there are 5 digitized sepals, we assume that they are correct
+    if len(lSepales)==5:
+        for a in xrange(73,360,72):        
+            angles.append(a*math.pi/180.)
+        #print "Angles : %s" % angles
+    else:
+        for sepale in lSepales[1:]:
         #print "len(sepale) = %d " % len(sepale)
-        sepalAxle= sepale[-2]-sepale[0]
-        sepalAxle.normalize()
+            sepalAxle= sepale[-2]-sepale[0]
+            sepalAxle.normalize()
         #print "getSepalsAzimuts::sepalAxle = %s" % sepalAxle
-        hPrime = Heading * dot(sepalAxle, Heading)
-        sepalAxle= sepalAxle - hPrime
-        sepalAxle.normalize()
+            hPrime = Heading * dot(sepalAxle, Heading)
+            sepalAxle= sepalAxle - hPrime
+            sepalAxle.normalize()
 
-        sinAngle= norm(cross (Radius,sepalAxle)) 
-        cosAngle= dot(Radius, sepalAxle)
-        angle= math.atan2(sinAngle, cosAngle) 
+            sinAngle= norm(cross (Radius,sepalAxle)) 
+            cosAngle= dot(Radius, sepalAxle)
+            angle= math.atan2(sinAngle, cosAngle) 
         # put it all in the same tour 
-        if angle <0:
-            angle += 2* math.pi
-        angles.append(angle)
+            if angle <0:
+                angle += 2* math.pi
+            angles.append(angle)
 
         #print "getSepalsAzimuts::angles= %s" % angles
     return angles
@@ -1529,7 +1545,7 @@ def simpleFruit(colorFunc=None):
     if colorFunc is None:
         myColorFunc=setTurtleOrange # custom 
         
-    def rawFruit(points, turtle=None):
+    def rawFruit(points, turtle=None, truc=None,Bidule=None): # ici
         """    computes a fruit from a pair or positions
         """
         # 
@@ -1537,12 +1553,13 @@ def simpleFruit(colorFunc=None):
         # 
         myColorFunc(turtle)
         #print "point= %s" % pointsnDiameters
-        
-        turtle.oLineTo(points[0][0])
+        #print "Points[0] =  %s" % points[0]
+
+        turtle.oLineTo(points[0]) #[0])
         #turtle.oLineTo(points[1])
         #turtle.setWidth(10)
-        botPt=points[0][0]
-        topPt=points[2][0]
+        botPt=points[0] #[0]
+        topPt=points[-1] #[0]
         fruitAxis=Vector3(topPt-botPt)
         # digit point is on top of etamins
         # etamins are not represented 
@@ -1745,7 +1762,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
                 points.append(position(n))
             leaf_computer(points,turtle)
 
-        elif n.label == 'J1' :
+        elif n.label == 'S1' :
             #turtle.setColor(4) # apple green
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
@@ -1795,7 +1812,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             fruit_computer (points, turtle, lSepalStore, -1)
             while lSepalStore:
                 sepal_computer(lSepalStore.pop(),turtle)
-                print "lSepalStore:USED in FRUIT"
+                #print "lSepalStore:USED in FRUIT"
 
             # process terminator
         elif n.label == "T1":
