@@ -1301,7 +1301,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         anglePetInt=lPetalAngles[-1]
     receptacle= Sphere( 1  )
     if anglePetExt > 90. and anglePetExt == anglePetInt: # Faded flower
-        setTurtleOrange(turtle)
+        #setTurtleOrange(turtle) ici
         receptacle=Scaled(Vector3( taille , taille , taille * 1.5 ),receptacle )         
     else:
         turtle.setColor(4) 
