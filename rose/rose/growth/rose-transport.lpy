@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 transport_speed = 1/2.
 
 nbEntity = 10
@@ -5,15 +7,19 @@ nbEntity = 10
 min_level = 0.01
 max_level = 10
 
-active_transport_coef = 1.
-diffusion_coef = 1.
-auxin_synth_coef = 1.
-auxin_degrad_coef = 1.
-dt = 1.
+active_transport_coef = 1. # T
+diffusion_coef = 1. # D
+auxin_synth_coef = 1. # \rho (c_i)
+auxin_degrad_coef = 1. # \delta_a (a)
+pin_wall_coeff = 1. # k^+
+wall_pin_coeff = 1. # k^-
+pin_degrad_coeff = 1. # \delta_p (a) 
+
+dt = 0.01
 
 def h(flux) :
   h_coef = 1.
-  return h_coef * (flux**2)
+  return h_coef * (flux**2 / (1 + flux**2))
 
 def g(auxin):
   g_coef = 1.
@@ -31,7 +37,7 @@ class OrganParameter(ParameterSet):
 #      - auxin : auxin concentration
 #      - sugar : sugar concentration
 #      - pin: PIN concentration in the organ not affected to the membranes
-#      -pin_up = 0, # PIN surfacic concentration on upward membrane
+#      - pin_up = 0, # PIN surfacic concentration on upward membrane
 #      - pin_down =0, # PIN surfacic concentration on downard membrane
 #      pin_lat=0 # PIN surfacic concentration on lateral membrane
 #      flux_up = 0 # flux coming from upward membrane (positive if entering the cell)
@@ -47,14 +53,16 @@ class OrganParameter(ParameterSet):
     flux_down =0 # flux coming from downard membrane
     flux_lat=0 # flux coming from lateral membrane
     
-    ParameterSet.__init__(self, auxin=auxin, sugar=sugar, pin=pin, pin_up=pin_up, pin_down=pin_down, pin_lat=pin_lat,flux_up=flux_up, flux_down=flux_down, flux_lat=flux_lat)
+    ParameterSet.__init__(self, auxin=auxin, sugar=sugar, pin=pin, pin_up=pin_up, 
+                          pin_down=pin_down, pin_lat=pin_lat,flux_up=flux_up, 
+                          flux_down=flux_down, flux_lat=flux_lat)
 
 
 module Apex(p) 
 
 Axiom: _(2)Apex(nbEntity)
 
-derivation length: 200
+derivation length: 1000
 ignore: +-
 production:
 
@@ -64,7 +72,9 @@ I(pd) < I(p) > I(pu) :
   fu, fd = p.flux_up, p.flux_down
   pin, pinu, pind = p.pin, p.pin_up, p.pin_down
   
+  p = deepcopy(p)
   #  p.auxin = a + (au+ad-2*a)*transport_speed
+  # fluxs are counted as positive when they get in of p
   p.flux_up = active_transport_coef * (pu.pin_down * au - p.pin_up*a) + \
               diffusion_coef * (au - a)
   p.flux_down = active_transport_coef * (pd.pin_up*ad - p.pin_down * a) + \
@@ -78,16 +88,20 @@ I(pd) < I(p) > I(pu) :
   ra += net_flux # sum phi_ji sij / vi
   
   p.auxin += ra*dt 
-  
+  #assert 0. <= p.auxin <= 10. 
   # dPiu/dt, dPid/dt => rpinu, rpind
-  rpinu = h(fu) 
-  rpind = h(fd) 
+  rpinu = h(fu)*pin + pin_wall_coeff*pin - wall_pin_coeff*pinu 
+  rpind = h(fd)*pin + pin_wall_coeff*pin - wall_pin_coeff*pind 
   p.pin_up += rpinu*dt
   p.pin_down += rpind*dt
   
-  # dPi / dt : No limit for produced pin for the moment
+  # CASE 1: 
+  #   dPi / dt : No limit for produced pin for the moment
   
-  
+  # CASE 2: 
+  rpin = g(a) - pin_degrad_coeff*pin - (rpinu+rpind)
+  p.pin += rpin*dt
+   
   produce I(p)
 
 I(p) > I(pu):
@@ -97,6 +111,7 @@ I(p) > I(pu):
 
   #  p.auxin = a+ (au-a)*transport_speed
   
+  p = deepcopy(p)
   p.flux_up = active_transport_coef * (pu.pin_down * au - p.pin_up*a) + \
               diffusion_coef * (au - a)
 
@@ -114,7 +129,14 @@ I(p) > I(pu):
 
   # dPiu/dt => rpinu
   rpinu = h(fu) 
-  p.pin_up += rpinu*dt
+  p.pin_up += rpinu*dt + pin_wall_coeff*pin - wall_pin_coeff*pinu
+
+  # CASE 1: 
+  #   dPi / dt : No limit for produced pin for the moment
+  
+  # CASE 2: 
+  rpin = g(a) - pin_degrad_coeff*pin - (rpinu)
+  p.pin += rpin*dt
 
   produce I(p)
 
@@ -123,6 +145,7 @@ I(pd) < I(p) :
   fd = p.flux_down
   pin, pind = p.pin, p.pin_down
 
+  p = deepcopy(p)
   p.flux_down = active_transport_coef * (pd.pin_up*ad - p.pin_down * a) + \
               diffusion_coef * (ad - p.auxin)
 
@@ -130,22 +153,30 @@ I(pd) < I(p) :
   
   # TODO this part is always the same for each rule: factorize
   # rate of change of auxin
-  ra = auxin_synth_coef # auxin synthesis
+  ra = auxin_synth_coef+10. # auxin synthesis
   ra += - auxin_degrad_coef * a # auxin degradation
   ra += net_flux # sum phi_ji sij / vi
   
-  p.auxin += ra*dt
+  p.auxin  += ra*dt
+  #p.auxin = max_level
   
   # dPid/dt => rpind
   rpind = h(fd) 
-  p.pin_down += rpind*dt
+  p.pin_down += rpind*dt + pin_wall_coeff*pin - wall_pin_coeff*pind
+
+  # CASE 1: 
+  #   dPi / dt : No limit for produced pin for the moment
+  
+  # CASE 2: 
+  rpin = g(a) - pin_degrad_coeff*pin - (rpind)
+  p.pin += rpin*dt
 
   produce I(p)
 
 decomposition:
 maximum depth: nbEntity+1
 
-Apex(0) --> Apex(0)
+Apex(0) --> *
 Apex(x) :
 
   if x == 1:
@@ -164,7 +195,7 @@ I(p) :
    a = p.auxin
    col = int(10*(a-min_level)/(max_level-min_level))
    a += 0.1
-   produce ;(col)F(3)[-(90)f(5);(3)@L(txt(a-0.1))f(4);(col)_(1)F(a)]F(3)
+   produce ;(col)F(3)[-(90)f(5);(3)@L(txt(a-0.1))f(4);(col)_(1)F(0.0001+a)]F(3)
 
 endlsystem
 ###### INITIALISATION ######
