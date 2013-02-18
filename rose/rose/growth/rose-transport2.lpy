@@ -14,14 +14,10 @@ auxin_degrad_coef = 1. # \delta_a (a)
 pin_wall_coeff = 1. # k^+
 wall_pin_coeff = 1. # k^-
 pin_degrad_coeff = 1. # \delta_p (a) 
-convergence_delay = 150
-ramif_threshold = 3
 
 dt = 0.01
 
 def h(flux) :
-  if flux < 0.:
-    return 0.
   h_coef = 1.
   return h_coef * (flux**2 / (1 + flux**2))
 
@@ -62,27 +58,20 @@ class OrganParameter(ParameterSet):
                           flux_down=flux_down, flux_lat=flux_lat)
 
 
-module Apex(p,t) 
+module Apex(p) 
 
-Axiom: _(2)I(OrganParameter(max_level,0)) Apex(nbEntity,0)
+Axiom: _(2)Apex(nbEntity)
 
-derivation length: 2000
+derivation length: 1000
 ignore: +-
 production:
 
 
-I(pd) < I(p) > x( [ I(pl) ] ) I(pu) :
+I(pd) < I(p) > I(pu) :
   a, au, ad = p.auxin, pu.auxin, pd.auxin
   fu, fd = p.flux_up, p.flux_down
   pin, pinu, pind = p.pin, p.pin_up, p.pin_down
   
-  is_ramif = (pl is None)
-  if is_ramif:
-    pl = pl[0]
-    al = pl.auxin
-    fl = p.flux_lat
-    pinl = p.pin_lat
-    
   p = deepcopy(p)
   #  p.auxin = a + (au+ad-2*a)*transport_speed
   # fluxs are counted as positive when they get in of p
@@ -90,13 +79,8 @@ I(pd) < I(p) > x( [ I(pl) ] ) I(pu) :
               diffusion_coef * (au - a)
   p.flux_down = active_transport_coef * (pd.pin_up*ad - p.pin_down * a) + \
               diffusion_coef * (ad - a)
-
+              
   net_flux = p.flux_up + p.flux_down
-
-  if is_ramif:
-    p.flux_lat = active_transport_coef * (pl.pin_down*al - p.pin_lat * a) + \
-              diffusion_coef * (al - a)                  
-    net_flux += p.flux_lat
   
   # rate of change of auxin
   ra = auxin_synth_coef # auxin synthesis
@@ -111,35 +95,20 @@ I(pd) < I(p) > x( [ I(pl) ] ) I(pu) :
   p.pin_up += rpinu*dt
   p.pin_down += rpind*dt
   
-  net_rpin = rpinu+rpind
-  if is_ramif:
-    rpinl = h(fl)*pin + pin_wall_coeff*pin - wall_pin_coeff*pinl
-    p.pin_lat += rpinl*dt
-    net_rpin += rpinl 
-  
   # CASE 1: 
   #   dPi / dt : No limit for produced pin for the moment
   
   # CASE 2: 
-  rpin = g(a) - pin_degrad_coeff*pin - net_rpin
+  rpin = g(a) - pin_degrad_coeff*pin - (rpinu+rpind)
   p.pin += rpin*dt
-  
-  if (p.auxin < ramif_threshold) and not is_ramif:
-    produce I(p) [ + I(OrganParameter(max_level,0)) ]
-  else:
-    produce I(p)
+   
+  produce I(p)
 
-I(p) > x( [ I(pl) ] ) I(pu):
+I(p) > I(pu):
   a, au = p.auxin, pu.auxin
   fu = p.flux_up
   pin, pinu = p.pin, p.pin_up
 
-  is_ramif = (pl is None)
-  if is_ramif:
-    pl = pl[0]
-    al = pl.auxin
-    fl = p.flux_lat
-    pinl = p.pin_lat
   #  p.auxin = a+ (au-a)*transport_speed
   
   p = deepcopy(p)
@@ -148,11 +117,6 @@ I(p) > x( [ I(pl) ] ) I(pu):
 
 
   net_flux = p.flux_up
-
-  if is_ramif:
-    p.flux_lat = active_transport_coef * (pl.pin_down*al - p.pin_lat * a) + \
-              diffusion_coef * (al - a)                  
-    net_flux += p.flux_lat
   
   # TODO this part is always the same for each rule: factorize
   # rate of change of auxin
@@ -167,98 +131,14 @@ I(p) > x( [ I(pl) ] ) I(pu):
   rpinu = h(fu) 
   p.pin_up += rpinu*dt + pin_wall_coeff*pin - wall_pin_coeff*pinu
 
-  net_rpin = rpinu
-  if is_ramif:
-    rpinl = h(fl)*pin + pin_wall_coeff*pin - wall_pin_coeff*pinl
-    p.pin_lat += rpinl*dt
-    net_rpin += rpinl
-  
   # CASE 1: 
   #   dPi / dt : No limit for produced pin for the moment
   
   # CASE 2: 
-  rpin = g(a) - pin_degrad_coeff*pin - (net_rpin)
+  rpin = g(a) - pin_degrad_coeff*pin - (rpinu)
   p.pin += rpin*dt
 
   produce I(p)
-
-I(pd) < [ + I(p) :
-  a, ad = p.auxin, pd.auxin
-  fd = p.flux_down
-  pin, pind = p.pin, p.pin_down
-
-  p = deepcopy(p)
-  p.flux_down = active_transport_coef * (pd.pin_lat*ad - p.pin_down * a) + \
-              diffusion_coef * (ad - p.auxin)
-
-  net_flux = p.flux_down
-  
-  # TODO this part is always the same for each rule: factorize
-  # rate of change of auxin
-  ra = auxin_synth_coef+10. # auxin synthesis
-  ra += - auxin_degrad_coef * a # auxin degradation
-  ra += net_flux # sum phi_ji sij / vi
-  
-  p.auxin  += ra*dt
-  #p.auxin = max_level
-  
-  # dPid/dt => rpind
-  rpind = h(fd) 
-  p.pin_down += rpind*dt + pin_wall_coeff*pin - wall_pin_coeff*pind
-
-  # CASE 1: 
-  #   dPi / dt : No limit for produced pin for the moment
-  
-  # CASE 2: 
-  rpin = g(a) - pin_degrad_coeff*pin - (rpind)
-  p.pin += rpin*dt
-
-  produce [ + I(p)
-
-I(pd) < I(p) > [ I(pl) ]:
-  a, ad = p.auxin, pd.auxin
-  fd = p.flux_down
-  pin, pind = p.pin, p.pin_down
-  
-  al = pl.auxin
-  fl = p.flux_lat
-  pinl = p.pin_lat
-
-  p = deepcopy(p)
-  p.flux_down = active_transport_coef * (pd.pin_up*ad - p.pin_down * a) + \
-              diffusion_coef * (ad - p.auxin)
-  p.flux_lat = active_transport_coef * (pl.pin_down*al - p.pin_lat * a) + \
-              diffusion_coef * (al - a)                  
-
-  net_flux = p.flux_down + p.flux_lat
-  
-  # TODO this part is always the same for each rule: factorize
-  # rate of change of auxin
-  ra = auxin_synth_coef+10. # auxin synthesis
-  ra += - auxin_degrad_coef * a # auxin degradation
-  ra += net_flux # sum phi_ji sij / vi
-  
-  p.auxin  += ra*dt
-  #p.auxin = max_level
-  
-  # dPid/dt => rpind
-  rpind = h(fd) 
-  p.pin_down += rpind*dt + pin_wall_coeff*pin - wall_pin_coeff*pind
-  
-  rpinl = h(fl)*pin + pin_wall_coeff*pin - wall_pin_coeff*pinl
-  p.pin_lat += rpinl*dt
-  
-  net_rpin = rpind + rpinl
-
-  # CASE 1: 
-  #   dPi / dt : No limit for produced pin for the moment
-  
-  # CASE 2: 
-  rpin = g(a) - pin_degrad_coeff*pin - net_rpin
-  p.pin += rpin*dt
-
-  produce I(p)
-
 
 I(pd) < I(p) :
   a, ad = p.auxin, pd.auxin
@@ -293,26 +173,20 @@ I(pd) < I(p) :
 
   produce I(p)
 
-
-Apex(0,t) --> *
-
-Apex(x,t) :
-  if t % convergence_delay == 0:
-    if x == 1:
-      auxin = max_level
-      sugar = 0.
-    else:
-      auxin = max_level
-      sugar = 0.
-    p = OrganParameter(auxin, sugar)
-    produce I(p)Apex(x-1,t+1)
-  else:
-    produce Apex(x,t+1)
-
 decomposition:
 maximum depth: nbEntity+1
 
+Apex(0) --> *
+Apex(x) :
 
+  if x == 1:
+    auxin = max_level
+    sugar = 0.
+  else:
+    auxin = min_level
+    sugar = 0.
+  p = OrganParameter(auxin, sugar)
+  produce I(p)Apex(x-1)
 
 
 interpretation:
