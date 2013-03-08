@@ -8,7 +8,8 @@ max_level = 10
 
 active_transport_coef = 0.1 # T
 diffusion_coef = 0.1 # D
-auxin_synth_coef = 5. # \rho (c_i)
+auxin_synth_coef = 1. # \rho (c_i)
+residual_auxin_synth_coef = 0.1 # \rho (c_i)
 # auxin_synth_coef = 0.5 # \rho (c_i)
 auxin_degrad_coef = 0.1 # \delta_a (a)
 pin_wall_coeff = 1. # k^+
@@ -16,7 +17,10 @@ wall_pin_coeff = 1. # k^-
 pin_degrad_coeff = 1 # \delta_p (a) 
 pin_synth_coeff = 0.01 
 convergence_delay = 25
+
 ramif_threshold = 3
+def activation_flux_th(sugar) :
+   return 0.5
 
 max_pin = 10
 
@@ -39,7 +43,7 @@ def txt(val):
     return str(round(val,2))[:5]
 
 class OrganParameter(ParameterSet):
-  def __init__(self, auxin, sugar, order = 0, first = False, auxin_synth_coef= 0):
+  def __init__(self, auxin, sugar, order = 0, first = False, auxin_synth_coef= residual_auxin_synth_coef):
 #    """ State variable of a compartment.
 #    
 #    Parameters
@@ -69,10 +73,11 @@ class OrganParameter(ParameterSet):
                           auxin_synth_coef = auxin_synth_coef)
 
 class ApexParameter(OrganParameter):
-  def __init__(self, auxin, sugar, nbentity, time = 0, order = 0, auxin_synth_coef = auxin_synth_coef):
-    OrganParameter.__init__(self, auxin, sugar, order, auxin_synth_coef)
+  def __init__(self, auxin, sugar, nbentity, time = 0, order = 0, active = False, auxin_synth_coef = auxin_synth_coef):
+    OrganParameter.__init__(self, auxin, sugar, order, False, auxin_synth_coef)
     self.time = time
     self.nbentity = nbentity
+    self.active = active
 
 def process_transport(p, pu = None, pd = None, pl = None):
   if not pl is None: 
@@ -175,60 +180,52 @@ def process_transport(p, pu = None, pd = None, pl = None):
   return p
 
 
+module Apex(p) , I(p)
 
-module Apex(p,t,o) 
-
-Axiom: _(2)I(OrganParameter(min_level,0,first=True)) Apex(nbEntity,0,0)
+Axiom: _(2) I(OrganParameter(min_level,0,first=True)) Apex(ApexParameter(max_level, 0, nbEntity,0,0, active = True))
 
 derivation length: 1000
 ignore: +-
 production:
 
 
-I(pd) < I(p) > x( [ I(pl) ] ) or(I(pu1),Apex( :
-  p.auxin_synth_coef = 0
-  p = process_transport(p,pu, pd, pl)
-  is_ramified = (len(pl) != 0)
-  if (p.auxin < ramif_threshold) and p.order == 0 and not is_ramified:
-    produce I(p) [ -(90) I(OrganParameter(max_level, 0, order = p.order+1)) Apex(nbLatEntity-1,1, p.order+1) ]
-  else:
-    produce I(p)
+I(pd) < I(p) > x( [ or(I(pl1),Apex(pl2)) ] ) or(I(pu1),Apex(pu2)) :
+  if len(pl1) == 0 : pl = None
+  else : 
+    pl = pl1 if not pl1[0] is None else pl2
+  p = process_transport(p,pu1 if pu1 else pu2, pd, pl)
+  produce I(p)
 
 I(pd) < I(p) > [ I(pl) ] x(Apex(a0,a1,a2)) :
-  p.auxin_synth_coef = auxin_synth_coef if len(a0) == 1 else 0
   p = process_transport(p,None, pd, [pl])
   produce I(p)
 
 
-I(p) >  I(pu): # The root compartment
-  p = process_transport(p,pu, None, None)
+I(p) >  or(I(pu1),Apex(pu2)): # The root compartment
+  p = process_transport(p,pu1 if pu1 else pu2, None, None)
   p.auxin = min_level
   produce I(p)
 
 
-I(pd) < I(p) > x(Apex(a0,a1,a2)) :
-  p.auxin_synth_coef = auxin_synth_coef if len(a0) == 1 else 0
+I(pd) < Apex(p) :
   p = process_transport(p,None, pd, None)
-  produce I(p)
-
-
-Apex(0,t,o) --> T
-
-Apex(x,t,o) :
-  if t % convergence_delay == 0:
-    if x == 1:
-      auxin = max_level
-      sugar = 0.
+  if not p.active:
+    if -p.flux_down > activation_flux_th(p.sugar) :
+      p.active = True
+  x = p.nbentity
+  p.time += 1
+  if p.active and x > 0:
+    t = p.time
+    if t % convergence_delay == 0:
+      pn = OrganParameter(max_level, 0, order = p.order)
+      nproduce I(pn)
+      if p.order == 0: 
+           nproduce [ -(90) Apex(ApexParameter(max_level, 0, nbentity=nbLatEntity-1, time=0, order = p.order+1  )) ] 
+      p.nbentity -= 1
+      produce Apex(p)
     else:
-      auxin = max_level
-      sugar = 0.
-    p = OrganParameter(auxin, sugar, order = o)
-    nproduce I(p)
-    if o == 0: 
-         nproduce [ -(90) I(OrganParameter(max_level, 0, order = p.order+1)) Apex(nbLatEntity-1,1, p.order+1) ] 
-    produce Apex(x-1,t+1,o)
-  else:
-    produce Apex(x,t+1,o)
+      produce Apex(p)
+  produce Apex(p)
 
 
 
@@ -236,7 +233,6 @@ Apex(x,t,o) :
 interpretation:
 maximum depth: 4
 I(pd) < [ -(90) I(p) :
-  
    nproduce [ | f(1.5)+(90)f(1.5)
    draw_internode(p)
 
@@ -244,13 +240,27 @@ I(p) :
    draw_internode(p)
 
 
-B(x,h) --> ,(20) _(lwidth) f(-lwidth/2) +(90) F((x+lwidth)/2.)@O -(90) F(h+lwidth) @O -(90)F(x+lwidth) @O -(90)F(h+lwidth) @O -(90)F((x+lwidth)/2.)-(90)f(h+lwidth/2)
+B(x,h) -->  _(lwidth) f(-lwidth/2) +(90) F((x+lwidth)/2.)@O -(90) F(h+lwidth) @O -(90)F(x+lwidth) @O -(90)F(h+lwidth) @O -(90)F((x+lwidth)/2.)-(90)f(h+lwidth/2)
 
 
 G(l) --> K(l,l)
 K(l,h) --> f(h/2.){+(90)f(l/2.).+(90)f(h).+(90)f(l).+(90)f(h).}
 
-Apex(x,t,o) --> ,(21) f(0.1) @O(0.3)
+I(pd) < [ -(90) Apex(p) :
+   nproduce [ | f(1.5)+(90)f(1.5)
+   draw_internode(p)
+   produce Flower(p)
+
+Flower(p):
+   col = 21
+   if not p.active: col = 9
+   elif p.nbentity <= 0 : col = 0
+   produce ,(col) f(0.1 if p.nbentity > 0 else 0.6) @O(0.3 if p.nbentity > 0 else 0.6)
+
+Apex(p) :
+  draw_internode(p)
+  produce Flower(p)
+
 T --> ,(0) f(0.3) @O(0.6)
 endlsystem
 
@@ -261,6 +271,7 @@ def draw_internode(p):
    rfd = abs(p.flux_down)*0.05 +0.01
    rfu = abs(p.flux_up)*0.05 +0.01
    rfl = abs(p.flux_lat)*0.05 +0.01
+   isapex = isinstance(p,ApexParameter)
    tl = 3
    nproduce  [
    if not p.first:
@@ -268,7 +279,7 @@ def draw_internode(p):
      nproduce ,(20 if p.flux_down > 0 else 21) _(rfd) F(0.5) 
    nproduce  [,(1) f(pindownr/2) K(2,pindownr)] 
    nproduce [,(1)-(90)f(1+pinlatr/2)+(90)f(1+(pinupr+pindownr)/2)K(pinlatr,2+pinupr+pindownr)] # lateral pin box
-   nproduce [-(90)f(pinlatr/2)+(90)B(2+pinlatr,2+pinupr+pindownr)] f(2+pinupr+pindownr) # black box
+   nproduce [-(90)f(pinlatr/2)+(90),(21 if isapex else 20)B(2+pinlatr,2+pinupr+pindownr)] f(2+pinupr+pindownr) # black box
    nproduce [ ,(1) | f(pinupr/2) K(2,pinupr) ]  # up pin box
    nproduce   ,(20 if p.flux_up > 0 else 21) _(rfu) F(0.5) ] f(pindownr + (1.5 if not p.first else 1))
    if abs(p.flux_lat) > 1e-3 :
@@ -281,10 +292,10 @@ def draw_internode(p):
      
    if p.first :
      bgcol = 6
-   elif p.auxin_synth_coef == 0:
-     bgcol = 16
-   else: 
+   elif isapex:
      bgcol = 22
+   else: 
+     bgcol = 16
     
    nproduce  [,(bgcol)G(2)]
    nproduce  [^(90)f(0.01)&(90),(15)G(2.*p.auxin/max_level)]
