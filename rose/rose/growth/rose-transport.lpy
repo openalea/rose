@@ -17,11 +17,14 @@ pin_degrad_coeff = 1. # \delta_p (a)
 convergence_delay = 150
 ramif_threshold = 3
 
-dt = 0.01
+max_pin = 10
+
+dt = 0.05
+
+lwidth = 0.02
 
 def h(flux) :
-  if flux < 0.:
-    return 0.
+  if flux < 0.:  return 0.
   h_coef = 1.
   return h_coef * (flux**2 / (1 + flux**2))
 
@@ -64,9 +67,11 @@ class OrganParameter(ParameterSet):
 
 module Apex(p,t) 
 
+module EmptyBox, Box
+
 Axiom: _(2)I(OrganParameter(max_level,0)) Apex(nbEntity,0)
 
-derivation length: 2000
+derivation length: 500
 ignore: +-
 production:
 
@@ -85,7 +90,7 @@ I(pd) < I(p) > x( [ I(pl) ] ) I(pu) :
     
   p = deepcopy(p)
   #  p.auxin = a + (au+ad-2*a)*transport_speed
-  # fluxs are counted as positive when they get in of p
+  # fluxs are counted as positive when they get into p
   p.flux_up = active_transport_coef * (pu.pin_down * au - p.pin_up*a) + \
               diffusion_coef * (au - a)
   p.flux_down = active_transport_coef * (pd.pin_up*ad - p.pin_down * a) + \
@@ -106,6 +111,7 @@ I(pd) < I(p) > x( [ I(pl) ] ) I(pu) :
   p.auxin += ra*dt 
   #assert 0. <= p.auxin <= 10. 
   # dPiu/dt, dPid/dt => rpinu, rpind
+  
   rpinu = h(fu)*pin + pin_wall_coeff*pin - wall_pin_coeff*pinu 
   rpind = h(fd)*pin + pin_wall_coeff*pin - wall_pin_coeff*pind 
   p.pin_up += rpinu*dt
@@ -124,10 +130,10 @@ I(pd) < I(p) > x( [ I(pl) ] ) I(pu) :
   rpin = g(a) - pin_degrad_coeff*pin - net_rpin
   p.pin += rpin*dt
   
-  if (p.auxin < ramif_threshold) and not is_ramif:
-    produce I(p) [ + I(OrganParameter(max_level,0)) ]
-  else:
-    produce I(p)
+  #if (p.auxin < ramif_threshold) and not is_ramif:
+  #  produce I(p) [ + I(OrganParameter(max_level,0)) ]
+  # else:
+  produce I(p)
 
 I(p) > x( [ I(pl) ] ) I(pu):
   a, au = p.auxin, pu.auxin
@@ -309,20 +315,34 @@ Apex(x,t) :
   else:
     produce Apex(x,t+1)
 
-decomposition:
-maximum depth: nbEntity+1
-
 
 
 
 interpretation:
+maximum depth: 4
 
 I(p) :
-   a = p.auxin
-   col = int(10*(a-min_level)/(max_level-min_level))
-   a += 0.1
-   produce ;(col)F(3)[-(90)f(5);(3)@L(txt(a-0.1))f(4);(col)_(1)F(0.0001+a)]F(3)
+   pinupr = 0.5 * p.pin_up /max_pin
+   pindownr = 0.5 * p.pin_down /max_pin
+   nproduce  [,(20 if p.flux_down > 0 else 21) _(abs(p.flux_down)*0.05 +0.01) F(0.5-pindownr) 
+   nproduce  [,(1) f(pindownr/2) K(2,pindownr) ] B(2,2+pinupr+pindownr) [ ,(1) | f(pinupr/2) K(2,pinupr) ] 
+   nproduce   ,(20 if p.flux_up > 0 else 21) _(abs(p.flux_up)*0.05 +0.01) F(0.5) ]
+   nproduce  [f(1.5),(16)G(2)][f(1.5)^(90)f(0.01)&(90),(15)G(2*p.auxin/max_level)] 
+   nproduce  f(3.5)
+   # nproduce ;(col)F(3)[-(90)f(5);(3)@L(txt(a-0.1))f(4);(col)_(1)F(0.0001+a)]F(3)
 
+
+B(x,h) --> ,(20) _(lwidth) +(90) F(x/2.)-(90)F(h)-(90)F(x)-(90)F(h)-(90)F(x/2.)-(90)f(h)
+
+S(a,w) :
+   l = w*a/max_level
+   col = 15 # int(10*(a-min_level)/(max_level-min_level))
+   produce ,(col)K(l,l)
+
+G(l) --> K(l,l)
+K(l,h) --> f(h/2.){+(90)f(l/2.).+(90)f(h).+(90)f(l).+(90)f(h).}
+
+Apex(x,t) --> ,(0) f(0.1) @O(0.2)
 endlsystem
 ###### INITIALISATION ######
 
@@ -363,6 +383,18 @@ def __initialiseContext__(context):
 	Color_10 = pgl.Material("Color_10" , ambient = (53,53,0) , diffuse = 3.64151 , )
 	Color_10.name = "Color_10"
 	context.turtle.setMaterial(10,Color_10)
+	Color_15 = pgl.Material("Color_15" , ambient = (0,0,255) , diffuse = 0.627451 , )
+	Color_15.name = "Color_15"
+	context.turtle.setMaterial(15,Color_15)
+	Color_16 = pgl.Material("Color_16" , ambient = (157,158,205) , diffuse = 0 , specular = (0,0,0) , )
+	Color_16.name = "Color_16"
+	context.turtle.setMaterial(16,Color_16)
+	Color_20 = pgl.Material("Color_20" , ambient = (0,0,0) , diffuse = 26.6667 , )
+	Color_20.name = "Color_20"
+	context.turtle.setMaterial(20,Color_20)
+	Color_21 = pgl.Material("Color_21" , ambient = (0,95,0) , diffuse = 0 , )
+	Color_21.name = "Color_21"
+	context.turtle.setMaterial(21,Color_21)
 __copyright__ = 'open-source GPL'
 __institutes__ = 'INRIA - CIRAD Virtual Plants'
 __authors__ = 'F. Boudon, C. Godin'
