@@ -53,7 +53,7 @@ def LightGreen():
     return Color3(176,255,176)
 def LightGrey():
     return Color3(192,192,192)
-def KoPink():
+def _KoPink():
     return Color3(140, 25, 55) # from petal scans
 def PerlGrey():
     return Color3(228,228,228)
@@ -100,7 +100,7 @@ def setTurtleLightGreen(t):
     t.setColor(lightGreen) 
 
 def setTurtleKoPink(t):
-    t.setColorAt(koPink, KoPink())
+    t.setColorAt(koPink, _KoPink())
     t.setColor(koPink) 
 
 def setTurtleOrange(t):
