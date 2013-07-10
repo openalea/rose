@@ -396,9 +396,10 @@ def localDir2DictOfFiles(listoffiles):
     dictoffiles = {} ; 
     # write the node code here.
     # downloads files from a web server in temp. files, then return the dictionnary that associates temp files and filenames.
+    from os import path as oPath
     for fichier in listoffiles:
         
-        dictoffiles[os.path.basename(fichier)] = fichier
+        dictoffiles[oPath.basename(fichier)] = fichier
 
     # return outputs
     return dictoffiles,
