@@ -1,0 +1,4 @@
+s_effect,0.25
+s_effect_ontarget,0.1
+s_effect_onPINdeg1,10.
+s_effect_onPINdeg2,0.029

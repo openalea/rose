@@ -1,0 +1,2 @@
+pin_degrad_coeff,7.5
+pin_synth_coeff,0.15

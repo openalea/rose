@@ -1,0 +1,482 @@
+from openalea.lpy.parameterset import ParameterSet
+from copy import deepcopy
+from numpy import*
+import csv
+
+debs=[]
+
+################# Input variables ###################################################
+
+### Number of leaves of the primary axis for each light treatment (TODO: replace by the number of phytomers)
+# fort
+#nbEntity = 9
+# faible
+#nbEntity = 8
+# faiblefort
+nbEntity = 9
+
+### Date of BFV (in thermal time) for each light treatment (TODO: rather put the apparition date of the last leaf)
+# fort
+#bfvI = 229
+# faible
+#bfvI = 356
+# faiblefort
+bfvI = 325
+
+### Number of leaves of each secondary axis for each light treatment, the position 0 in the vector being the lower leaf of the primary axis
+# For the moment, I put the same values for missing data in 'faiblefort' and 'faible' than those observed in 'fort'
+# fort
+#nbLatEntity = [5,7,9,3,3,3,3,5,5]
+# faible
+#nbLatEntity = [3,4,3,3,3,3,5,5]
+# faiblefort
+nbLatEntity = [4,4,3,3,3,3,3,5,5]
+
+### Growth duration of each secondary axis for each light treatment
+# For the moment, I put the same values for missing data in 'faiblefort' and 'faible' than those observed in 'fort'
+# fort
+#growth_duration=[120,158,317,85,45,67,57,39,11]
+# faible
+#growth_duration=[57,86,17,45,67,57,39,11]
+# faiblefort
+growth_duration=[99,101,143,85,45,67,57,39,11]
+
+
+################# Parameters ###################################################
+
+pin_init = 0.5 # non-null initial concentration of PIN for inter-nodes (and not for buds)
+innate_polarity = 1 # if innate_polarity=1, PIN cannot polarized on the upward membrane in response to an upward flux.
+
+## Auxin transport parameters
+paramauxintransport={}
+filename_paramauxintransport = "D:\SurSamba\RosierVirtuel\Parameters\Auxin_transport.txt"
+file_paramauxintransport=csv.reader(open(filename_paramauxintransport,'r'),delimiter=',') 
+for line in file_paramauxintransport:
+  paramauxintransport.setdefault(line[0],float(line[1]))
+active_transport_coef=paramauxintransport['active_transport_coef']
+diffusion_coef=paramauxintransport['diffusion_coef']
+
+## Auxin synthesis and degradation parameters
+paramauxin={}
+filename_paramauxin = "D:\SurSamba\RosierVirtuel\Parameters\Auxin.txt"
+file_paramauxin=csv.reader(open(filename_paramauxin,'r'),delimiter=',') 
+for line in file_paramauxin:
+  paramauxin.setdefault(line[0],float(line[1]))
+auxin_synth_coef=paramauxin['auxin_synth_coef']
+residual_auxin_synth_coef=paramauxin['residual_auxin_synth_coef']
+min_level=paramauxin['min_level']
+max_level=paramauxin['max_level']
+auxin_degrad_coef=paramauxin['auxin_degrad_coef']
+auxin_degrad_coef_root=paramauxin['auxin_degrad_coef_root']
+
+## PIN synthesis and degradation parameters
+parampin={}
+filename_parampin = "D:\SurSamba\RosierVirtuel\Parameters\Pin.txt"
+file_parampin=csv.reader(open(filename_parampin,'r'),delimiter=',') 
+for line in file_parampin:
+  parampin.setdefault(line[0],float(line[1]))
+pin_degrad_coeff=parampin['pin_degrad_coeff']
+pin_synth_coeff=parampin['pin_synth_coeff']
+
+## Feedback parameters
+paramfeedback={}
+filename_paramfeedback = "D:\SurSamba\RosierVirtuel\Parameters\Feedback.txt"
+file_paramfeedback=csv.reader(open(filename_paramfeedback,'r'),delimiter=',') 
+for line in file_paramfeedback:
+  paramfeedback.setdefault(line[0],float(line[1]))
+h_coef=paramfeedback['h_coef']
+K=paramfeedback['K']
+
+## Threshold of auxin flux above which there is a bud break
+paramseuil={}
+filename_paramseuil = "D:\SurSamba\RosierVirtuel\Parameters\Seuil.txt"
+file_paramseuil=csv.reader(open(filename_paramseuil,'r'),delimiter=',') 
+for line in file_paramseuil:
+  paramseuil.setdefault(line[0],float(line[1]))
+threshold=paramseuil['threshold']
+
+
+#active_transport_coef = 0.5 # T
+#diffusion_coef = 0.02 # D
+#auxin_synth_coef = 10. # \rho (c_i)
+#residual_auxin_synth_coef = 0. # valeur après la transition florale; si=10, déb continue, si=0 déb se limite aux bgs sup
+#auxin_degrad_coef = 0.005 # \delta_a (a)
+#auxin_degrad_coef_root = 1.
+#pin_degrad_coeff = 7.5 # \delta_p (a) 
+#pin_synth_coeff = 0.15
+#min_level = 2.5
+#max_level = 10.
+#h_coef=10.
+#K=0.5
+#threshold=2.
+
+
+def compute_phyllochrone(duration,nb):
+  return duration/nb
+
+
+def activation_flux_th(sugar) :
+  return threshold
+
+max_pin = 5
+dt = 0.05
+nsteps=1500
+
+lwidth = 0.02
+
+def h(flux) :
+  if flux > 0.:  return 0.
+  n = 3
+  fluxn = abs(flux) ** n
+  return h_coef * (fluxn / (K**n + fluxn))
+
+def txt(val):
+    return str(round(val,2))[:5]
+
+class OrganParameter(ParameterSet):
+  def __init__(self, auxin, pin_down, sugar, order = 0, first = False):
+#    """ State variable of a compartment.
+#    
+#    Parameters
+#    ==========
+#      - auxin : auxin concentration
+#      - sugar : sugar concentration
+#      - pin: PIN concentration in the organ not affected to the membranes
+#      - pin_up = 0, # PIN surfacic concentration on upward membrane
+#      - pin_down =0, # PIN surfacic concentration on downard membrane
+#      pin_lat=0 # PIN surfacic concentration on lateral membrane
+#      flux_up = 0 # flux coming from upward membrane (positive if entering the cell)
+#      flux_down =0, # flux coming from downard membrane
+#      flux_lat=0 # flux coming from lateral membrane
+#    """
+#    
+    pin=0 # PIN concentration in the organ not affected to the membranes
+    pin_up = 0 # PIN surfacic concentration on upward membrane
+    #pin_down =0 # PIN surfacic concentration on downard membrane
+    pin_lat=0 # PIN surfacic concentration on lateral membrane
+    flux_up = 0 # flux coming from upward membrane (positive if entering the cell)
+    flux_down =0 # flux coming from downard membrane
+    flux_lat=0 # flux coming from lateral membrane
+    
+    ParameterSet.__init__(self, auxin=auxin, pin_up=pin_up,sugar=sugar, pin=pin, 
+                          pin_down=pin_down, pin_lat=pin_lat,flux_up=flux_up, 
+                          flux_down=flux_down, flux_lat=flux_lat,first=first,order=order)
+
+class ApexParameter(OrganParameter):
+  def __init__(self, auxin, pin_down, sugar, nbentity, position, phyllochrone, time = 0, order = 0, active = False):
+#    """
+#      - nbentity: number of entities that the apex has still to do
+#      - position: position of the apex on the primary axis (=-1 if the primary axis)
+#    """
+    OrganParameter.__init__(self, auxin, pin_down, sugar, order, False)
+    self.time = time
+    self.nbentity = nbentity
+    self.active = active
+    self.position=position
+    self.phyllochrone=phyllochrone
+
+def process_transport(p, pu = None, pd = None, pl = None):
+  if not pl is None: 
+    if len(pl) == 0: pl = None
+    else: pl = pl[0]
+  
+  a = p.auxin
+  fu, fd, fl  = p.flux_up, p.flux_down, p.flux_lat
+  pin, pinu, pind, pinl = p.pin, p.pin_up , p.pin_down, p.pin_lat
+  
+  if pu: au =  pu.auxin
+  if pd: ad =  pd.auxin
+  if pl: al = pl.auxin
+    
+  p = deepcopy(p)
+  
+  # fluxs are counted as positive when they get into p
+  if pu:
+    p.flux_up = active_transport_coef * (pu.pin_down * au - p.pin_up*a) + \
+                diffusion_coef * (au - a)
+  else:
+    p.flux_up = 0.
+  
+  if pd:
+    if pd.order < p.order:
+      pdpin = pd.pin_lat
+    else:
+      pdpin = pd.pin_up
+    p.flux_down = active_transport_coef * (pdpin*ad - p.pin_down * a) + \
+                    diffusion_coef * (ad - a)
+  else:
+    p.flux_down = 0.
+
+  if pl:
+    p.flux_lat = active_transport_coef * (pl.pin_down*al - p.pin_lat * a) + \
+              diffusion_coef * (al - a)                  
+  else:
+    p.flux_lat = 0.
+  
+
+
+  hu = h(fu)
+  hd = h(fd)
+  hl = h(fl)
+  
+  # the case where there is PIN_COMPETITION is not functional
+  if PIN_COMPETITION:
+    
+    sh = hu+hd+hl
+    if abs(sh) < 1e-5 : sh = 1 
+    hu /= sh
+    hd /= sh
+    hl /= sh
+    
+    net_rpin = 0
+    if pu:
+      rpinu = hu*pin_wall_coeff*pin - wall_pin_coeff*pinu
+      p.pin_up += rpinu*dt
+      net_rpin += rpinu
+    
+    if pd:
+      rpind = hd*pin_wall_coeff*pin - wall_pin_coeff*pind 
+      p.pin_down += rpind*dt
+      net_rpin += rpind
+    
+    if pl:
+      rpinl = hl*pin_wall_coeff*pin - wall_pin_coeff*pinl
+      p.pin_lat += rpinl*dt
+      net_rpin += rpinl
+  else:
+    net_rpin = 0
+    if pu:
+      rpinu = hu + pin_synth_coeff - pin_degrad_coeff*p.pin_up
+      if innate_polarity==1:
+        rpinu = pin_synth_coeff - pin_degrad_coeff*p.pin_up
+      p.pin_up += rpinu*dt # this computation should be done in the production rules to cover the case where there is no flux up towards apex or buds
+      net_rpin += rpinu
+    
+    if pd:
+      rpind = hd + pin_synth_coeff - pin_degrad_coeff*p.pin_down 
+      p.pin_down += rpind*dt
+      net_rpin += rpind
+    
+    if pl:
+      rpinl = hl + pin_synth_coeff - pin_degrad_coeff*p.pin_lat
+      if innate_polarity==1:
+        rpinl = pin_synth_coeff - pin_degrad_coeff*p.pin_lat
+      p.pin_lat += rpinl*dt
+      net_rpin += rpinl
+
+  return p
+
+
+convergence_delay_I = compute_phyllochrone(bfvI,nbEntity)
+sugar_level=SUGAR_LEVEL/100.
+
+module Apex(p) , I(p)
+
+Axiom: _(2) I(OrganParameter(0,pin_init,sugar_level,first=True)) Apex(ApexParameter(max_level, 0, sugar_level, nbEntity,-1, convergence_delay_I, 0,0, active = True))
+
+derivation length: nsteps
+
+
+ignore: +-
+production:
+
+
+I(pd) < I(p) > x( [ or(I(pl1),Apex(pl2)) ] ) or(I(pu1),Apex(pu2)) :
+  if len(pl1) == 0 : pl = None
+  else : 
+    pl = pl1 if not pl1[0] is None else pl2
+  p = process_transport(p,pu1 if pu1 else pu2, pd, pl)
+  ra = p.flux_up+p.flux_down+p.flux_lat- auxin_degrad_coef * p.auxin # auxin flows in, out and decays
+  p.auxin+= ra*dt
+  
+  produce I(p)
+
+
+I(pd) < I(p) > [ I(pl) ] x(Apex(a0,a1,a2)) :
+  p = process_transport(p,None, pd, [pl])
+  ra = p.flux_up+p.flux_down+p.flux_lat- auxin_degrad_coef * p.auxin # auxin flows in, out and decays
+  p.auxin+= ra*dt 
+  produce I(p)
+
+
+I(p) >  or(I(pu1),Apex(pu2)): # The root compartment
+  p = process_transport(p,pu1 if pu1 else pu2, None, None)
+  ra = p.flux_up- auxin_degrad_coef_root * p.auxin # auxin flows in and decays
+  p.auxin+= ra*dt 
+  produce I(p)
+
+
+I(pd) < Apex(p) :
+  p.time += 1
+  if not p.active:
+    p = process_transport(p,None, pd, None)
+    ra = p.flux_down+auxin_synth_coef*(max_level-p.auxin)- auxin_degrad_coef * p.auxin # auxin flows out, is synthetized and decays
+    p.auxin+= ra*dt 
+    if -p.flux_down > activation_flux_th(p.sugar) :
+      p.active = True
+      debs.append([p.position,p.time])
+      print(debs)
+      savetxt('D:/SurSamba/RosierVirtuel/datedebsV2.txt',array(debs))
+  if p.active and p.nbentity > 0:
+    p = process_transport(p,None, pd, None)
+    ra = p.flux_down+auxin_synth_coef*(max_level-p.auxin)- auxin_degrad_coef * p.auxin # auxin flows out, is synthetized and decays
+    p.auxin+= ra*dt 
+    t = p.time
+    convergence_delay=p.phyllochrone
+    if t % convergence_delay == 0:
+      pn = OrganParameter(p.auxin, pin_init, sugar_level, order = p.order)
+      nproduce I(pn)
+      if p.order == 0:
+        x=p.nbentity
+        phyllochrone=compute_phyllochrone(growth_duration[x-1],nbLatEntity[x-1])
+        nproduce [ -(90) Apex(ApexParameter(p.auxin, 0, sugar_level, nbentity=nbLatEntity[x-1], position=x, phyllochrone=phyllochrone, time=p.time, order = p.order+1 )) ] 
+      p.nbentity -= 1
+      produce Apex(p)
+    else:
+      produce Apex(p)
+  if p.active and p.nbentity==0:
+    p = process_transport(p,None, pd, None)
+    ra = p.flux_down+residual_auxin_synth_coef*(min_level-p.auxin)- auxin_degrad_coef * p.auxin # auxin flows out, is synthetized at a minimal level (floral transition) and decays
+    p.auxin+= ra*dt
+  produce Apex(p)
+
+
+
+
+interpretation:
+maximum depth: 4
+I(pd) < [ -(90) I(p) :
+   nproduce [ | f(1.5)+(90)f(1.5)
+   draw_internode(p)
+
+I(p) :
+   draw_internode(p)
+
+
+B(x,h) -->  _(lwidth) f(-lwidth/2) +(90) F((x+lwidth)/2.)@O -(90) F(h+lwidth) @O -(90)F(x+lwidth) @O -(90)F(h+lwidth) @O -(90)F((x+lwidth)/2.)-(90)f(h+lwidth/2)
+
+
+G(l) --> K(l,l)
+K(l,h) --> f(h/2.){+(90)f(l/2.).+(90)f(h).+(90)f(l).+(90)f(h).}
+
+I(pd) < [ -(90) Apex(p) :
+   nproduce [ | f(1.5)+(90)f(1.5)
+   draw_internode(p)
+   produce Flower(p)
+
+Flower(p):
+   col = 21
+   if not p.active: col = 9
+   elif p.nbentity <= 0 : col = 0
+   produce ,(col) f(0.1 if p.nbentity > 0 else 0.6) @O(0.3 if p.nbentity > 0 else 0.6)
+
+Apex(p) :
+  draw_internode(p)
+  produce Flower(p)
+
+T --> ,(0) f(0.3) @O(0.6)
+endlsystem
+
+def draw_internode(p):
+   pinupr = 0.5 * p.pin_up /max_pin
+   pindownr = 0.5 * p.pin_down /max_pin
+   pinlatr = 0.5 * p.pin_lat /max_pin
+   rfd = abs(p.flux_down)*0.05 +0.01
+   rfu = abs(p.flux_up)*0.05 +0.01
+   rfl = abs(p.flux_lat)*0.05 +0.01
+   isapex = isinstance(p,ApexParameter)
+   tl = 3
+   nproduce  [
+   if not p.first:
+     tl = 2.5
+     nproduce ,(20 if p.flux_down > 0 else 21) _(rfd) F(0.5) 
+   nproduce  [,(1) f(pindownr/2) K(2,pindownr)] 
+   nproduce [,(1)-(90)f(1+pinlatr/2)+(90)f(1+(pinupr+pindownr)/2)K(pinlatr,2+pinupr+pindownr)] # lateral pin box
+   nproduce [-(90)f(pinlatr/2)+(90),(21 if isapex else 20)B(2+pinlatr,2+pinupr+pindownr)] f(2+pinupr+pindownr) # black box
+   nproduce [ ,(1) | f(pinupr/2) K(2,pinupr) ]  # up pin box
+   nproduce   ,(20 if p.flux_up > 0 else 21) _(rfu) F(0.5) ] f(pindownr + (1.5 if not p.first else 1))
+   if abs(p.flux_lat) > 1e-3 :
+     nproduce [-(90) f(1+pinlatr),(20 if p.flux_lat > 0 else 21) _(rfl) F(0.5)
+     if p.flux_lat < 0:
+       nproduce  [,(10)|f(0.2)|_(rfl+0.2)F(0.4,rfl)]
+     elif p.flux_lat > 0:
+       nproduce  [,(10)|f(0.2)|_(rfl)F(0.4,rfl+0.2)]
+     nproduce ]
+     
+   if p.first :
+     bgcol = 6
+   elif isapex:
+     bgcol = 22
+   else: 
+     bgcol = 16
+    
+   nproduce  [,(bgcol)G(2)]
+   nproduce  [^(90)f(0.01)&(90),(15)G(2.*p.auxin/(max_level*2))]
+   
+   nproduce  f(1.5+pinupr)
+   if p.flux_up < 0:
+     nproduce  [,(10)|f(0.2)|_(rfu+0.2)F(0.4,rfu)]
+   elif p.flux_up > 0:
+     nproduce  [,(10)|f(0.2)|_(rfu)F(0.4,rfu+0.2)]
+  
+###### INITIALISATION ######
+
+__lpy_code_version__ = 1.1
+
+def __initialiseContext__(context):
+	import openalea.plantgl.all as pgl
+	Color_0 = pgl.Material("Color_0" , ambient = (39,0,0) , diffuse = 4.61538 , )
+	Color_0.name = "Color_0"
+	context.turtle.setMaterial(0,Color_0)
+	Color_1 = pgl.Material("Color_1" , ambient = (40,5,0) , diffuse = 4.518 , )
+	Color_1.name = "Color_1"
+	context.turtle.setMaterial(1,Color_1)
+	Color_2 = pgl.Material("Color_2" , ambient = (41,10,0) , diffuse = 4.42061 , )
+	Color_2.name = "Color_2"
+	context.turtle.setMaterial(2,Color_2)
+	Color_3 = pgl.Material("Color_3" , ambient = (43,15,0) , diffuse = 4.32322 , )
+	Color_3.name = "Color_3"
+	context.turtle.setMaterial(3,Color_3)
+	Color_4 = pgl.Material("Color_4" , ambient = (44,21,0) , diffuse = 4.22583 , )
+	Color_4.name = "Color_4"
+	context.turtle.setMaterial(4,Color_4)
+	Color_5 = pgl.Material("Color_5" , ambient = (46,26,0) , diffuse = 4.12845 , )
+	Color_5.name = "Color_5"
+	context.turtle.setMaterial(5,Color_5)
+	Color_6 = pgl.Material("Color_6" , ambient = (47,31,0) , diffuse = 4.03106 , )
+	Color_6.name = "Color_6"
+	context.turtle.setMaterial(6,Color_6)
+	Color_7 = pgl.Material("Color_7" , ambient = (48,37,0) , diffuse = 3.93367 , )
+	Color_7.name = "Color_7"
+	context.turtle.setMaterial(7,Color_7)
+	Color_8 = pgl.Material("Color_8" , ambient = (50,42,0) , diffuse = 3.83628 , )
+	Color_8.name = "Color_8"
+	context.turtle.setMaterial(8,Color_8)
+	Color_9 = pgl.Material("Color_9" , ambient = (51,47,0) , diffuse = 3.7389 , )
+	Color_9.name = "Color_9"
+	context.turtle.setMaterial(9,Color_9)
+	Color_10 = pgl.Material("Color_10" , ambient = (53,53,0) , diffuse = 3.64151 , )
+	Color_10.name = "Color_10"
+	context.turtle.setMaterial(10,Color_10)
+	Color_15 = pgl.Material("Color_15" , ambient = (0,0,255) , diffuse = 0.627451 , )
+	Color_15.name = "Color_15"
+	context.turtle.setMaterial(15,Color_15)
+	Color_16 = pgl.Material("Color_16" , ambient = (157,158,205) , diffuse = 0 , specular = (0,0,0) , )
+	Color_16.name = "Color_16"
+	context.turtle.setMaterial(16,Color_16)
+	Color_20 = pgl.Material("Color_20" , ambient = (0,0,0) , diffuse = 26.6667 , )
+	Color_20.name = "Color_20"
+	context.turtle.setMaterial(20,Color_20)
+	Color_21 = pgl.Material("Color_21" , ambient = (0,95,0) , diffuse = 0 , )
+	Color_21.name = "Color_21"
+	context.turtle.setMaterial(21,Color_21)
+	Color_22 = pgl.Material("Color_22" , ambient = (128,193,96) , diffuse = 0 , )
+	Color_22.name = "Color_22"
+	context.turtle.setMaterial(22,Color_22)
+	scalars = [('PIN_COMPETITION', False, False, True), ('SUGAR_LEVEL', 51, 0, 100)]
+	context["__scalars__"] = scalars
+	for n,v,mnv,mxv in scalars:
+		context[n] = v
+__copyright__ = 'open-source GPL'
+__institutes__ = 'INRIA - CIRAD Virtual Plants'
+__authors__ = 'F. Boudon, C. Godin'
