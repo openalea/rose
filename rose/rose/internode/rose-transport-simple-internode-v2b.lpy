@@ -130,7 +130,7 @@ def dfluxij(fluxij,ci,cj,pinij,pinji):
   if fluxij <= 0.:
      return active_transport_coef * ci * h(fluxij) - pin_degrad_coeff * (abs(fluxij) ** n) + (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
   else:
-     return - pin_degrad_coeff * fluxij + (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
+     return  - pin_degrad_coeff * fluxij + (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
 
 monitorci, monitorcj, monitorpinij, monitorpji = None, None, None, None
 
