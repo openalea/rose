@@ -1,7 +1,7 @@
 from copy import deepcopy
 from numpy import arange
 
-def plotCurve(data, xextend = None, yextend = None, pos = (-0.8,-0.8), dim = (1.6,1.6), xtick = None, ytick = None ):
+def plotCurve(data, xextend = None, yextend = None, pos = (0.1,-0.9), dim = (0.8,0.8), xtick = None, ytick = None ):
   if LPY_VERSION_MAJOR < 2 or (LPY_VERSION_MAJOR == 2 and LPY_VERSION_MINOR < 4):
     import warnings
     warnings.warn("Your version of lpy do not allow 2D plot")
@@ -32,9 +32,6 @@ def plotCurve(data, xextend = None, yextend = None, pos = (-0.8,-0.8), dim = (1.
     if ytick is None:
       nbdigit = round(log(yext,10))
       ytick = 10**(nbdigit-1)
-      #ytick = yext*0.1
-    print xtick, ytick
-    print minx, maxx
     data = [(projx(x),projy(y)) for x,y in data]
     ticklength = 0.02
     
@@ -131,7 +128,7 @@ def fluxij(ci,cj,pinij,pinji):
 
 def dfluxij(fluxij,ci,cj,pinij,pinji):
   if fluxij <= 0.:
-     return active_transport_coef * ci * h(fluxij) - pin_degrad_coeff * (fluxij ** n) + (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
+     return active_transport_coef * ci * h(fluxij) - pin_degrad_coeff * (abs(fluxij) ** n) + (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
   else:
      return - pin_degrad_coeff * fluxij + (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
 
@@ -286,8 +283,7 @@ LF(t):
 
 Medium(pd) < I(p) > [  LApex(pl) ]  Medium(pu) :
   assert p.auxin_synth_coef == 0
-  p = process_transport(p, pu, pd, [pl],verbose=True)
-  print p.auxin
+  p = process_transport(p, pu, pd, [pl],verbose=False)
   produce I(p)
 
 I(pd) < LApex(p) :
@@ -311,7 +307,7 @@ Medium(p) >  I(pu): # The root compartment
   produce Medium(p)
 
 I(pd) < Medium(p) : # The root compartment
-  p = process_transport(p,None, pd, None, verbose = 2)
+  p = process_transport(p,None, pd, None) #, verbose = 2)
   p.auxin = medium_auxin_level
   produce Medium(p)
 
