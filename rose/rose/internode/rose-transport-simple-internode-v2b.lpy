@@ -1,7 +1,7 @@
 from copy import deepcopy
 from numpy import arange
 
-def plotCurve(data, xextend = None, yextend = None, pos = (0.1,-0.9), dim = (0.8,0.8), xtick = None, ytick = None ):
+def plotCurve(data, xextend = None, yextend = None, pos = (0.1,0.1), dim = (0.8,0.8), xtick = None, ytick = None ):
   if LPY_VERSION_MAJOR < 2 or (LPY_VERSION_MAJOR == 2 and LPY_VERSION_MINOR < 4):
     import warnings
     warnings.warn("Your version of lpy do not allow 2D plot")
@@ -68,7 +68,7 @@ with_auxin_max_level = True
 
 medium_auxin_level= 9
 initial_auxin_level = 10
-initial_lateral_auxin_level = 10
+initial_lateral_auxin_level = 5
 
 # for lateral inhibition
 #active_transport_coef = 0.1 # T
@@ -271,7 +271,7 @@ Axiom:
 
 
 
-derivation length: 10000
+derivation length: 1000
 ignore: +-
 production:
 
@@ -336,6 +336,9 @@ I(pd) [  <   LApex(p) :
    fluxvalues = arange(-1,5,0.1)
    dfvalues  = map(lambda f: dfluxij(f,p.auxin,pd.auxin,p.pin_down,pd.pin_lat),fluxvalues)
    plotCurve((fluxvalues,dfvalues))
+   fluxvalues = arange(-0.5,0.5,0.01)
+   dfvalues  = map(lambda f: dfluxij(f,p.auxin,pd.auxin,p.pin_down,pd.pin_lat),fluxvalues)
+   plotCurve((fluxvalues,dfvalues),pos=(0.1,-0.9))
 
 Flower(p):
    col = 0
