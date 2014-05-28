@@ -53,7 +53,7 @@ def plotCurve(data, xextend = None, yextend = None, pos = (0.1,0.1), dim = (0.8,
         if cytick != 0:
           nproduce @g(Polyline2D([(projx(0)-ticklength,projy(cytick)),(projx(0)+ticklength,projy(cytick))]))
         if cytick == (maxy-cytick):
-          print projx(0)+2*ticklength,projy(cytick), cytick
+          # print projx(0)+2*ticklength,projy(cytick), cytick
           nproduce @M(projx(0)+2*ticklength,projy(cytick)) Label(str(cytick))
         cytick += ytick
     nproduce ]
@@ -64,6 +64,7 @@ def plotCurve(data, xextend = None, yextend = None, pos = (0.1,0.1), dim = (0.8,
 """
 Note: 
   - The concentration of ci control the magnitude of s shape of the curve
+  - Parameter values of the simulation
   FigS2 A : cj = 10; deltacicj = -5 (ci = 5)
   FigS2 B : cj = 10; deltacicj = 2  (ci = 12)
   FigS2 C : cj = 5;  deltacicj = 7  (ci = 12)

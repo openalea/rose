@@ -2,7 +2,7 @@ from copy import deepcopy
 from numpy import arange
 
 
-def plotCurve(curvedata, pointdata = None, xextend = None, yextend = None, pos = (0.1,-0.3), dim = (0.8,0.8), xtick = None, ytick = None ):
+def plotCurve(curvedata, pointdata = None, xextend = None, yextend = None, pos = (0.1,0.1), dim = (0.8,0.8), xtick = None, ytick = None ):
   if LPY_VERSION_MAJOR < 2 or (LPY_VERSION_MAJOR == 2 and LPY_VERSION_MINOR < 4):
     import warnings
     warnings.warn("Your version of lpy do not allow 2D plot")
@@ -74,22 +74,19 @@ ACTIVATION = False
 with_auxin_max_level = True
 
 initial_internode_auxin_level = 10 # cj
-initial_bud_auxin_level = 5      # ci
-initial_top_medium_auxin_level= 10
+initial_bud_auxin_level = 10      # ci
+initial_top_medium_auxin_level= 6
 initial_root_medium_auxin_level= 3
 
 active_transport_coef = 0.5 # T
 diffusion_coef = 0.1 # D
 
-apical_bud_auxin_synth_coef = 10
+apical_bud_auxin_synth_coef = 0
 lateral_bud_auxin_synth_coef = 10.0  # for lapex
 residual_auxin_synth_coef = 0.5 # \rho (c_i)
 
 #auxin_synth_coef = 10.0 # \rho (c_i)
 auxin_target_concentration = 10.0
-delayed_lateral_bud_target_concentration = 10
-delayed_apex_target_concentration = 5
-# bud_auxin_target_concentration = 10.0
 
 # axin degradation coefficient
 default_auxin_degrad_coef = 0.1 # v (a)
@@ -129,15 +126,12 @@ def fluxij(ci,cj,pinij,pinji):
     return active_transport_coef * (pinij *ci - pinji *cj) +  diffusion_coef * (ci-cj)
 
 
-def dfluxij(fluxij, ci, cj, efi, efj, verbose = False):
+def dfluxij(fluxij,ci,cj):
   selfenhancingterm = active_transport_coef * ci * h(fluxij)
   
   degradationterm = - pin_degrad_coeff * (fluxij)
   
-  diffusionterm1 = (pin_synth_coeff*active_transport_coef)*(ci*efi - cj*efj)
-  diffusionterm2 =  (pin_degrad_coeff * diffusion_coef *(ci - cj)) 
-  if verbose : print diffusionterm1, diffusionterm2
-  diffusionterm = diffusionterm1 + diffusionterm2
+  diffusionterm = (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
   
   result = 0
   if fluxij > 0.:
@@ -181,13 +175,11 @@ class OrganParameter(ParameterSet):
     # pin concentration
     # PIN surfacic concentration on the upward, downward and lateral membrane
     self.setdefault(pin_up=0, pin_down=0,  pin_lat=0)
-    self.setdefault(pin_efficiency=1)
     # flux coming from the upward, downward and lateral membrane (negative if entering the cell)
     self.setdefault(flux_up=0, flux_down=0, flux_lat=0)
     # auxin coeficient
     self.setdefault(auxin_synth_coef  = residual_auxin_synth_coef, 
-                    auxin_degrad_coef = default_auxin_degrad_coef,
-                    auxin_target_concentration = self.auxin)
+                    auxin_degrad_coef = default_auxin_degrad_coef)
 
 class ApexParameter(OrganParameter):
   def __init__(self, **kwd):
@@ -195,13 +187,13 @@ class ApexParameter(OrganParameter):
     self.setdefault(active=False)
 
 
+#def StartEach(lstring):
+#  if getIterationNb() == 100:
+#    global initial_top_medium_auxin_level
+#    initial_top_medium_auxin_level = 35
+#
 initial_view= 0
 
-def StartEach(lstring):
-  if getIterationNb() == 60:
-      lstring[4].p.auxin_target_concentration = delayed_lateral_bud_target_concentration
-  elif getIterationNb() == 120:
-      lstring[-2].p.auxin_target_concentration = delayed_apex_target_concentration
 
 module Apex(p) , I(p), Root(p), Medium(p), LApex(p) , LF(t)
 Axiom: 
@@ -209,7 +201,7 @@ Axiom:
   nproduce Medium (OrganParameter(auxin=initial_root_medium_auxin_level, auxin_degrad_coef = root_auxin_degrad_coef, first=True, medium=True)) 
   nproduce I(OrganParameter(auxin=initial_internode_auxin_level,pin_down=pin_init)) 
   nproduce [ LApex(ApexParameter(auxin=initial_bud_auxin_level, auxin_synth_coef = lateral_bud_auxin_synth_coef)) ]
-  nproduce Medium(OrganParameter(auxin=initial_top_medium_auxin_level,pin_down=pin_init,medium=True,auxin_synth_coef=apical_bud_auxin_synth_coef))
+  nproduce Medium(OrganParameter(auxin=initial_top_medium_auxin_level,pin_down=pin_init,medium=True))
   nproduce E
 
 
@@ -232,18 +224,18 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   # fluxs are counted negativelly when they get into p
   net_flux = 0
   if pu:
-    p.flux_up = fluxij(a,au,p.pin_up*p.pin_efficiency,pu.pin_down*pu.pin_efficiency)
+    p.flux_up = fluxij(a,au,p.pin_up,pu.pin_down)
     net_flux += p.flux_up 
   
   if pd:
     if pd.order < p.order:   pdpin = pd.pin_lat
     else:                    pdpin = pd.pin_up
     
-    p.flux_down = fluxij(a,ad,p.pin_down*p.pin_efficiency,pdpin*pd.pin_efficiency)
+    p.flux_down = fluxij(a,ad,p.pin_down,pdpin)
     net_flux +=  p.flux_down
 
   if pl:
-    p.flux_lat = fluxij(a,al,p.pin_lat*p.pin_efficiency,pl.pin_down*pl.pin_efficiency)                
+    p.flux_lat = fluxij(a,al,p.pin_lat,pl.pin_down)                
     net_flux += p.flux_lat
   
   if verbose : print p.flux_up, p.flux_down, p.flux_lat
@@ -255,7 +247,7 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   if not with_auxin_max_level:
       ra = p.auxin_synth_coef 
   else:
-      ra = p.auxin_synth_coef * (p.auxin_target_concentration - a)# auxin synthesis
+      ra = p.auxin_synth_coef * (auxin_target_concentration - a)# auxin synthesis
   
   ra += - p.auxin_degrad_coef * a # auxin degradation
   ra -= net_flux # sum phi_ji sij / vi
@@ -323,7 +315,7 @@ Medium(p) >  I(pu): # The root compartment
 
 I(pd) < Medium(p) : # The root compartment
   p = process_transport(p,None, pd, None) #, verbose = 2)
-  #p.auxin = initial_top_medium_auxin_level
+  p.auxin = initial_top_medium_auxin_level
   produce Medium(p)
 
 
@@ -348,13 +340,12 @@ I(pd) [  <   LApex(p) :
    nproduce | f(1.5) +(90) f(1.5)
    draw_internode(p)
    nproduce Flower(p)
-   mdfluxij = lambda f: dfluxij(f,p.auxin, pd.auxin, p.pin_efficiency, pd.pin_efficiency)
+   mdfluxij = lambda f: dfluxij(f,p.auxin,pd.auxin)
    
    fluxvalues = arange(-1,5,0.1)
    dfvalues  = map(mdfluxij,fluxvalues)
    # print p.flux_down,mdfluxij(p.flux_down)
-   mdfluxij = lambda f: dfluxij(f,p.auxin, pd.auxin, p.pin_efficiency, pd.pin_efficiency)
-   plotCurve((fluxvalues,dfvalues),[(p.flux_down, mdfluxij(p.flux_down))]) #,yextend=(-5,10))
+   plotCurve((fluxvalues,dfvalues),[(p.flux_down, mdfluxij(p.flux_down))])
 
 
 Flower(p):

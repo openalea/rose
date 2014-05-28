@@ -67,28 +67,28 @@ def plotCurve(curvedata, pointdata = None, xextend = None, yextend = None, pos =
     nproduce ]
 
 
-
+"""
+Introduction of a pin efficiency coefficient
+"""
 
 innate_polarity = True
 ACTIVATION = False
 with_auxin_max_level = True
 
 initial_internode_auxin_level = 10 # cj
-initial_bud_auxin_level = 5      # ci
+initial_bud_auxin_level = 12      # ci
 initial_top_medium_auxin_level= 10
 initial_root_medium_auxin_level= 3
 
 active_transport_coef = 0.5 # T
 diffusion_coef = 0.1 # D
 
-apical_bud_auxin_synth_coef = 10
+apical_bud_auxin_synth_coef = 0
 lateral_bud_auxin_synth_coef = 10.0  # for lapex
 residual_auxin_synth_coef = 0.5 # \rho (c_i)
 
 #auxin_synth_coef = 10.0 # \rho (c_i)
 auxin_target_concentration = 10.0
-delayed_lateral_bud_target_concentration = 10
-delayed_apex_target_concentration = 5
 # bud_auxin_target_concentration = 10.0
 
 # axin degradation coefficient
@@ -187,7 +187,7 @@ class OrganParameter(ParameterSet):
     # auxin coeficient
     self.setdefault(auxin_synth_coef  = residual_auxin_synth_coef, 
                     auxin_degrad_coef = default_auxin_degrad_coef,
-                    auxin_target_concentration = self.auxin)
+                    auxin_target_concentration = auxin_target_concentration)
 
 class ApexParameter(OrganParameter):
   def __init__(self, **kwd):
@@ -195,13 +195,14 @@ class ApexParameter(OrganParameter):
     self.setdefault(active=False)
 
 
+def StartEach(lstring):
+    if getIterationNb() == 50:
+      assert lstring[4].name == 'LApex'
+      print lstring[4].p.pin_down
+      lstring[4].p.pin_efficiency = 6.5
+
 initial_view= 0
 
-def StartEach(lstring):
-  if getIterationNb() == 60:
-      lstring[4].p.auxin_target_concentration = delayed_lateral_bud_target_concentration
-  elif getIterationNb() == 120:
-      lstring[-2].p.auxin_target_concentration = delayed_apex_target_concentration
 
 module Apex(p) , I(p), Root(p), Medium(p), LApex(p) , LF(t)
 Axiom: 
@@ -209,7 +210,7 @@ Axiom:
   nproduce Medium (OrganParameter(auxin=initial_root_medium_auxin_level, auxin_degrad_coef = root_auxin_degrad_coef, first=True, medium=True)) 
   nproduce I(OrganParameter(auxin=initial_internode_auxin_level,pin_down=pin_init)) 
   nproduce [ LApex(ApexParameter(auxin=initial_bud_auxin_level, auxin_synth_coef = lateral_bud_auxin_synth_coef)) ]
-  nproduce Medium(OrganParameter(auxin=initial_top_medium_auxin_level,pin_down=pin_init,medium=True,auxin_synth_coef=apical_bud_auxin_synth_coef))
+  nproduce Medium(OrganParameter(auxin=initial_top_medium_auxin_level,pin_down=pin_init,medium=True))
   nproduce E
 
 
@@ -255,7 +256,7 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   if not with_auxin_max_level:
       ra = p.auxin_synth_coef 
   else:
-      ra = p.auxin_synth_coef * (p.auxin_target_concentration - a)# auxin synthesis
+      ra = p.auxin_synth_coef * (auxin_target_concentration - a)# auxin synthesis
   
   ra += - p.auxin_degrad_coef * a # auxin degradation
   ra -= net_flux # sum phi_ji sij / vi
@@ -323,7 +324,7 @@ Medium(p) >  I(pu): # The root compartment
 
 I(pd) < Medium(p) : # The root compartment
   p = process_transport(p,None, pd, None) #, verbose = 2)
-  #p.auxin = initial_top_medium_auxin_level
+  p.auxin = initial_top_medium_auxin_level
   produce Medium(p)
 
 
@@ -353,7 +354,7 @@ I(pd) [  <   LApex(p) :
    fluxvalues = arange(-1,5,0.1)
    dfvalues  = map(mdfluxij,fluxvalues)
    # print p.flux_down,mdfluxij(p.flux_down)
-   mdfluxij = lambda f: dfluxij(f,p.auxin, pd.auxin, p.pin_efficiency, pd.pin_efficiency)
+   mdfluxij = lambda f: dfluxij(f,p.auxin, pd.auxin, p.pin_efficiency, pd.pin_efficiency, True)
    plotCurve((fluxvalues,dfvalues),[(p.flux_down, mdfluxij(p.flux_down))]) #,yextend=(-5,10))
 
 
