@@ -68,14 +68,14 @@ with_auxin_max_level = True
 
 medium_auxin_level= 9
 initial_auxin_level = 10
-initial_lateral_auxin_level = 5
+initial_lateral_auxin_level = 10
 
 # for lateral inhibition
 #active_transport_coef = 0.1 # T
 #diffusion_coef = 0.05 # D
 
 active_transport_coef = 0.5 # T
-diffusion_coef = 0.02 # D
+diffusion_coef = 0.1 # D
 
 #apical_bud_auxin_synth_coef = 10
 lateral_bud_auxin_synth_coef = 10.0  # for lapex
@@ -92,7 +92,7 @@ pin_init = 0.5
 
 # parameter of the flux feedback function
 h_coef = 10 # 7.5 # rho_i->j in the paper
-K = 0.5#1.3
+K = 0.5 #1.3
 # non linear exponent of the flux feedback function
 n = 3
 
@@ -126,9 +126,10 @@ def txt(val):
 def fluxij(ci,cj,pinij,pinji):
     return active_transport_coef * (pinji *cj - pinij *ci) +  diffusion_coef * (cj-ci)
 
+
 def dfluxij(fluxij,ci,cj,pinij,pinji):
-  if fluxij <= 0.:
-     return active_transport_coef * ci * h(fluxij) - pin_degrad_coeff * (abs(fluxij) ** n) + (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
+  if fluxij > 0.:
+     return active_transport_coef * ci * h(-fluxij) - pin_degrad_coeff * (fluxij ** n) + (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
   else:
      return  - pin_degrad_coeff * fluxij + (pin_degrad_coeff * diffusion_coef + pin_synth_coeff*active_transport_coef)*(ci - cj)
 
@@ -265,13 +266,13 @@ initial_view= 0
 module Apex(p) , I(p), Root(p), Medium(p), LApex(p) , LF(t)
 Axiom: 
   nproduce _(2) Medium (MediumParameter(medium_auxin_level,0,first=True)) I(OrganParameter(initial_auxin_level,0,pin_down=pin_init)) [ 
-  if lateral_bud_init_time > 0:  LF(0) 
+  if lateral_bud_init_time > 0:  nproduce LF(0) 
   else : nproduce LApex(ApexParameter(initial_lateral_auxin_level, 0, nbEntity,0,1, active = False, auxin_synth_coef = lateral_bud_auxin_synth_coef))
   nproduce ] Medium(MediumParameter(medium_auxin_level,0,pin_down=pin_init))
 
 
 
-derivation length: 1000
+derivation length: 100
 ignore: +-
 production:
 
