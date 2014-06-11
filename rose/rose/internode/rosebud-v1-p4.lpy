@@ -1,73 +1,75 @@
 from copy import deepcopy
 from numpy import arange
+import transport_eq
+reload(transport_eq)
+from transport_eq import *
+import utils
+reload(utils)
+from utils import *
 
-lpymodimported = {}
-def mylpyimport(modname, *funcnames):
-  global lpymodimported 
-  if lpymodimported.has_key(modname):
-    l = lpymodimported[modname]
-  else:
-    l = Lsystem(modname+'.lpy')
-    lpymodimported[modname] = l
-  for fname in funcnames:
-    globals()[fname] = l.context()[fname]
 
-mylpyimport('plotcurve','plotCurve')
+mylpyimport(globals(), 'plotcurve','plotCurve','draw_internode')
 
 
 """
-We can decrease the auxin concentration by augmenting the active_transport_coef.
+Initial model of canalization.
+Reproduction of result of switching behaviour of 2009 paper:
+  Figure S2
+In the first steps, the auxin concentration in the lateral bud is low and the main flux is established on the main stem.
+At step 60, the auxin concentration in the lateral bud is raised which triggers a new potential stable state with high flux from lateral bud to stem.
+However, this potential state is not realized and the previous stable state with low flux from lateral bud is conserved.
+The bud does not break out and the flux remain high on the main stem.
+At step 120, the auxin concentration at the apical bud is dropped which makes the previous stable state not achievable anymore.
+The second stable state with high flux from the lateral bud takes over.
+
 """
 
-innate_polarity = True
-ACTIVATION = False
-with_auxin_max_level = True
 
 initial_internode_auxin_level = 10 # cj
-initial_bud_auxin_level = 12      # ci
+initial_bud_auxin_level = 5       # ci
 initial_top_medium_auxin_level= 10
 initial_root_medium_auxin_level= 3
 
-active_transport_coef = 0.5 # T
-diffusion_coef = 0.1 # D
-
 apical_bud_auxin_synth_coef = 10
-lateral_bud_auxin_synth_coef = 10.0  # for lapex
-residual_auxin_synth_coef = 0.5 # \rho (c_i)
+lateral_bud_auxin_synth_coef = 10.0
 
-#auxin_synth_coef = 10.0 # \rho (c_i)
-auxin_target_concentration = 10.0
-# bud_auxin_target_concentration = 10.0
-
-# axin degradation coefficient
-default_auxin_degrad_coef = 0.1 # v (a)
-root_auxin_degrad_coef = 1.0 # v (a)
-
-pin_synth_coeff = 0.0 # rho_0
-pin_degrad_coeff = 10  # \mu
+root_auxin_degrad_coef = 1.0
 
 pin_init = 0.5
 
-# parameter of the flux feedback function
-h_coef = 7.5 # rho_i->j in the paper
-# non linear exponent of the flux feedback function
-n = 3
-# hill saturation coef
-K = 1.3
+class SimuParameters:
+  innate_polarity = True
+  ACTIVATION = False
+  with_auxin_max_level = True
+    
+  default_active_transport_coef = 0.5 # T
+  diffusion_coef = 0.1 # D
+  
+  # axin synthesis and degradation coefficient
+  default_auxin_synth_coef = 0.5 # \rho (c_i)
+  default_auxin_degrad_coef = 0.1 # v (a)
+  
+  default_pin_synth_coeff = 0.0 # rho_0
+  pin_degrad_coeff = 10  # \mu
+    
+  # parameter of the flux feedback function
+  h_coef = 7.5 # rho_i->j in the paper
+  # non linear exponent of the flux feedback function
+  n = 3
+  # hill saturation coef
+  K = 1.3
+  
+  dt = 0.05
+  
+  DEGRADATION = DEGRADATION
+  DIFFUSION   = DIFFUSION
 
-dt = 0.01
+set_simu_parameters(SimuParameters())
 
 # Graphical parameters 
 max_pin_value = 1
+max_auxin_value = 20
 lwidth = 0.02
-
-
-
-def h(flux) :
-  if flux < 0.:  return 0.
-
-  fluxn = abs(flux) ** n
-  return h_coef * (fluxn / (K**n + fluxn))
 
 
 def txt(val):
@@ -78,23 +80,27 @@ flux_threshold = 10
 def activation_flux_th(p):
   return p.flux_down > flux_threshold
 
-
+initial_view= 0
 
 def StartEach(lstring):
-    if getIterationNb() == 50:
-      global active_transport_coef
-      active_transport_coef = 6
-
-initial_view= 0
+    if getIterationNb() == 60:
+      lapex = lstring[4]
+      assert lapex.name == 'LApex'
+      lapex.p.auxin_target_concentration = 10
+    elif getIterationNb() == 120:
+      apex = lstring[6]
+      assert apex.name == 'Medium'
+      apex.p.auxin_target_concentration = 5
 
 
 module Apex(p) , I(p), Root(p), Medium(p), LApex(p) , LF(t)
+
 Axiom: 
   nproduce _(2) 
   nproduce Medium (OrganParameter(auxin=initial_root_medium_auxin_level, auxin_degrad_coef = root_auxin_degrad_coef, first=True, medium=True)) 
   nproduce I(OrganParameter(auxin=initial_internode_auxin_level,pin_down=pin_init)) 
-  #nproduce [ LApex(ApexParameter(auxin=initial_bud_auxin_level, auxin_synth_coef = lateral_bud_auxin_synth_coef,pin_efficiency=0)) ]
-  nproduce Medium(OrganParameter(auxin=initial_top_medium_auxin_level,pin_down=pin_init,medium=True,auxin_synth_coef=apical_bud_auxin_synth_coef))
+  nproduce [ LApex(ApexParameter(auxin=initial_bud_auxin_level, auxin_synth_coef = lateral_bud_auxin_synth_coef)) ]
+  nproduce Medium(OrganParameter(auxin=initial_top_medium_auxin_level,auxin_synth_coef=apical_bud_auxin_synth_coef, pin_down=pin_init,medium=True))
   nproduce E
 
 
@@ -123,12 +129,10 @@ Medium(pd) < I(p) >  Medium(pu) :
 
 Medium(p) >  I(pu): # The root compartment
   p = process_transport(p,pu, None, None)
-  p.auxin = initial_root_medium_auxin_level
   produce Medium(p)
 
-I(pd) < Medium(p) : # The root compartment
+I(pd) < Medium(p) : # The top compartment
   p = process_transport(p,None, pd, None) #, verbose = 2)
-  #p.auxin = initial_top_medium_auxin_level
   produce Medium(p)
 
 
@@ -138,57 +142,51 @@ maximum depth: 4
 
 
 I(p) :
-    draw_internode(p)
+    draw_internode(p, max_pin_value, max_auxin_value, lwidth)
 
 Root(p) :
-   draw_internode(p)
+   draw_internode(p, max_pin_value, max_auxin_value, lwidth)
 
 
 Medium(p) :
-   draw_internode(p)
+   draw_internode(p, max_pin_value, max_auxin_value, lwidth)
 
 
 
 I(pd) [  <   LApex(p) :
    nproduce | f(1.5) +(90) f(1.5)
-   draw_internode(p)
+   draw_internode(p, max_pin_value, max_auxin_value, lwidth)
    nproduce Flower(p)
-   mdfluxij = lambda f: dfluxij(f,p.auxin, pd.auxin, p.pin_efficiency, pd.pin_efficiency)
+   mdfluxij = lambda f: dfluxij(f,p, pd)
    
    pfd = p.flux_down
    fluxvalues = arange(min(pfd,-1),max(pfd,5),0.1)
    dfvalues  = map(mdfluxij,fluxvalues)
-   # print p.flux_down,mdfluxij(p.flux_down)
-   mdfluxij = lambda f: dfluxij(f,p.auxin, pd.auxin, p.pin_efficiency, pd.pin_efficiency)
+   
+   mdfluxij = lambda f: dfluxij(f,p, pd)
    plotCurve((fluxvalues,dfvalues),[(p.flux_down, mdfluxij(p.flux_down))]) #,yextend=(-5,10))
 
 
 Flower(p):
    col = 0
    if not p.active: col = 9
-   elif p.nbentity <= 0 : col = 0
    produce ,(col) f(0.1 if  not p.active else 0.6) @O(0.3 if not p.active else 0.6)
 
 Apex(p) :
-  draw_internode(p)
+  draw_internode(p, max_pin_value, max_auxin_value, lwidth)
   produce Flower(p)
 
 
 ##############
 
 T --> ,(0) f(0.3) @O(0.6)
-B(x,h) -->  _(lwidth) f(-lwidth/2) +(90) F((x+lwidth)/2.)@O -(90) F(h+lwidth) @O -(90)F(x+lwidth) @O -(90)F(h+lwidth) @O -(90)F((x+lwidth)/2.)-(90)f(h+lwidth/2)
 
 
-G(l) --> K(l,l)
-K(l,h) --> f(h/2.){+(90)f(l/2.).+(90)f(h).+(90)f(l).+(90)f(h).}
+
 
 E --> @2D @M(0.9,0.9 )Label( str(getIterationNb()) )
 
 endlsystem
-
-
-
 ###### INITIALISATION ######
 
 __lpy_code_version__ = 1.1
