@@ -26,7 +26,7 @@ The second stable state with high flux from the lateral bud takes over.
 
 
 initial_internode_auxin_level = 10 # cj
-initial_bud_auxin_level = 5       # ci
+initial_bud_auxin_level = 3       # ci
 initial_top_medium_auxin_level= 10
 initial_root_medium_auxin_level= 3
 
