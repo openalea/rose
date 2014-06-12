@@ -20,7 +20,7 @@ and the lateral bud can break out.
 
 
 initial_internode_auxin_level = 10 # cj
-initial_bud_auxin_level = 9      # ci
+initial_bud_auxin_level = 10      # ci
 initial_top_medium_auxin_level= 10
 initial_root_medium_auxin_level= 3
 
@@ -37,7 +37,7 @@ class SimuParameters:
   ACTIVATION = False
   with_auxin_max_level = True
     
-  default_active_transport_coef = 5 # T
+  default_active_transport_coef = 0.5 # T
   diffusion_coef = 0.1 # D
   
   # axin synthesis and degradation coefficient
@@ -62,7 +62,7 @@ class SimuParameters:
 P = SimuParameters()
 set_simu_parameters(P)
 
-lateral_bud_active_transport_coef = P.default_active_transport_coef
+lateral_bud_active_transport_coef = 2
 
 # Graphical parameters 
 max_pin_value = 1

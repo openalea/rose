@@ -27,8 +27,8 @@ initial_root_medium_auxin_level= 3
 apical_bud_auxin_synth_coef = 10
 lateral_bud_auxin_synth_coef = 10.0
 
-root_auxin_degrad_coef = 0.0
-later_root_auxin_degrad_coef = 0.1
+root_auxin_degrad_coef = 1
+later_root_auxin_degrad_coef = 1
 
 pin_init = 0.5
 

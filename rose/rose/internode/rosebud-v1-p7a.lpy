@@ -12,9 +12,8 @@ mylpyimport(globals(), 'plotcurve','plotCurve','draw_internode')
 
 
 """
-Root degradation.
-If the root does not degrade the auxin it accumulate and the flux in the main stem drop.
-If suddenly the root degrade rapidly the auxin, the concentration in the main stem drop and 
+Internode degradation.
+If suddenly the internode degrade rapidly the auxin, the concentration in the main stem drop and 
 the lateral bud start diffusing in the stem and potentially break out.
 Light degradation rate increase (x2)
 
