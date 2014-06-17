@@ -8,6 +8,7 @@
 from openalea.mtg.aml import MTG
 import math
 from openalea.mtg.plantframe import *
+from openalea.plantgl.math import Vector4, Vector3
 
 from openalea.core.external import * 
 from openalea.core.logger  import *
