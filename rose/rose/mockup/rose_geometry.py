@@ -1668,7 +1668,8 @@ def petalMatrix():
 
     :returns: the control points matrix 
     """
-    from openalea.mtg.plantframe import Vector4 as V4
+    #from openalea.mtg.plantframe import Vector4 as V4
+    from openalea.plantgl.math import Vector4 as V4
     ctpm = None; 
     # code 
     ctpm = [[V4(0,    -0.12,   0.,   1), V4(0,     0, -0,   1),  V4(0,     0.12,  0.,   1)],
