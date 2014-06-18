@@ -5,10 +5,13 @@
 .. moduleauthor:: H. Autret <hautret@angers.inra.fr>
 """
 
-from openalea.mtg.aml import MTG
+#from openalea.mtg.aml import MTG
 import math
-from openalea.mtg.plantframe import *
-from openalea.plantgl.math import Vector4, Vector3
+
+#from openalea.mtg.plantframe import *
+from openalea.mtg import *
+
+from openalea.plantgl.math import Vector4, Vector3, Vector2
 
 from openalea.core.external import * 
 from openalea.core.logger  import *
