@@ -5,11 +5,11 @@
 .. moduleauthor:: H. Autret <hautret@angers.inra.fr>
 """
 
-#from openalea.mtg.aml import MTG
 import math
 
 #from openalea.mtg.plantframe import *
 from openalea.mtg import *
+from openalea.mtg.aml import MTG # dans cet ordre ?
 
 from openalea.plantgl.math import Vector4, Vector3, Vector2
 
@@ -445,9 +445,9 @@ def revolution(points=None, stride=8):
     if points is None:
         points=budArray()
     #print points
-    pa=Point2Array(points)
-    pl=Polyline2D(pa)
-    rev=Revolution(pl,stride)
+    pa=pgl.Point2Array(points)
+    pl=pgl.Polyline2D(pa)
+    rev=pgl.Revolution(pl,stride)
     return rev
 
 def revolutionBud(revVol=None ):
