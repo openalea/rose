@@ -7,9 +7,9 @@
 
 import math
 
-#from openalea.mtg.plantframe import *
-from openalea.mtg import *
-from openalea.mtg.aml import MTG # dans cet ordre ?
+from openalea.mtg.plantframe import turtle
+from openalea.mtg import DressingData, PlantFrame, MTG
+#from openalea.mtg.aml import MTG # dans cet ordre ?
 
 from openalea.plantgl.math import Vector4, Vector3, Vector2
 
@@ -20,7 +20,7 @@ from openalea.core.logger  import *
 import openalea.plantgl.all as pgl
 
 # walk through MTG trees
-from openalea.mtg.turtle import pre_order2_with_filter
+#from openalea.mtg.plantframe.turtle import pre_order2_with_filter
 from openalea.mtg.traversal import pre_order2_with_filter
 
 from rose_colors import *
@@ -805,7 +805,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
     if colorFunc is None:
         myColorFunc=setTurtlePink # custom 
         
-    def bpFlower(pointsnDiameters, turtle=None,):
+    def bpFlower(pointsnDiameters, turtle=None, dummy0=None, dummy1=None):
         """ computes a flower from two points and the diameters associated to 
         the flower.
         @param points : list of pairs[Vector3, scalar] resp. (position;diameter)
@@ -1600,7 +1600,7 @@ class RawFruit(Node):
 
 ########################################
 
-def noThing(points, turtle=None):
+def noThing(points, turtle=None, dummy=None):
     """ A function that makes nothing 
 
     :param points: unused
@@ -1924,8 +1924,10 @@ def TurtleFrame(g, visitor):
         # moved the "position" function away
         origin = pgl.Vector3(plant_node.XX, plant_node.YY, plant_node.ZZ)
         turtle.move(origin)
+        #vid =  g.component_roots_at_scale(plant_id, scale=n).next() # does not run 
+        tmp= iter(g.component_roots_at_scale(plant_id, scale=n))
+        vid = tmp.next()
 
-        vid =  g.component_roots_at_scale(plant_id, scale=n).next()
         traverse_with_turtle(g, vid, visitor, turtle)
     return turtle.getScene()
 
