@@ -11,13 +11,15 @@ from openalea.mtg.plantframe import turtle
 from openalea.mtg import DressingData, PlantFrame, MTG
 #from openalea.mtg.aml import MTG # dans cet ordre ?
 
-from openalea.plantgl.math import Vector4, Vector3, Vector2
+from openalea.plantgl.math import * # Vector4, Vector3, Vector2, norm, cross
+
 
 from openalea.core.external import * 
 from openalea.core.logger  import *
 
 # for TurtleFrame
 import openalea.plantgl.all as pgl
+
 
 # walk through MTG trees
 #from openalea.mtg.plantframe.turtle import pre_order2_with_filter
@@ -213,7 +215,7 @@ def rawBud():
         turtle.oLineTo(centerOfBud)
         turtle.push()
         radius = norm(radiusOfBud)
-        geometry=  Sphere(radius)
+        geometry=  pgl.Sphere(radius)
         #return Translated(distance, Sphere(radius))
         #geom = leaf_factory(points)
         turtle.customGeometry(geometry, 1)
@@ -283,10 +285,10 @@ def builtBud(stride=10):
 
         turtle.move(botPt + budAxis *step )
         # the ray of the receptacle is increased by 20% to intersect the upper sphere  
-        turtle.customGeometry(Sphere(step * 1.2,lStride ), 1)
+        turtle.customGeometry(pgl.Sphere(step * 1.2,lStride ), 1)
         # we draw the upper sphere of the bud (the one formd by the sepals)
         turtle.move(botPt +budAxis * step*4)
-        turtle.customGeometry(Sphere(step*2, lStride ), 1)
+        turtle.customGeometry(pgl.Sphere(step*2, lStride ), 1)
         
         
 
@@ -484,7 +486,7 @@ def revolutionBud(revVol=None ):
         # we must orient the turtle before to draw 
         faceTo(turtle,budAxis)
 
-        revBud=Scaled(Vector3(length *0.2, length *0.2, length),  lRevVol)
+        revBud=pgl.Scaled(Vector3(length *0.2, length *0.2, length),  lRevVol)
         #revBud=Oriented(upAxis, budAxis, revBud)
         # we are ready to draw the rev'bud
         turtle.customGeometry(revBud,1)
@@ -632,11 +634,11 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
             ls_pts.append(Vector3(xMesh[i],0,0))
         ls_pts.append(Vector3(1.,0.,0.))
         # we build triangles C O U N T E R Clockwise
-        ls_ind=[Index3(0,2,1),Index3(1,2,3),Index3(2,4,3),Index3(3,4,5),Index3(4,6,5),Index3(5,6,7)]        
-        triangleSet=TriangleSet(Point3Array(ls_pts),Index3Array(ls_ind))
+        ls_ind=[pgl.Index3(0,2,1),pgl.Index3(1,2,3),pgl.Index3(2,4,3),pgl.Index3(3,4,5),pgl.Index3(4,6,5),pgl.Index3(5,6,7)]        
+        triangleSet=pgl.TriangleSet(pgl.Point3Array(ls_pts),pgl.Index3Array(ls_ind))
 
         geom=triangleSet
-        geom=Scaled((axisLength,halfWidth,1),geom)
+        geom=pgl.Scaled((axisLength,halfWidth,1),geom)
         #setHead sets the turtle such as the xy plane is displayed by it side 
         turtle.setHead(normAxis,Axis)
         turtle.customGeometry(geom, 1)
@@ -659,10 +661,10 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
             meshPoint[1] *= -1.
         # As the Y coordinate has changed its sign, we build 
         # the triangles C C W again.
-        ls_ind=[Index3(0,1,2),Index3(1,3,2),Index3(2,3,4),Index3(3,5,4),Index3(4,5,6),Index3(5,7,6)]
-        triangleSet=TriangleSet(Point3Array(ls_pts),Index3Array(ls_ind))
+        ls_ind=[pgl.Index3(0,1,2),pgl.Index3(1,3,2),pgl.Index3(2,3,4),pgl.Index3(3,5,4),pgl.Index3(4,5,6),pgl.Index3(5,7,6)]
+        triangleSet=pgl.TriangleSet(pgl.Point3Array(ls_pts),pgl.Index3Array(ls_ind))
         geom=triangleSet
-        geom=Scaled((axisLength,halfWidth,1),geom)
+        geom=pgl.Scaled((axisLength,halfWidth,1),geom)
         # setHead() see previously
         turtle.setHead(normAxis, Axis)
         turtle.customGeometry(geom, 1)
@@ -829,9 +831,9 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
         petalLength=math.sqrt(flowerHeight*flowerHeight + deltaRay*deltaRay)
 
         # we build the generic patch
-        petalMesh=BezierPatch(lControlpointmatrix,luStride, lvStride)
+        petalMesh=pgl.BezierPatch(lControlpointmatrix,luStride, lvStride)
         # patch is scaled according to the global flower dimensions
-        petalMesh=Scaled(Vector3(petalLength,max(baseRay,flowerRay)*1.1,baseRay),petalMesh)
+        petalMesh=pgl.Scaled(Vector3(petalLength,max(baseRay,flowerRay)*1.1,baseRay),petalMesh)
         # 
         rad5eTour=math.pi/2.5 # a fifth of a tour
 
@@ -844,7 +846,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
             openingAngle=math.pi*0.5
 
         #ovary=Disc(baseRay ,luStride)
-        ovary=Sphere(baseRay ,luStride)
+        ovary=pgl.Sphere(baseRay ,luStride)
 
         turtle.push() # we draw now
 
@@ -858,13 +860,13 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
 
         for iIndex in range(0,5):
             # closing the flower : 
-            petal=AxisRotated((0,1,0),-openingAngle,petalMesh)
+            petal=pgl.AxisRotated((0,1,0),-openingAngle,petalMesh)
             # twisting a bit to limit collisions [Todo in the patch]
             # NOTWIST 4 test petal=AxisRotated((1,0,0),openingAngle*0.05,petal)
-            petal=AxisRotated((1,0,0),openingAngle*0.055, petal)# HALFTWIST 4 test 
+            petal=pgl.AxisRotated((1,0,0),openingAngle*0.055, petal)# HALFTWIST 4 test 
             angle=iIndex*rad5eTour
-            petal=AxisRotated((0,0,1),angle,petal)
-            petal=Translated(Vector3(baseRay *math.cos(angle) *0.8,\
+            petal=pgl.AxisRotated((0,0,1),angle,petal)
+            petal=pgl.Translated(Vector3(baseRay *math.cos(angle) *0.8,\
                                          baseRay *math.sin(angle) *0.8,\
                                          0),\
                                  petal)
@@ -1127,7 +1129,8 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     :todo: add a param with the direction of existing sepals in the local mark, if any
     """
 
-    from openalea.mtg.plantframe import Vector4 as V4
+    #from openalea.mtg.plantframe import Vector4 as V4
+    from openalea.plantgl.math import Vector4 as V4
 
     numSepals=5. # number of sepals
     numPetals=10. # number of petals
@@ -1303,15 +1306,15 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     if lPetalAngles :
         anglePetExt=lPetalAngles[0]
         anglePetInt=lPetalAngles[-1]
-    receptacle= Sphere( 1  )
+    receptacle= pgl.Sphere( 1  )
     if anglePetExt > 90. and anglePetExt == anglePetInt: # Faded flower
         #setTurtleOrange(turtle) ici
-        receptacle=Scaled(Vector3( taille , taille , taille * 1.5 ),receptacle )         
+        receptacle=pgl.Scaled(Vector3( taille , taille , taille * 1.5 ),receptacle )         
     else:
         turtle.setColor(4) 
-        receptacle=Scaled(Vector3( taille , taille , taille ),receptacle ) 
+        receptacle=pgl.Scaled(Vector3( taille , taille , taille ),receptacle ) 
 
-    receptacle= Translated(0,0,taille,receptacle) 
+    receptacle= pgl.Translated(0,0,taille,receptacle) 
     turtle.customGeometry(receptacle,1) #
 
     ############################ S E P A L S
@@ -1324,7 +1327,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         angleSepExt=lSepalAngles[0]
         angleSepInt=lSepalAngles[-1]
 
-    groupe=Group([])
+    groupe=pgl.Group([])
     thisHeight= height
     heightInc=0
     if lSepalDims:
@@ -1346,12 +1349,12 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
                     lNoSepals.remove(az)
         if Go : # the sepal was not digitized
             sepalMatrix=TransformSepal(sepalmatrix2, angleSepExt, angleSepInt, index)        
-            thisSepal=BezierPatch(sepalMatrix, ustride, vstride)
+            thisSepal=pgl.BezierPatch(sepalMatrix, ustride, vstride)
             #localHeight = thisHeight * (index+1) #*index 4 DBG
-            #thisSepal=Scaled(Vector3(localHeight,localHeight,localHeight), thisSepal) 
-            thisSepal=Scaled(Vector3(thisHeight,thisHeight,thisHeight), thisSepal) 
+            #thisSepal=pgl.Scaled(Vector3(localHeight,localHeight,localHeight), thisSepal) 
+            thisSepal=pgl.Scaled(Vector3(thisHeight,thisHeight,thisHeight), thisSepal) 
             # répartition tous les 144° : aspect ouverture 1 peu aléatoire
-            newSepal=AxisRotated((0,0,1),rotationAngle+math.pi,thisSepal) # test (0,0,1)
+            newSepal=pgl.AxisRotated((0,0,1),rotationAngle+math.pi,thisSepal) # test (0,0,1)
             groupe.geometryList.append(newSepal)
         #else:           print "turtle.customGeometry( Cone(),1)"
         # Debug
@@ -1379,7 +1382,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
 
     # DBG
     if groupe.geometryList :
-        groupe=Translated(Vector3(0,0,taille * 1.86), groupe)
+        groupe=pgl.Translated(Vector3(0,0,taille * 1.86), groupe)
         turtle.customGeometry( groupe,1) 
 
     # stage zero : No petal to build (invisible...) 
@@ -1407,16 +1410,16 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     thisInc=(lPetalDims[0]-lPetalDims[-1])/ (numPetals -1)
     for index in xrange(int(numPetals)):
         petalMatrix= TransformPetal(petalmatrix2, anglePetExt, anglePetInt, index)
-        petal=BezierPatch(petalMatrix, ustride, vstride)
-        petal=Scaled(Vector3(thisLength,thisLength,thisLength), petal) 
+        petal=pgl.BezierPatch(petalMatrix, ustride, vstride)
+        petal=pgl.Scaled(Vector3(thisLength,thisLength,thisLength), petal) 
         thisLength -= thisInc
         ##newPetal=petal
         #couleur= 5 +  index # pour repérer les pétales par numéro
         # A  P A R A M E T R E R
         thisAngle=angleRepartition* index
         (thisSin, thisCos)= getSiCo(thisAngle)
-        thisPetal=AxisRotated((0,0,1), thisAngle, petal) # orientation
-        thisPetal=Translated(-0.33 *taille *thisCos, -0.33 *taille *thisSin, taille*2., thisPetal) # placement
+        thisPetal=pgl.AxisRotated((0,0,1), thisAngle, petal) # orientation
+        thisPetal=pgl.Translated(-0.33 *taille *thisCos, -0.33 *taille *thisSin, taille*2., thisPetal) # placement
         #thisPetal=AxisRotated((thisCos,thisSin,0), 0.1* stage, thisPetal) # twist
         #turtle.setColor(couleur)
     #groupe.geometryList.append(newPetal)
@@ -1575,7 +1578,7 @@ def simpleFruit(colorFunc=None):
         faceTo(turtle, fruitAxis)
 
         turtle.move(botPt + fruitAxis * 0.5 )
-        fruit=Scaled(Vector3(fruitSize*.66, fruitSize*.66 , fruitSize),  Sphere())
+        fruit=pgl.Scaled(Vector3(fruitSize*.66, fruitSize*.66 , fruitSize),  pgl.Sphere())
 
         turtle.customGeometry(fruit, 1)
 
