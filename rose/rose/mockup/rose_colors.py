@@ -4,6 +4,9 @@
 from openalea.core.external import * 
 from openalea.core.logger  import *
 
+# for Colors
+import openalea.plantgl.all as pgl
+
 from openalea.mtg.plantframe import *
 """ there are 5 builtin colors in oa.mtg.plantframe :
     0 : kind of black
@@ -40,43 +43,43 @@ brokenWhite=29
 koPink=30
 
 def Blue():
-    return Color3(80,80,255)
+    return pgl.Color3(80,80,255)
 def LightBlue():
-    return Color3(127,192,255) 
+    return pgl.Color3(127,192,255) 
 def Brown():
-    return Color3(70,32,10) 
+    return pgl.Color3(70,32,10) 
 def LightBrown():
-    return Color3(139,69,19) # from SaddleBrown in /usr/share/X11/rgb.txt
+    return pgl.Color3(139,69,19) # from SaddleBrown in /usr/share/X11/rgb.txt
 def Green():
-    return Color3(80,255,80)   # flashy green
+    return pgl.Color3(80,255,80)   # flashy green
 def LightGreen():
-    return Color3(176,255,176)
+    return pgl.Color3(176,255,176)
 def LightGrey():
-    return Color3(192,192,192)
+    return pgl.Color3(192,192,192)
 def _KoPink():
-    return Color3(140, 25, 55) # from petal scans
+    return pgl.Color3(140, 25, 55) # from petal scans
 def PerlGrey():
-    return Color3(228,228,228)
+    return pgl.Color3(228,228,228)
 def Orange():
-    return Color3(255,127,0)
+    return pgl.Color3(255,127,0)
 def LightOrange():
-    return Color3(255,192,127)
+    return pgl.Color3(255,192,127)
 def Purple():
-    return Color3(255,80,255)
+    return pgl.Color3(255,80,255)
 def LightPurple():
-    return Color3(255,144,255)
+    return pgl.Color3(255,144,255)
 def Pink():
-    return Color3(255,192,203)
+    return pgl.Color3(255,192,203)
 def Strand():
-    return Color3(80,80,20) # set a realistic one
+    return pgl.Color3(80,80,20) # set a realistic one
 def White():
-    return Color3(255,255,255)
+    return pgl.Color3(255,255,255)
 def BrokenWhite():
-    return Color3(240,240,240)
+    return pgl.Color3(240,240,240)
 def Yellow():
-    return Color3(240,240,16)
+    return pgl.Color3(240,240,16)
 def LightYellow():
-    return Color3(250,250,192)
+    return pgl.Color3(250,250,192)
 
 def setTurtleBlue(t):
     t.setColorAt(blue, Blue())
