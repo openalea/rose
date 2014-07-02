@@ -7,8 +7,13 @@
 
 import math
 
-from openalea.mtg.plantframe import turtle
+#from openalea.mtg.plantframe import turtle
+#from openalea.mtg import DressingData, PlantFrame, MTG
+
 from openalea.mtg import DressingData, PlantFrame, MTG
+#from amlPy import
+
+
 #from openalea.mtg.aml import MTG # dans cet ordre ?
 
 from openalea.plantgl.math import * # Vector4, Vector3, Vector2, norm, cross

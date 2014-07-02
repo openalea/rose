@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
 """
-.. module rose_geometry 
+.. module rose_file 
 .. moduleauthor:: H. Autret <hautret@angers.inra.fr>
 """
 # for csv
@@ -84,3 +84,79 @@ class Scene2Can01(Node):
 
     def __call__( self, inputs ):
         return scene2Can01
+
+def intSort(listeOfStrings):
+    """ returns a numerically sorted list of string'd numbers """
+    resN=[] # tmp list for nums
+    resS=[] # tmp list for strings
+    tmpNum=None
+    for elt in listeOfStrings:
+        try:
+            tmpNum=int(float(elt))
+            resN.append(tmpNum)
+        except:
+            resS.append(elt)
+            continue
+    resN.sort()
+    resNOut=[ "%s" % (elt) for elt in resN ]
+    return resNOut+resS
+
+class IntSort(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input(name= 'strList', interface=ISequence, value=[])
+        self.add_output( name = 'sortedList', interface = ISequence,value=None )
+
+    def __call__(self,inputs):
+        listeFics= self.get_input( 'strList' )
+        return intSort(listeFics)
+ 
+
+
+
+def rootName(nom):
+    """ renvoie le nom de fichier sans racine ni extension """
+    root=nom.rsplit("/",1)[-1]
+    root=root.split(".",1)[0]
+    return root
+    
+class RootName(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input(name= 'fileName', interface=IStr, value="")
+        self.add_output( name = 'rootName', interface = IStr,value=None )
+
+    def __call__(self,inputs):
+        nomFic= self.get_input( 'fileName' )
+        return rootName(nomFic)
+
+
+if __name__ == "__main__":
+    import unittest # + tard
+
+    class TestSimple(unittest.TestCase):
+        def setUp(self):
+            self.root='toto'
+            self.tupleInt=('1','2','4','9','16','25','36','49','64','81','100')
+            pass
+        def tearDown(self):
+            pass
+        def test01_rootName(self):
+            nom="titi/%s.txt" % self.root
+            self.assertEqual(self.root,rootName(nom))
+        def test02_intSort(self):                   
+            import random
+            l1=list(self.tupleInt)
+            random.shuffle(l1)
+            liste=["%s" % (elt) for elt in  l1]
+            random.shuffle(liste)            
+            # il y a une chance sur (10!)² que le résultat du test soit dû au hasard
+            self.assertEqual(self.tupleInt,tuple(intSort(liste)))
+
+            t1=tuple(l1)
+            # il n'est plus dû au hasard :
+            self.assertNotEqual(t1,tuple(intSort(liste)))
+
+    unittest.main()
+
+    
