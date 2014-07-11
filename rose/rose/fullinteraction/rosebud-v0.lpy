@@ -40,7 +40,7 @@ pin_init = 0.5
 ck_init  = 10
 sl_init  = 10
 
-ck_synth_coef = 0.5
+ck_synth_coef = 0.8
 sl_synth_coef = 0.5
 
 init_brc1 = 5
@@ -53,6 +53,7 @@ ck_g_interaction = 0.1
 brc1_g_interaction = 0.1
 auxflux_g_interaction = 0.1
 auxin_g_interaction = 0.1
+g_auxin_interaction = 0.1
 g_decay = 1.0
 g_init = 0.1
 g_threshold = 1
@@ -143,6 +144,7 @@ Axiom:
                                  g = g_init, 
                                  ck_g_interaction = ck_g_interaction, brc1_g_interaction = brc1_g_interaction,
                                  auxflux_g_interaction= auxflux_g_interaction, auxin_g_interaction=auxin_g_interaction,
+                                 g_auxin_interaction = g_auxin_interaction,
                                  g_decay = g_decay)) ]
   nproduce Medium(OrganParameter(auxin=initial_top_medium_auxin_level,auxin_synth_coef=apical_bud_auxin_synth_coef, pin_down=pin_init,medium=True))
   nproduce E

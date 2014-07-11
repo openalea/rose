@@ -200,7 +200,6 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   ra += - p.auxin_decay_coef * a # auxin degradation
   ra -= net_flux # sum phi_ji sij / vi
   
-  p.auxin += ra*P.dt 
   
   #assert 0. <= p.auxin <= 10. 
   # dPiu/dt, dPid/dt => rpinu, rpind
@@ -244,8 +243,11 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   # growth
   if hasattr(p,'g'):
     g = p.g
-    dg = p.ck_g_interaction * (p.ck*g) - p.brc1_g_interaction *(p.brc1*g) + p.auxflux_g_interaction *(g * net_flux) + p.auxin_g_interaction *(p.auxin*g) - p.g_decay *g
+    dg = p.ck_g_interaction * (p.ck*g) - p.brc1_g_interaction *(p.brc1*g) + p.auxflux_g_interaction *(g * net_flux) - p.auxin_g_interaction *(p.auxin*g) - p.g_decay *g
     p.g += dg*P.dt
+    
+    ra += p.g_auxin_interaction *(p.auxin*g)
   
+  p.auxin += ra*P.dt 
   return p
 
