@@ -7,6 +7,11 @@ import utils
 reload(utils)
 from utils import *
 
+"""
+First version of the model.
+Calibrated to have stable concentration of sl and ck and thus brc1.
+"""
+
 
 mylpyimport(globals(), 'plotcurve','plotCurve','draw_internode')
 

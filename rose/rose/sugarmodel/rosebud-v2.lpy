@@ -7,16 +7,16 @@ import utils
 reload(utils)
 from utils import *
 
+"""
+Modeling of the Sugar/Auxin ratio effect on the CK/SL ratio effect hat itself induce the brc1 level.
+By default, A ratio of S/A of 1 gives stable ratio of CK/SL.
+If we increment Sugar to 15, then CK is increased, SL decrease and BRC1 also.
+If we decrease Auxin (to 5), the opposite situation occurs.
+"""
+
 
 mylpyimport(globals(), 'plotcurve','plotCurve','draw_internode')
 
-
-"""
-Root degradation.
-If the root does not degrade the auxin it accumulate and the flux in the main stem drop.
-The lateral bud has a high auxin concentration so it starts rapidly. Because of the accumulation in the stem, 
-the apical bud starts to lose the priority on the main stem.
-"""
 
 # to have rapid burst:
 initial_bud_auxin_level = 10 # instead of 10
@@ -31,7 +31,6 @@ initial_top_medium_auxin_level= 10
 initial_root_medium_auxin_level= 3
 
 apical_bud_auxin_synth_coef = 10
-lateral_bud_auxin_synth_coef = 1
 
 root_auxin_decay_coef = 1
 later_root_auxin_decay_coef = 1
@@ -40,15 +39,11 @@ pin_init = 0.5
 ck_init  = 10
 sl_init  = 10
 
-ck_base_synth_coef = 0.5
-ck_synth_coef = 0.0
-sl_base_synth_coef = 0.5
-sl_synth_coef = 0.0
 
-init_brc1 = 5
-brc1_synth_coef = 0.5
+init_brc1 = 10
+brc1_synth_coef = 0.4
 brc1_base_synth_coef = 0.1
-brc1_decay_coef = 0.03
+brc1_decay_coef = 0.05
 
 
 
@@ -76,29 +71,32 @@ class SimuParameters:
   
   dt = 0.05
   
-  default_sugar = 10
-  
-  default_ck = 10
-  default_ck_synth_coef = 0 # depend on ratio sugar/auxin
-  default_ck_base_synth_coef = 0
-  default_ck_decay_coef =0.01
+  default_sugar = 20.
+  default_ck = 10.
+  default_ck_synth_coef = 0.4 # depend on ratio sugar/auxin
+  default_ck_base_synth_coef = 0.5
+  default_ck_decay_coef =0.1
   ck_diffusion_coef = 0.5
   
   default_sl = 10
-  default_sl_synth_coef = 0
-  default_sl_base_synth_coef = 0
-  default_sl_decay_coef = 0.01
+  default_sl_synth_coef = 0.1
+  default_sl_base_synth_coef = 0.3
+  default_sl_decay_coef = 0.1
   sl_diffusion_coef = 0.5
   
-  default_slp = 0
-  default_slp_synth_coef = 0
-  default_slp_decay_coef = 0
+  default_slp = 10
+  default_slp_synth_coef = 0.5
+  default_slp_decay_coef = 0.05
   
   default_pin_slp_interaction = 0
   default_auxin_synth_coef = 1
   
+  brc1_auxin_interaction = 0.01
+  
   DEGRADATION = DEGRADATION
   DIFFUSION   = DIFFUSION
+
+lateral_bud_auxin_synth_coef = 0.3
 
 set_simu_parameters(SimuParameters())
 
@@ -124,8 +122,8 @@ def StartEach(lstring):
       assert entity.name == 'Medium'
       entity.p.auxin_decay_coef = later_root_auxin_decay_coef
 
-propstodraw= ['auxin','sugar','sl','ck','brc1']
-propcolors = [15,10,17,18,21]
+propstodraw= ['sugar','auxin','ck','sl','slp','brc1']
+propcolors = [10,21,17,18,15,23]
 
 def EndInterpretation():
    nproduce  @2D 
@@ -141,11 +139,7 @@ Axiom:
   nproduce I(OrganParameter(auxin=initial_internode_auxin_level,
                             pin_down=pin_init,
                             ck=ck_init,
-                            ck_base_synth_coef=ck_base_synth_coef,
-                            ck_synth_coef=ck_synth_coef,
-                            sl=sl_init,
-                            sl_base_synth_coef=sl_base_synth_coef,
-                            sl_synth_coef=sl_synth_coef))
+                            sl=sl_init))
   
   nproduce [ LApex(ApexParameter(auxin=initial_bud_auxin_level, 
                                  auxin_synth_coef = lateral_bud_auxin_synth_coef,
@@ -159,7 +153,7 @@ Axiom:
 
 
 
-derivation length: 500
+derivation length: 1000
 ignore: +-
 production:
 
@@ -169,6 +163,7 @@ Medium(pd) < I(p) > [  LApex(pl) ]  Medium(pu) :
 
 I(pd) < LApex(p) :
   # print p.auxin, pd.auxin, p.flux_down, p.pin_down
+  print p.brc1, p.auxin
   p = process_transport(p,None, pd, None)
   if not p.active:
     if  activation_flux_th(p) and ACTIVATION:
@@ -209,7 +204,7 @@ Medium(p) :
 
 I(pd) [  <   LApex(p) :
    nproduce | f(1.5) +(90) f(1.5)
-   draw_internode(p, max_pin_value, max_auxin_value, lwidth,propstodraw=['auxin','sugar','sl','ck','brc1'])
+   draw_internode(p, max_pin_value, max_auxin_value, lwidth,propstodraw=['sugar','auxin','ck','sl','slp','brc1'])
    #   nproduce f(0.02) _(p.g) @b(1)
    #   if p.g > g_threshold:
    #      nproduce _(0.01) ,(21) F(0.5) Flower(p)
@@ -305,6 +300,9 @@ def __initialiseContext__(context):
 	Color_22 = pgl.Material("Color_22" , ambient = (128,193,96) , diffuse = 0 , )
 	Color_22.name = "Color_22"
 	context.turtle.setMaterial(22,Color_22)
+	Color_23 = pgl.Material("Color_23" , ambient = (217,104,0) , diffuse = 0 , )
+	Color_23.name = "Color_23"
+	context.turtle.setMaterial(23,Color_23)
 	context.options.setSelection('Warning with sharp module',0)
 	context.options.setSelection('Selection Always Required',1)
 	scalars = [('DEGRADATION', 'Bool', True), ('DIFFUSION', 'Bool', True), ('ACTIVATION', 'Bool', True)]

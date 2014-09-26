@@ -70,7 +70,7 @@ def plotCurve(curvedata, pointdata = None, xextend = None, yextend = None, pos =
         cytick += ytick
     nproduce ]
 
-def draw_internode(p, max_pin_value, max_auxin_value, lwidth, propstodraw= ['auxin','sl','ck'],propcolors = [15,10,17,18]):
+def draw_internode(p, max_pin_value, max_auxin_value, lwidth, propstodraw= ['sugar','auxin','ck','sl','slp'],propcolors = [10,21,17,18,15,23]):
    from transport_eq import  ApexParameter
    pinupr = 0.5 * p.pin_up /max_pin_value
    pindownr = 0.5 * p.pin_down /max_pin_value

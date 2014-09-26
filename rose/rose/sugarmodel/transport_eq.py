@@ -23,32 +23,25 @@ class SimuParameters:
   K = 1.3
   
   default_sugar = 0
+  
   default_ck = 0
-  default_ck_synth_coef = 0
+  default_ck_synth_coef = 0 # depend on ratio sugar/auxin
+  default_ck_base_synth_coef = 0
   default_ck_degrad_coef =0
   ck_diffusion_coef = 0.2
   
   default_sl = 0
-  default_sl_synth_coef = 0
+  default_sl_synth_coef = 0 
+  default_sl_base_synth_coef = 0 # depend on auxin
   default_sl_degrad_coef = 0
   sl_diffusion_coef = 0.2
   
-  default_pin_sl_interaction = 0
+  default_pin_slp_interaction = 0
   
   dt = 0.05
   
   DEGRADATION = True
-  DIFFUSION   = True
-
-  ck_auxin_interaction = 0
-  ck_sugar_interaction = 0
-  
-  # strigolactone coeficient
-  sl_auxin_interaction = 0
-  sl_sugar_interaction = 0
-  
-  auxin_sugar_interaction = 0
-
+  DIFFUSION   = True 
 
 P = SimuParameters()
 
@@ -80,7 +73,6 @@ class OrganParameter(ParameterSet):
     
     # auxin and sugar concentration
     self.setdefault(auxin=0, sugar=P.default_sugar)
-    self.setdefault(auxin_sugar_interaction = P.auxin_sugar_interaction)
     # topological situation
     self.setdefault(first = False, order = 0)
     # pin concentration
@@ -96,21 +88,24 @@ class OrganParameter(ParameterSet):
     self.setdefault(auxin_synth_coef  = P.default_auxin_synth_coef, 
                     auxin_decay_coef = P.default_auxin_decay_coef,
                     auxin_target_concentration = self.auxin)
-    # cytokinin coeficient
+    # cytokinin coeficient 
     self.setdefault(ck = P.default_ck,
                     ck_synth_coef = P.default_ck_synth_coef,
-                    ck_decay_coef = P.default_ck_decay_coef,
-                    ck_auxin_interaction = P.ck_auxin_interaction,
-                    ck_sugar_interaction = P.ck_sugar_interaction)
+                    ck_base_synth_coef = P.default_ck_base_synth_coef,
+                    ck_decay_coef = P.default_ck_decay_coef)
+                    
     # strigolactone coeficient
     self.setdefault(sl = P.default_sl,
                     sl_synth_coef = P.default_sl_synth_coef,
-                    sl_decay_coef= P.default_sl_decay_coef,
-                    sl_auxin_interaction = P.sl_auxin_interaction,
-                    sl_sugar_interaction = P.sl_sugar_interaction)
+                    sl_base_synth_coef = P.default_sl_base_synth_coef,
+                    sl_decay_coef= P.default_sl_decay_coef)
                     
-    self.setdefault(pin_sl_interaction=P.default_pin_sl_interaction,
-                    pin_sugar_interaction=P.pin_sugar_interaction)
+    # perceived strigolactone coeficient
+    self.setdefault(slp = P.default_slp,
+                    slp_synth_coef = P.default_slp_synth_coef,
+                    slp_decay_coef= P.default_slp_decay_coef)
+                    
+    self.setdefault(pin_slp_interaction=P.default_pin_slp_interaction)
 
 class ApexParameter(OrganParameter):
   def __init__(self, **kwd):
@@ -165,8 +160,34 @@ def basediffusion(propname, p, pu, pd, pl, diffusioncoef):
     if pd: deltaprop += (getattr(pd,propname)-prop)
     if pl: deltaprop += (getattr(pl,propname)-prop)
     
-    dp = deltaprop*diffusioncoef + getattr(p,propname+'_synth_coef') - getattr(p,propname+'_decay_coef')*prop
-    return dp 
+    return deltaprop*diffusioncoef
+    
+    #dp = deltaprop*diffusioncoef + getattr(p,propname+'_synth_coef') - getattr(p,propname+'_decay_coef')*prop
+    #return dp 
+
+MINAUXINLEVEL = 0.0001
+MINCKLEVEL = 0.0001
+
+def ck_synth(ck_synth_coef, ck_base_synth_coef, sugar, auxin):
+  ratio = sugar/max(MINAUXINLEVEL,auxin)
+  return (ck_synth_coef * ratio) + ck_base_synth_coef
+
+def sl_synth(sl_synth_coef, sl_base_synth_coef,  auxin):
+  return (sl_synth_coef * auxin) + sl_base_synth_coef
+
+def slp_synth(slp_synth_coef, sugar):
+  return slp_synth_coef/(1+sugar)
+
+def brc1_synth(brc1_synth_coef, brc1_base_synth_coef, sl, ck):
+  ratio = sl/max(MINCKLEVEL,ck)
+  return (brc1_synth_coef * ratio) + brc1_base_synth_coef
+
+def auxin_synth(auxin_synth_coef,brc1):
+  return auxin_synth_coef/(1+P.brc1_auxin_interaction*(brc1**2))
+
+def auxin_synth(auxin_synth_coef,brc1):
+  #print auxin_synth_coef+(P.brc1_auxin_interaction*(10-brc1)),auxin_synth_coef,P.brc1_auxin_interaction,brc1
+  return auxin_synth_coef+(P.brc1_auxin_interaction*(11-brc1)**2)
 
 def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   if not pl is None: 
@@ -207,16 +228,19 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   ra = 0
   
   # auxin synthesis
+  if hasattr(p,'brc1'):
+    auxin_synth_coef = auxin_synth(p.auxin_synth_coef,p.brc1)
+  else:
+    auxin_synth_coef = p.auxin_synth_coef
+    
   if not P.with_auxin_max_level:
-      ra = p.auxin_synth_coef 
+      ra = auxin_synth_coef 
   else:
       diffauxin = p.auxin_target_concentration - a
-      ra = p.auxin_synth_coef * (diffauxin if diffauxin > 0 else 0)  # auxin synthesis
+      ra = auxin_synth_coef * (diffauxin if diffauxin > 0 else 0)  # auxin synthesis
   
   ra += - p.auxin_decay_coef * a # auxin degradation
   ra -= net_flux # sum phi_ji sij / vi
-  
-  ra += p.auxin_sugar_interaction * a * p.sugar
   
   p.auxin += ra*P.dt 
   
@@ -226,57 +250,55 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   # pin concentration.
   net_rpin = 0
   if pu:
-    rpinu = p.pin_synth_coeff - P.pin_decay_coeff * p.pin_up  - p.pin_sl_interaction*(p.pin_up*p.sl)
+    rpinu = p.pin_synth_coeff - P.pin_decay_coeff * p.pin_up 
     if not P.innate_polarity:
       hu = P.h_coef * h(fu)
       rpinu += hu
-    rpinu -= p.pin_sl_interaction * p.pin_up * p.sl
-    rpinu += p.pin_sugar_interaction * p.pin_up * p.sugar
+    rpinu -= p.pin_slp_interaction * p.pin_up * p.slp
     p.pin_up += rpinu*P.dt
     net_rpin += rpinu
   
   if pd:
     hd = P.h_coef * h(fd)
-    rpind = hd + p.pin_synth_coeff - P.pin_decay_coeff*p.pin_down   - p.pin_sl_interaction*(p.pin_down*p.sl)
+    rpind = hd + p.pin_synth_coeff - P.pin_decay_coeff*p.pin_down 
+    rpind -= p.pin_slp_interaction * p.pin_down * p.slp
     p.pin_down += rpind*P.dt
-    rpind -= p.pin_sl_interaction * p.pin_down * p.sl
-    rpind += p.pin_sugar_interaction * p.pin_down * p.sugar
     net_rpin += rpind
     
   if pl:
-    rpinl =  p.pin_synth_coeff - P.pin_decay_coeff*p.pin_lat   - p.pin_sl_interaction*(p.pin_lat*p.sl)
+    rpinl =  p.pin_synth_coeff - P.pin_decay_coeff*p.pin_lat 
     if not P.innate_polarity:
       hl = P.h_coef * h(fl)
       rpinl += hl
-    rpinl -= p.pin_sl_interaction * p.pin_lat * p.sl
-    rpinl += p.pin_sugar_interaction * p.pin_lat * p.sugar
+    rpinl -= p.pin_slp_interaction * p.pin_lat * p.slp
     p.pin_lat += rpinl*P.dt
     net_rpin += rpinl
   
   
   # citokinin
   dck = basediffusion('ck', p, pu, pd, pl, P.ck_diffusion_coef)
-  dck -= p.ck_auxin_interaction * p.ck * a
-  dck += p.ck_sugar_interaction * p.ck * p.sugar
-  p.ck = dck*P.dt
+  dck += ck_synth(p.ck_synth_coef, p.ck_base_synth_coef, p.sugar, p.auxin) 
+  dck -= p.ck_decay_coef * p.ck
+  
+  p.ck += dck*P.dt
   
   #strigolactone
   dsl = basediffusion('sl', p, pu, pd, pl, P.sl_diffusion_coef)
-  dsl += p.sl_auxin_interaction * p.sl * a
-  dsl -= p.sl_sugar_interaction * p.sl * p.sugar
-  p.sl = dsl*P.dt
+  dsl += sl_synth(p.sl_synth_coef, p.sl_base_synth_coef, p.auxin) 
+  dsl -= p.sl_decay_coef * p.sl
+  p.sl += dsl*P.dt
+  
+  #perceived strigolactone
+  dslp = slp_synth(p.slp_synth_coef, p.sugar) * p.sl 
+  dslp -= p.slp_decay_coef * p.slp
+  p.slp += dslp*P.dt
   
   # brc1
   if hasattr(p,'brc1'):
     brc1 = p.brc1
-    dbrc1 = - p.ck_brc1_interaction *(brc1*p.ck) + p.sl_brc1_interaction *(brc1*p.sl) - p.brc1_decay_coef*brc1 + p.brc1_synth_coef
+    dbrc1 = brc1_synth(p.brc1_synth_coef,p.brc1_base_synth_coef,p.slp,p.ck) - p.brc1_decay_coef*brc1
     p.brc1 += dbrc1*P.dt
   
-  # growth
-  if hasattr(p,'g'):
-    g = p.g
-    dg = p.ck_g_interaction * (p.ck*g) - p.brc1_g_interaction *(p.brc1*g) + p.auxflux_g_interaction *(g * net_flux) + p.auxin_g_interaction *(p.auxin*g) - p.g_decay *g
-    p.g += dg*P.dt
   
   return p
 
