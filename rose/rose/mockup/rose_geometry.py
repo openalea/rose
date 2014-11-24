@@ -1870,7 +1870,6 @@ class VertexVisitor(Node):
         return vertexVisitor(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory)
 
 
-#################################### ReconstructWithTurtle ##########
 
 #### Copy from mtg.turtle ###
 def traverse_with_turtle(g, vid, visitor, turtle=None):

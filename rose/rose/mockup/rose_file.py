@@ -132,7 +132,7 @@ class RootName(Node):
 
 
 if __name__ == "__main__":
-    import unittest # + tard
+    import unittest 
 
     class TestSimple(unittest.TestCase):
         def setUp(self):
