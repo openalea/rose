@@ -331,13 +331,13 @@ class BuiltBud(Node):
         stride=self.get_input('stride')
         return builtBud(stride)
 
-############################################# Generic _BUD_
+############################################# Fin Generic _BUD_
 
 
 def flower(points, turtle=None, lSepales=[], diameter=None):
     """
     We compute the angles of the sepals, if some are deployed
-    and we draw the bud.
+    and we draw the organ.
     
     :param points:  points of the bud in the MTG object,
     :param turtle: the turtle to draw the bud in.
@@ -969,6 +969,7 @@ def notation2flowerAngles(stade, PcStade):
     :param stade: a stage of flowering in "BFV ... FF"
     :param PcStade: the percent of evolution within the stage "stade"
     :return: a list of two lists containing the angles described above
+    :bugs: the fruits are not at their right place.
     """
     return ([0,0],[0,0])
 # end notation2flowerAngles
@@ -1313,7 +1314,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         anglePetInt=lPetalAngles[-1]
     receptacle= pgl.Sphere( 1  )
     if anglePetExt > 90. and anglePetExt == anglePetInt: # Faded flower
-        #setTurtleOrange(turtle) ici
+        #setTurtleOrange(turtle)
         receptacle=pgl.Scaled(Vector3( taille , taille , taille * 1.5 ),receptacle )         
     else:
         turtle.setColor(4) 
@@ -1339,7 +1340,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         thisHeight=lSepalDims[0]
         heightInc=(lSepalDims[0]-lSepalDims[-1])/ (numSepals-1)
     for index in xrange(0,int(numSepals)):
-        rotationAngle=angle72*index *2 #ici
+        rotationAngle=angle72*index *2 #
         turtle.setColor(index)
         # has this sepal been digitized ?
         Go=True 
@@ -1558,32 +1559,43 @@ def simpleFruit(colorFunc=None):
         myColorFunc=setTurtleOrange # custom 
         
     def rawFruit(points, turtle=None, truc=None,Bidule=None): # ici
-        """    computes a fruit from a pair or positions
+        """    
+        Computes a fruit from a pair or positions
+        This is experimental code for debugging
         """
         # 
         turtle.push()
         # 
-        myColorFunc(turtle)
-        #print "point= %s" % pointsnDiameters
-        #print "Points[0] =  %s" % points[0]
 
-        turtle.oLineTo(points[0]) #[0])
-        #turtle.oLineTo(points[1])
-        #turtle.setWidth(10)
-        botPt=points[0] #[0]
-        topPt=points[-1] #[0]
-        fruitAxis=Vector3(topPt-botPt)
+        #print "Points[0] =  %s" % points[0]
+        #print "%d points" % (len(points))
+        point=points[0]
+#C        turtle.oLineTo(points[0]) #[0]) F A I L S
+
+        point0=Vector3([point.properties()['XX'], point.properties()['YY'],point.properties()['ZZ']])
+        point=points[1]
+        point1=Vector3([point.properties()['XX'], point.properties()['YY'],point.properties()['ZZ']])
+
+        turtle.oLineTo(point0) 
+        turtle.oLineTo(point1)
+        #turtle.setWidth(10) ??
+
+        myColorFunc(turtle)
+
+        botPt=point0 
+        topPt=point1 
+        fruitAxis=topPt-botPt
         # digit point is on top of etamins
         # etamins are not represented 
-        fruitSize=norm(fruitAxis) * 0.5 
-        fruitAxis.normalize()
-
+        fruitSize=norm(fruitAxis)
+        #fruitAxis.normalize()
         ## we must orient the turtle before to draw 
         ## this makes better fitting of the sphere and the paraboloid
         faceTo(turtle, fruitAxis)
-
-        turtle.move(botPt + fruitAxis * 0.5 )
-        fruit=pgl.Scaled(Vector3(fruitSize*.66, fruitSize*.66 , fruitSize),  pgl.Sphere())
+        #turtle.move(botPt + fruitAxis ) # badly placed !
+        #turtle.move( (topPt+botPt)*.05 ) # worse
+        turtle.move( (topPt-fruitAxis) ) # 
+        fruit=pgl.Scaled(Vector3(fruitSize*0.33, fruitSize *0.33, fruitSize*0.66),  pgl.Sphere())
 
         turtle.customGeometry(fruit, 1)
 
@@ -1807,8 +1819,8 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             flower_computer (points, turtle, lSepalStore, n.Diameter)
 
             # process digitized sepals (if any)
-            #turtle.setColor(len(lSepalStore)) # apple green ici
-            turtle.setColor(4) # apple green ici
+            #turtle.setColor(len(lSepalStore)) # apple green 
+            turtle.setColor(4) # apple green 
             while lSepalStore:
                 #turtle.setColor(couleur)
                 #couleur +=1
