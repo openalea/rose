@@ -1297,14 +1297,14 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     # P R O C E S S I N G
     turtle.push()
     turtle.setHead(Heading, Radius) # -Radius ?
-    taille = height / 9.0
+    taille = height / 9. # 9.0 empirique
+    taille_fruit=taille*2.5
     #print "floralOrgan:TAILLE = %s" % taille
     # ready to draw 
 
     # we prolongate the ped along the heading direction : 
     turtle.push()
-    turtle.oLineRel(Heading *taille  ) 
-    turtle.pop()
+    turtle.oLineRel(Heading *taille_fruit  ) 
     #setTurtleOrange(turtle)
     #turtle.setColor(4) 
 
@@ -1314,14 +1314,17 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         anglePetInt=lPetalAngles[-1]
     receptacle= pgl.Sphere( 1  )
     if anglePetExt > 90. and anglePetExt == anglePetInt: # Faded flower
-        #setTurtleOrange(turtle)
-        receptacle=pgl.Scaled(Vector3( taille , taille , taille * 1.5 ),receptacle )         
+        setTurtleOrange(turtle)
+        receptacle=pgl.Scaled(Vector3( 
+                taille_fruit*1.333, taille_fruit*1.333, taille_fruit), receptacle )         
     else:
         turtle.setColor(4) 
-        receptacle=pgl.Scaled(Vector3( taille , taille , taille ),receptacle ) 
+        receptacle=pgl.Scaled(Vector3( taille_fruit, taille_fruit, taille_fruit),receptacle ) 
 
-    receptacle= pgl.Translated(0,0,taille,receptacle) 
+    receptacle= pgl.Translated(0,0,taille_fruit,receptacle) 
     turtle.customGeometry(receptacle,1) #
+
+    turtle.pop()
 
     ############################ S E P A L S
     ustride = 10 # the U resolution of the patch (along z)
@@ -1558,45 +1561,35 @@ def simpleFruit(colorFunc=None):
     if colorFunc is None:
         myColorFunc=setTurtleOrange # custom 
         
-    def rawFruit(points, turtle=None, truc=None,Bidule=None): # ici
+    def rawFruit(points, turtle=None, truc=None, Bidule=None): # arity is 4
         """    
         Computes a fruit from a pair or positions
         This is experimental code for debugging
         """
-        # 
         turtle.push()
-        # 
-
-        #print "Points[0] =  %s" % points[0]
-        #print "%d points" % (len(points))
-        point=points[0]
-#C        turtle.oLineTo(points[0]) #[0]) F A I L S
+        #  Looks like points are (end, begining...)
+        point=points[1]
+        #turtle.oLineTo(points[0]) #[0]) F A I L S because points[0] is a "ProxyNode"
 
         point0=Vector3([point.properties()['XX'], point.properties()['YY'],point.properties()['ZZ']])
-        point=points[1]
+        point=points[0]
         point1=Vector3([point.properties()['XX'], point.properties()['YY'],point.properties()['ZZ']])
-
-        turtle.oLineTo(point0) 
-        turtle.oLineTo(point1)
-        #turtle.setWidth(10) ??
-
-        myColorFunc(turtle)
 
         botPt=point0 
         topPt=point1 
-        fruitAxis=topPt-botPt
+        fruit_center=(topPt *0.4 +botPt *.6)
+        turtle.oLineTo(fruit_center) 
+
+        myColorFunc(turtle)
+
+        fruitAxis=Vector3(topPt-botPt) # should be typed such, anyway
         # digit point is on top of etamins
         # etamins are not represented 
-        fruitSize=norm(fruitAxis)
-        #fruitAxis.normalize()
+        fruitSize=norm(fruitAxis) #
         ## we must orient the turtle before to draw 
         ## this makes better fitting of the sphere and the paraboloid
         faceTo(turtle, fruitAxis)
-        #turtle.move(botPt + fruitAxis ) # badly placed !
-        #turtle.move( (topPt+botPt)*.05 ) # worse
-        turtle.move( (topPt-fruitAxis) ) # 
-        fruit=pgl.Scaled(Vector3(fruitSize*0.33, fruitSize *0.33, fruitSize*0.66),  pgl.Sphere())
-
+        fruit=pgl.Scaled(Vector3(fruitSize*0.6, fruitSize *0.6, fruitSize*0.4),  pgl.Sphere())
         turtle.customGeometry(fruit, 1)
 
         turtle.pop()
