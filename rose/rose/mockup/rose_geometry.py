@@ -1319,7 +1319,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
                 taille_fruit*1.333, taille_fruit*1.333, taille_fruit), receptacle )         
     else:
         turtle.setColor(4) 
-        receptacle=pgl.Scaled(Vector3( taille_fruit, taille_fruit, taille_fruit),receptacle ) 
+        receptacle=pgl.Scaled(Vector3( taille, taille, taille),receptacle ) 
 
     receptacle= pgl.Translated(0,0,taille_fruit,receptacle) 
     turtle.customGeometry(receptacle,1) #

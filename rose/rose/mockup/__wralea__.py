@@ -17,7 +17,7 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['drawLeaflets', 'rose_geometry_VertexVisitor', 'rose_process_RunXV', 'rose_geometry_ReconstructWithTurtle', 'roseMtgDataDir', 'rose_geometry_computeLeaflet4pts', 'iterOnce', 'rose_CropGeneration_2011', 'rose_MTG_union', 'testMTGs', 'rose_geometry_Flower', 'rose_HttpDir2DictOfFiles', 'rose_Files2MTGs', 'rose_GetGrid', 'rose_geometry_RawBud', '_64555088', 'GetLocalFiles', 'rose_LocalDir2DictOfFiles', 'rose_file_RootName', 'rose_geometry_RawFruit', 'rose_geometry_PetalMatrix', 'CanopyReconstruction2011', '_64554704', '_64555536', 'rose_file_IntSort', '_64555920', 'rose_file_scene2Can01', 'rose_geometry_BuiltBud', 'drawFlowers', 'rose_geometry_PolygonLeaflet', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', 'GetWebFiles', 'rose_geometry_RevolutionBud', 'drawBuds', 'rose_geometry_RevolutionFig', 'rose_GetOrigin', 'convertMtgToCanFiles', 'ChooseOnePlant', 'rose_geometry_BudArray', 'rose_geometry_BezierPatchFlower', 'Canopy2011Filenames', 'tempPickleFile_tempPickleFile', 'rose_colors_ColorFuncs', 'rose_geometry_FineBudArray', 'rose_file_readCsv']
+__all__ = ['drawLeaflets', 'rose_geometry_VertexVisitor', 'rose_process_RunXV', 'rose_geometry_ReconstructWithTurtle', 'roseMtgDataDir', 'rose_geometry_computeLeaflet4pts', 'iterOnce', 'rose_CropGeneration_2011', 'rose_MTG_union', 'testMTGs', 'rose_geometry_Flower', 'rose_HttpDir2DictOfFiles', 'rose_Files2MTGs', 'rose_GetGrid', 'rose_geometry_RawBud', '_64555088', 'GetLocalFiles', 'rose_LocalDir2DictOfFiles', 'rose_file_RootName', 'rose_geometry_RawFruit', 'rose_geometry_PetalMatrix', 'CanopyReconstruction2011', '_64554704', '_64555536', 'rose_file_IntSort', '_64555920', 'scene2Can01', 'rose_geometry_BuiltBud', 'drawFlowers', 'rose_geometry_PolygonLeaflet', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', 'GetWebFiles', 'rose_geometry_RevolutionBud', 'drawBuds', 'rose_geometry_RevolutionFig', 'rose_GetOrigin', 'convertMtgToCanFiles', 'ChooseOnePlant', 'rose_geometry_BudArray', 'rose_geometry_BezierPatchFlower', 'Canopy2011Filenames', 'tempPickleFile_tempPickleFile', 'rose_colors_ColorFuncs', 'rose_geometry_FineBudArray', 'readCsv', 'readXls', 'decode_liste']
 
 
 
@@ -3704,13 +3704,16 @@ _64555920 = CompositeNodeFactory(name='rose_reconstruction',
 
 
 
-rose_file_scene2Can01 = Factory(name='scene2Can01',
+scene2Can01 = Factory(name='scene2Can01',
                 authors=' (rose authors)',
                 description='a function that writes a can file.',
                 category='data processing',
                 nodemodule='rose_file',
                 nodeclass='scene2Can01',
-                inputs=[{'interface': IData, 'name': 'maScene', 'value': None, 'desc': 'an openalea scene'}, {'interface': IStr, 'name': 'fileName', 'value': None, 'desc': 'a complete path to the CAN01 file.'}],
+                inputs=[{'interface': IData, 'name': 'maScene', 'value': None, 'desc': 'an openalea scene'}, 
+                        {'interface': IStr, 'name': 'fileName', 'value': None, 'desc': 'a complete path to the CAN01 file.'},
+                        {'interface': IBool, 'name': 'makeDir', 'value': False, 'desc': 'should the path to the output file be made if it does not exist ?'}
+                        ],
                 outputs=[{'interface': IData, 'name': 'laScene', 'desc': 'the incoming openAlea scene'}],
                 widgetmodule=None,
                 widgetclass=None,
@@ -6068,18 +6071,49 @@ rose_geometry_FineBudArray = Factory(name='fineBudArray',
 
 
 
-rose_file_readCsv = Factory(name='readCsv',
+readCsv = Factory(name='readCsv',
+                  authors=' (rose authors)',
+                  description='a function that reads a csv file.',
+                  category='data processing',
+                  nodemodule='rose_file',
+                  nodeclass='readCsv',
+                  inputs=[ {'interface': IStr, 'name': 'fileName', 'value': None, 'desc': 'a complete path to a CSV file'}, 
+                           {'interface': IStr, 'name': 'delimiter', 'value': ',', 'desc': 'a character that delimits fields within the lines'},
+        {'interface': IInt, 'name': 'ligne_debut', 'value': 0, 'desc': 'the line number to begin with (0 => all lines)'}, 
+        ],
+                outputs=[{'interface': ISequence, 'name': 'retList', 'desc': 'the columns within lines that could be read'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+readXls = Factory(name='readXls',
                 authors=' (rose authors)',
-                description='a function that reads a csv file.',
+                description='a function that reads an Excel file.',
                 category='data processing',
                 nodemodule='rose_file',
-                nodeclass='readCsv',
-                inputs=[{'interface': IStr, 'name': 'fileName', 'value': None, 'desc': 'a complete path to a CSV file'}, {'interface': IStr, 'name': 'delimiter', 'value': ',', 'desc': 'a character that delimits fields within the lines'}],
-                outputs=[{'interface': IFunction, 'name': 'flower', 'desc': 'function to draw a bud or a flower'}],
+                nodeclass='readXls',
+                  inputs=[  {'interface': IStr, 'name': 'fileName', 'value': None, 'desc': 'a complete path to a CSV file'}, 
+        {'interface': IInt, 'name': 'sheet_number', 'value':0, 'desc':'the number of the sheet to use'}, 
+        {'interface': IInt, 'name': 'ligne_debut', 'value': 0, 'desc': 'the line number to begin with (0 => all lines)'} 
+        ],
+                outputs=[{'interface': ISequence, 'name': 'retList', 'desc': 'the columns within lines that could be read'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
 
 
 
-
+decode_liste= Factory(name='decode_liste',
+                     authors=' (rose authors)',
+                     description='changing the codes of the "pixel measuring team" to a list of path/plantID',
+                     category='data processing',
+                     nodemodule='rose_process',
+                     nodeclass='Decode_liste',
+                     inputs=[
+        {'interface': ISequence, 'name': 'list_of_codes','value':[], 'desc':'a list of coding strings used by Arch-E\'s Pixel Measuring Team'},
+        {'interface': ISequence, 'name': 'colonnes', 'value': [], 'desc': 'the column numbers we need to read ([] => all columns)'}
+        ],
+                      outputs=[{'interface': ISequence, 'name': 'list_of_plants', 'desc':'the list of plants described by the input list'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )

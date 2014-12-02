@@ -7,11 +7,11 @@
 # for csv
 from openalea.core.external import * 
 import openalea.core.logger  as ocl
-import csv
 
 
-def readCsv(fileName, delimiter=','):
+def readCsv(fileName, delimiter=',', ligne_debut=0):
     """ we read the csv file, then we return a list of splited lines """
+    import csv
     retList=[]
     fIn=open(fileName,"U")
     if not fIn:
@@ -19,10 +19,16 @@ def readCsv(fileName, delimiter=','):
         return retList
     else :
         csvIn=csv.reader(fIn,delimiter=delimiter)
+        lu=0
         for ligne in csvIn:
-            retList.append(ligne)
+            if ligne:
+                sortie=[]
+                if lu >= ligne_debut:
+                    for item in ligne :
+                        sortie.append(item)
+                    retList.append(sortie)
+            lu += 1
         fIn.close()
-
     return retList
 # end readCsv
 
@@ -31,10 +37,52 @@ class ReadCsv(Node):
         Node.__init__(self)
         self.add_input(name= 'fileName', interface = IStr, value=None) 
         self.add_input(name= 'delimiter', interface = IStr, value=",") 
-        self.add_output( name = retList, interface = ISequence )
+        self.add_input(name= 'ligne_debut', interface = IInt, value=0) 
+        self.add_output( name = 'retList', interface = ISequence )
 
     def __call__( self, inputs ):
         return readCsv
+
+def readXls(fileName, numero_feuille=0, ligne_debut=0):
+    """ we read the csv file, then we return a list of splited lines """
+    import csv, xlrd
+    retList=[]
+    wb = xlrd.open_workbook(fileName)
+    if not wb:
+        ocl.error("%s : no such file" %filename ) 
+        return retList
+    else :
+        
+        try:
+            sh1=wb.sheet_by_index(numero_feuille)
+        except:
+            print "Le classeur %s n'a pas de feuille numéro %d" %  (fileName, numero_feuille)
+            return retList
+        rep=""
+        plantID=""
+        for rx in range(sh1.nrows):
+            sortie=[]
+            if rx >= ligne_debut :
+                for item in sh1.row(rx) :
+                    sortie.append(item.value)
+                retList.append(sortie)
+                
+        #print "%s" % dir(rep)
+            #print "%s %s" % (rep, plantID)
+    return retList
+# end readXls
+
+class ReadXls(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input(name= 'fileName', interface = IStr, value=None) 
+        self.add_input(name= 'sheet_number', interface = IInt, value=0)         
+        self.add_input(name= 'ligne_debut', interface = IInt, value=0) 
+        self.add_output( name = retList, interface = ISequence )
+
+    def __call__( self, inputs ):
+        return readXls
+# end Class readXls
 
 # for scene2can10
 import openalea.plantgl.all as pgl
@@ -54,7 +102,7 @@ def mesh(geometry):
 def canline(ind, label,p):
     return "p 2 %s 9 3 %s"%(str(label), ' '.join(str(x) for i in ind for x in p[i]))
 
-def scene2Can01 (maScene, fileName):
+def scene2Can01 (maScene, fileName, makeDir=False):
     # copied from alinea.topvine
     out = []
     for obj in range (len(maScene)):
@@ -65,6 +113,15 @@ def scene2Can01 (maScene, fileName):
         index = geometry.indexList
         for ind in index:
             out.append(canline(ind, label,p))
+
+    if makeDir:
+        chemin=os.path.dirname(fileName)
+        if not os.path.isdir(chemin):
+            os.system("mkdir -p %s" % chemin)       
+#        try:
+#            os.stat(chemin)
+#        except:
+#            os.system("mkdir -p %s" % chemin)       
 
     o = open(fileName, 'w')#stockage dans un fichier can persistant
     o.write("CAN01\n")
@@ -80,6 +137,7 @@ class Scene2Can01(Node):
         Node.__init__(self)
         self.add_input(name= 'maScene', interface = None, value=None) 
         self.add_input(name= 'fileName', interface = IStr, value="can01.can") 
+        self.add_input(name= 'makeDir', interface = IBool, value=False) 
         self.add_output( name = 'maScene', interface = None )
 
     def __call__( self, inputs ):
