@@ -130,7 +130,7 @@ def scene2Can01 (maScene, fileName, makeDir=False):
         o.write(out[i]+"\n")
 
     o.close()
-    return maScene
+    return maScene, fileName
 
 class Scene2Can01(Node):
     def __init__(self):
@@ -139,6 +139,7 @@ class Scene2Can01(Node):
         self.add_input(name= 'fileName', interface = IStr, value="can01.can") 
         self.add_input(name= 'makeDir', interface = IBool, value=False) 
         self.add_output( name = 'maScene', interface = None )
+        self.add_output( name = 'fileName', interface = IStr )
 
     def __call__( self, inputs ):
         return scene2Can01
