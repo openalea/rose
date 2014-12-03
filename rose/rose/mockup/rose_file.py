@@ -7,6 +7,7 @@
 # for csv
 from openalea.core.external import * 
 import openalea.core.logger  as ocl
+import re
 
 
 def readCsv(fileName, delimiter=',', ligne_debut=0):
@@ -170,12 +171,11 @@ class IntSort(Node):
         return intSort(listeFics)
  
 
-
-
 def rootName(nom):
-    """ renvoie le nom de fichier sans racine ni extension """
+    """ renvoie la séquence numérique en début du nom de fichier """
     root=nom.rsplit("/",1)[-1]
     root=root.split(".",1)[0]
+    root=re.sub("^([0-9]+).*","\\1", root)
     return root
     
 class RootName(Node):
