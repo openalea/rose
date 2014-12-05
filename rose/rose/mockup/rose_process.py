@@ -47,7 +47,7 @@ def decode_liste(codes=[], colonnes=[]):
     dictOfDirs={}
     listOfPlants=[]
 
-    print "Entrée: \"%s\"" % codes
+    #print "Entrée: \"%s\"" % codes
     
     map(lambda k, v: dictOfDirs.update({k: v}), clefs, manips)
     col_manip=0
@@ -81,13 +81,10 @@ def decode_liste(codes=[], colonnes=[]):
                 #result += "%s" % plante
                 if not result in listOfPlants:
                     listOfPlants.append(result)
-                    retVal.append(result)
-                    # preparer les répertoires de stockage pour les can
-                    #os.system("mkdir -p can/%s" % outDir) 
-        
+                    retVal.append(result)        
     
     return retVal
-
+# decode_list
 
 class Decode_liste(Node):
     def __init__(self):
