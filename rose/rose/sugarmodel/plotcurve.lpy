@@ -1,7 +1,7 @@
 
+defaultcurvescolors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(0,255,255)]
 
-
-def plotCurve(curvedata, pointdata = None, xextend = None, yextend = None, pos = (0.1,-0.3), dim = (0.8,0.8), xtick = None, ytick = None, withorigin = True ):
+def plotCurve(curvedata=None, pointdata = None, curves = None, curvescolors = defaultcurvescolors, xextend = None, yextend = None, pos = (0.1,-0.3), dim = (0.8,0.8), xtick = None, ytick = None, withorigin = True ):
   if LPY_VERSION_MAJOR < 2 or (LPY_VERSION_MAJOR == 2 and LPY_VERSION_MINOR < 4):
     import warnings
     warnings.warn("Your version of lpy do not allow 2D plot")
@@ -10,11 +10,24 @@ def plotCurve(curvedata, pointdata = None, xextend = None, yextend = None, pos =
   from openalea.plantgl.all import Polyline2D
   if type(curvedata) == tuple:
     curvedata = zip(curvedata[0],curvedata[1])
+  if not curves is None:
+    ncurves = []
+    for c in curves:
+      if type(c) == tuple:
+        ncurves.append(zip(c[0],c[1]))
+      else: ncurves.append(c)
+    curves = ncurves
   if type(pointdata) == tuple:
     pointdata = zip(pointdata[0],pointdata[1])
-  data = list(curvedata)
+  data = []
+  if not curvedata is None:
+     data += list(curvedata)
   if not pointdata is None:
     data += pointdata
+  if not curves is None:
+    for c in curves:
+      data += list(c)
+  
   if len(data) > 1:
     if xextend:
       minx, maxx = xextend
@@ -42,7 +55,11 @@ def plotCurve(curvedata, pointdata = None, xextend = None, yextend = None, pos =
     if ytick is None:
       nbdigit = round(log(yext,10))
       ytick = 10**(nbdigit-1)
-    curvedata = [(projx(x),projy(y)) for x,y in curvedata]
+    if curvedata:
+      curvedata = [(projx(x),projy(y)) for x,y in curvedata]
+    if curves:
+      curves = [[(projx(x),projy(y)) for x,y in curve] for curve in curves]
+      
     ticklength = 0.02
     
     nproduce [ @2D SetColor(255,0,0) @M(pos[0],pos[1]) @R 
@@ -52,6 +69,12 @@ def plotCurve(curvedata, pointdata = None, xextend = None, yextend = None, pos =
       nproduce SetColor(255,0,255)
       for x,y in pointdata:
         nproduce [ @M(pos[0]+projx(x),pos[1]+projy(y)) @O(0.03)]
+    if not curves is None:
+      for curve,col in zip(curves,curvescolors):
+        if type(col) == int: nproduce SetColor(col)
+        else : nproduce SetColor(col[0],col[1],col[2]) 
+        nproduce @g(Polyline2D(curve,width=3))
+          
     if miny <= 0 <= maxy:
       nproduce SetColor(0,255,0) @g(Polyline2D([(projx(minx),projy(0)),(projx(maxx),projy(0))]))
       cxtick = ((minx // xtick) * xtick)
@@ -146,3 +169,9 @@ def B(x,h, lwidth) :
 def G(l) : K(l,l)
 def K(l,h) :
   nproduce f(h/2.){+(90)f(l/2.).+(90)f(h).+(90)f(l).+(90)f(h).}
+###### INITIALISATION ######
+
+__lpy_code_version__ = 1.1
+
+def __initialiseContext__(context):
+	context.options.setSelection('Warning with sharp module',0)

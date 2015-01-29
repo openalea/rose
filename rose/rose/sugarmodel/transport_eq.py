@@ -27,7 +27,8 @@ class SimuParameters:
   default_ck = 0
   default_ck_synth_coef = 0 # depend on ratio sugar/auxin
   default_ck_base_synth_coef = 0
-  default_ck_degrad_coef =0
+  default_ck_decay_coef = 0
+  default_ck_base_decay_coef = 0
   ck_diffusion_coef = 0.2
   
   default_sl = 0
@@ -92,7 +93,8 @@ class OrganParameter(ParameterSet):
     self.setdefault(ck = P.default_ck,
                     ck_synth_coef = P.default_ck_synth_coef,
                     ck_base_synth_coef = P.default_ck_base_synth_coef,
-                    ck_decay_coef = P.default_ck_decay_coef)
+                    ck_decay_coef = P.default_ck_decay_coef,
+                    ck_base_decay_coef = P.default_ck_base_decay_coef)
                     
     # strigolactone coeficient
     self.setdefault(sl = P.default_sl,
@@ -168,19 +170,47 @@ def basediffusion(propname, p, pu, pd, pl, diffusioncoef):
 MINAUXINLEVEL = 0.0001
 MINCKLEVEL = 0.0001
 
-def ck_synth(ck_synth_coef, ck_base_synth_coef, sugar, auxin):
+HillConstant  = 2
+
+def hill(x, k= HillConstant, n=1):
+  return x**n/(k+x**n)
+
+def ck_synth0(ck_synth_coef, ck_base_synth_coef, sugar, auxin):
   ratio = sugar/max(MINAUXINLEVEL,auxin)
   return (ck_synth_coef * ratio) + ck_base_synth_coef
 
-def sl_synth(sl_synth_coef, sl_base_synth_coef,  auxin):
-  return (sl_synth_coef * auxin) + sl_base_synth_coef
+def ck_decay0(ck_decay_coef, ck_base_decay_coef, ck, sugar, auxin):
+  return ck_base_decay_coef * ck
 
-def slp_synth(slp_synth_coef, sugar):
-  return slp_synth_coef/(1+sugar)
-
-def brc1_synth(brc1_synth_coef, brc1_base_synth_coef, sl, ck):
+def brc1_synth0(brc1_synth_coef, brc1_base_synth_coef, sl, ck):
   ratio = sl/max(MINCKLEVEL,ck)
   return (brc1_synth_coef * ratio) + brc1_base_synth_coef
+
+
+
+def ck_synth(ck_synth_coef, ck_base_synth_coef, sugar, auxin):
+  return (ck_synth_coef * hill(sugar,0.2,5) ) + ck_base_synth_coef
+
+
+def ck_decay(ck_decay_coef, ck_base_decay_coef, ck, auxin):
+  return (ck_decay_coef * auxin + ck_base_decay_coef) * ck
+
+
+def sl_synth(sl_synth_coef, sl_base_synth_coef,  auxin, sugar):
+  return (sl_synth_coef * auxin) + sl_base_synth_coef/(1+sugar)**2
+
+
+def slp_synth(slp_synth_coef, sugar):
+  return slp_synth_coef* (1 - hill(sugar))
+
+def brc1_synth(brc1_synth_coef, brc1_base_synth_coef, slp, ck):
+  return (brc1_synth_coef * slp) + brc1_base_synth_coef
+
+def brc1_decay(brc1_decay_coef, brc1_base_decay_coef, ck):
+  return (brc1_decay_coef * ck) + brc1_base_decay_coef
+
+
+
 
 def auxin_synth(auxin_synth_coef,brc1):
   return auxin_synth_coef/(1+P.brc1_auxin_interaction*(brc1**2))
@@ -278,25 +308,27 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   # citokinin
   dck = basediffusion('ck', p, pu, pd, pl, P.ck_diffusion_coef)
   dck += ck_synth(p.ck_synth_coef, p.ck_base_synth_coef, p.sugar, p.auxin) 
-  dck -= p.ck_decay_coef * p.ck
+  dck -= ck_decay(p.ck_decay_coef, p.ck_base_decay_coef, p.ck, p.auxin)
   
   p.ck += dck*P.dt
   
   #strigolactone
   dsl = basediffusion('sl', p, pu, pd, pl, P.sl_diffusion_coef)
-  dsl += sl_synth(p.sl_synth_coef, p.sl_base_synth_coef, p.auxin) 
+  dsl += sl_synth(p.sl_synth_coef, p.sl_base_synth_coef, p.auxin, p.sugar) 
   dsl -= p.sl_decay_coef * p.sl
   p.sl += dsl*P.dt
   
   #perceived strigolactone
   dslp = slp_synth(p.slp_synth_coef, p.sugar) * p.sl 
   dslp -= p.slp_decay_coef * p.slp
+  
   p.slp += dslp*P.dt
   
   # brc1
   if hasattr(p,'brc1'):
     brc1 = p.brc1
-    dbrc1 = brc1_synth(p.brc1_synth_coef,p.brc1_base_synth_coef,p.slp,p.ck) - p.brc1_decay_coef*brc1
+    dbrc1 = brc1_synth(p.brc1_synth_coef,p.brc1_base_synth_coef,p.slp,p.ck) 
+    dbrc1 -= brc1_decay(p.brc1_decay_coef,p.brc1_base_decay_coef ,p.ck)*brc1
     p.brc1 += dbrc1*P.dt
   
   

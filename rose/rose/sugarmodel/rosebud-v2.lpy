@@ -71,7 +71,7 @@ class SimuParameters:
   
   dt = 0.05
   
-  default_sugar = 20.
+  default_sugar = 10.
   default_ck = 10.
   default_ck_synth_coef = 0.4 # depend on ratio sugar/auxin
   default_ck_base_synth_coef = 0.5
@@ -117,18 +117,20 @@ def activation_flux_th(p):
 initial_view= 0
 
 def StartEach(lstring):
-    if getIterationNb() == 200:
-      entity = lstring[1]
-      assert entity.name == 'Medium'
-      entity.p.auxin_decay_coef = later_root_auxin_decay_coef
+    #if getIterationNb() == 200:
+    #  entity = lstring[1]
+    #  assert entity.name == 'Medium'
+    #  entity.p.auxin_decay_coef = later_root_auxin_decay_coef
+    pass
 
 propstodraw= ['sugar','auxin','ck','sl','slp','brc1']
 propcolors = [10,21,17,18,15,23]
 
 def EndInterpretation():
+   px,py = 0.5, -0.2
    nproduce  @2D 
    for i,prop in enumerate(propstodraw):
-     nproduce @M(0.2,-0.5-0.11*i),(propcolors[i])  _(0.05) @B(0.1) @M(0.27,-0.45-0.11*i) ,(20) Label(prop,16)
+     nproduce @M(px,py-0.11*i-0.01,0.1) ,(20) _(0.06) @B(0.12) @M(px,py-0.11*i),(propcolors[i])  _(0.05) @B(0.1)  @M(px+0.1,py+0.04-0.11*i) ,(20) Label(prop,16)
 
 module Apex(p) , I(p), Root(p), Medium(p), LApex(p) , LF(t)
 
@@ -217,7 +219,7 @@ I(pd) [  <   LApex(p) :
    dfvalues  = map(mdfluxij,fluxvalues)
    
    mdfluxij = lambda f: dfluxij(f,p, pd)
-   plotCurve((fluxvalues,dfvalues),[(p.flux_down, mdfluxij(p.flux_down))]) #,yextend=(-5,10))
+   plotCurve((fluxvalues,dfvalues),[(p.flux_down, mdfluxij(p.flux_down))],pos = (0.1,0)) #,yextend=(-5,10))
 
 
 Flower(p):
