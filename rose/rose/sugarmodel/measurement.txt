@@ -1,0 +1,12 @@
+
+
+CK :
+avec auxin = 0 
+O sucre -> 1 CK
+100 sucre --> 1.9 (5.8)
+250 sucre --> 2.1 (6.3)
+
+avec auxin = 2.5 
+O sucre -> 0.25 (0.8) CK
+100 sucre --> 0.5 (1.5)
+250 sucre --> 0.6 (1.8)

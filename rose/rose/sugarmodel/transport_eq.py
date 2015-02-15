@@ -189,19 +189,24 @@ def brc1_synth0(brc1_synth_coef, brc1_base_synth_coef, sl, ck):
 
 
 def ck_synth(ck_synth_coef, ck_base_synth_coef, sugar, auxin):
-  return (ck_synth_coef * hill(sugar,0.2,5) ) + ck_base_synth_coef
+  return (ck_synth_coef * hill(sugar,0.1,2)    + (ck_base_synth_coef))* (1 - hill(auxin,0.5, 2))
 
 
 def ck_decay(ck_decay_coef, ck_base_decay_coef, ck, auxin):
-  return (ck_decay_coef * auxin + ck_base_decay_coef) * ck
+  #return (ck_decay_coef * auxin +
+  return ck_base_decay_coef * (ck ** 2)
 
 
-def sl_synth(sl_synth_coef, sl_base_synth_coef,  auxin, sugar):
-  return (sl_synth_coef * auxin) + sl_base_synth_coef/(1+sugar)**2
+def sl_synth(sl_base_synth_coef, sl_synth_coef,   auxin, sugar):
+  return ((sl_synth_coef * auxin ))  + sl_base_synth_coef
+
+def sl_decay(sl_base_decay_coef, sl_decay_coef,  sugar, auxin,  sl):
+  return  sl_base_decay_coef * sl
+
 
 
 def slp_synth(slp_synth_coef, sugar):
-  return slp_synth_coef* (1 - hill(sugar))
+  return slp_synth_coef* (1 - hill(sugar,0.9,2))
 
 def brc1_synth(brc1_synth_coef, brc1_base_synth_coef, slp, ck):
   return (brc1_synth_coef * slp) + brc1_base_synth_coef
@@ -314,8 +319,8 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   
   #strigolactone
   dsl = basediffusion('sl', p, pu, pd, pl, P.sl_diffusion_coef)
-  dsl += sl_synth(p.sl_synth_coef, p.sl_base_synth_coef, p.auxin, p.sugar) 
-  dsl -= p.sl_decay_coef * p.sl
+  dsl += sl_synth(p.sl_base_synth_coef,  p.sl_synth_coef, p.auxin, p.sugar) 
+  dsl -= sl_decay(p.sl_base_decay_coef,  p.sl_decay_coef, p.sugar, p.auxin, p.sl) 
   p.sl += dsl*P.dt
   
   #perceived strigolactone
@@ -333,4 +338,3 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   
   
   return p
-

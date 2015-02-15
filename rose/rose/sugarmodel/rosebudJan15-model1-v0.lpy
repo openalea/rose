@@ -30,7 +30,7 @@ if not 'SUGAR' in globals():
 # to have rapid burst:
 initial_auxin_level = AUXIN # float(2.5) # instead of 10
 initial_sugar_level = SUGAR # float(0) # float(SUGAR)
-print initial_auxin_level, initial_sugar_level
+#print initial_auxin_level, initial_sugar_level
 
 auxin_synth_coef = 0
 auxin_decay_coef = 0
@@ -38,29 +38,40 @@ auxin_decay_coef = 0
 
 # to have slower burst
 ck_init  = 0
-ck_synth_coef = 0.11 # instead of 0.5
+ck_synth_coef = 0.35 # instead of 0.5
 ck_base_synth_coef = 0.1
 ck_decay_coef = 0.1
 ck_base_decay_coef = 0.1
 
 sl_init  = 0
-sl_synth_coef = 0.03
+sl_synth_coef = 0.02
 sl_base_synth_coef = 0.1
-sl_decay_coef = 0.1
+sl_decay_coef = 0.5
+sl_base_decay_coef = 0.1
 
 
-slp_init = 1
-slp_synth_coef = 0.3
+slp_init = 0
+slp_synth_coef = 0.05
 slp_decay_coef = 0.1
 
 pin_init = 0.5
 
-init_brc1 = 1
-brc1_synth_coef = 0.2
-brc1_base_synth_coef = 0.1
-brc1_decay_coef = 0.05
-brc1_base_decay_coef = 0.01
 
+
+init_brc1 = 0
+if 'BRC1' in globals():
+  brc1_synth_coef, brc1_base_synth_coef, brc1_decay_coef, brc1_base_decay_coef = BRC1
+else:
+# BRC1 = 0.2,  0, 0.05, 0.1
+# BRC1 = 4.2,  7.6, 7.2, 2.7
+
+  brc1_synth_coef = 4.2
+  brc1_base_synth_coef = 7.6 # 0.01
+
+  brc1_decay_coef = 7.2
+  brc1_base_decay_coef = 2.7
+
+#print brc1_synth_coef, brc1_base_synth_coef, brc1_decay_coef, brc1_base_decay_coef
 
 class SimuParameters:
   innate_polarity = True
@@ -119,7 +130,7 @@ set_simu_parameters(SimuParameters())
 
 # Graphical parameters 
 max_pin_value = 1
-max_auxin_value =  max(2*max(initial_auxin_level, initial_sugar_level),30)
+max_auxin_value =  max(2*max(initial_auxin_level, initial_sugar_level),10)
 lwidth = 0.02
 
 
@@ -157,6 +168,10 @@ propcolorm = [context().turtle.getMaterial(c).diffuseColor() for c in propcolors
 propcolorm = [(c.red,c.green,c.blue) for c in propcolorm]
 propcolorm = [(0 if c[0] == 0 else 255,0 if c[1] == 0 else 255,0 if c[2] == 0 else 255) for c in propcolorm]
 
+def End(lstring):
+  p = lstring[2].p
+  #print 'SLp/SL ratio', p.slp/p.sl
+
 def EndInterpretation():
    px,py = 0.7, 0.7
    nproduce @M(0.9,0.9) Label(str(getIterationNb()))
@@ -165,6 +180,9 @@ def EndInterpretation():
 
 wscale = 0.7
 pinit = (-0.0,-0.5)
+asize = 0.05
+angapsize = 0.07
+ansize = 0.02
 
 def draw_property(p, prop, pos):
   val = 0.5*getattr(p,prop)/max_auxin_value
@@ -197,6 +215,7 @@ Axiom:
                             sl = sl_init,
                             sl_synth_coef = sl_synth_coef,
                             sl_base_synth_coef = sl_base_synth_coef,
+                            sl_base_decay_coef = sl_base_decay_coef,
                             sl_decay_coef=sl_decay_coef,
                             slp = slp_init,
                             slp_synth_coef = slp_synth_coef,
@@ -266,12 +285,13 @@ I(p) :
   BotAnchor  = (0,-0.1)
   nproduce ,(14) Arrow(posauxin + RightAnchor, possl + LeftAnchor)
   nproduce  Arrow(possugar+ RightAnchor, posck + LeftAnchor)
+  #nproduce  NotArrow(possugar+ RightAnchor, possl + LeftAnchor)
   nproduce  Arrow(possl + RightAnchor, posslp + LeftAnchor)
   nproduce  NotArrow(posauxin + RightAnchor, posck + LeftAnchor)
   nproduce  Arrow(posslp + RightAnchor,posbrc1 + LeftAnchor)
   nproduce  NotArrow(posck + RightAnchor,posbrc1 + LeftAnchor)
   intpoint = (posmidslslp[0], (possugar[1]+posmidslslp[1])/2)
-  nproduce Line( possugar + RightAnchor, intpoint) NotArrow(intpoint,posmidslslp+BotAnchor )
+  nproduce Line( possugar + RightAnchor, intpoint) NotArrow(intpoint,posmidslslp )
 
 
 
@@ -280,22 +300,20 @@ Arrow(start,target):
   target = sp(target)
   dir = (target-start)
   l = dir.normalize()
-  ratio = 0.8
-  ptarget = start+ dir*ratio*l
+  ptarget = start+ dir*(l-asize)
   #nproduce [@M(start[0],start[1],-0.1) ,(0) @O(0.02)]
   #nproduce [@M(target[0],target[1],-0.1) ,(0) @O(0.02)]
   
-  nproduce [@M(start[0],start[1]) _(0.01*wscale) OLineTo(0,ptarget[0],ptarget[1]) _(0.03*wscale) F(l*(1-ratio),0)]
+  nproduce [@M(start[0],start[1]) _(0.01*wscale) OLineTo(0,ptarget[0],ptarget[1]) _(0.03*wscale) F(asize,0)]
 
 NotArrow(start,target):
   start = sp(start)
   target = sp(target)
   dir = (target-start)
   l = dir.normalize()
-  ratio = 0.85
-  ptarget = start+ dir*ratio*l
+  ptarget = start+ dir*(l-angapsize)
   w = 0.07*wscale  
-  nproduce [@M(start[0],start[1]) _(0.01*wscale) OLineTo(0,ptarget[0],ptarget[1]) _(w) F(l*(0.05))]
+  nproduce [@M(start[0],start[1]) _(0.01*wscale) OLineTo(0,ptarget[0],ptarget[1]) _(w) F(ansize)]
 
 Line(start,target):
   start = sp(start)
