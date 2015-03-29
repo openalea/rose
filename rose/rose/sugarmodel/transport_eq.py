@@ -175,6 +175,9 @@ HillConstant  = 2
 def hill(x, k= HillConstant, n=1):
   return x**n/(k+x**n)
 
+def invhill(x, k= HillConstant, n=1):
+  return 1/(k+x**n)
+
 def ck_synth0(ck_synth_coef, ck_base_synth_coef, sugar, auxin):
   ratio = sugar/max(MINAUXINLEVEL,auxin)
   return (ck_synth_coef * ratio) + ck_base_synth_coef
@@ -188,32 +191,30 @@ def brc1_synth0(brc1_synth_coef, brc1_base_synth_coef, sl, ck):
 
 
 
-def ck_synth(ck_synth_coef, ck_base_synth_coef, sugar, auxin):
-  return (ck_synth_coef * hill(sugar,0.1,2)    + (ck_base_synth_coef))* (1 - hill(auxin,0.5, 2))
+def ck_synth(ck_base_synth_coef, ck_sugar_synth_coef, ck_sugar_k_synth_coef,  ck_auxin_k_synth_coef, sugar, auxin):
+  return (ck_base_synth_coef + ck_sugar_synth_coef * hill(sugar,ck_sugar_k_synth_coef,2))* invhill(auxin,ck_auxin_k_synth_coef, 2)
 
 
-def ck_decay(ck_decay_coef, ck_base_decay_coef, ck, auxin):
+def ck_decay(ck_base_decay_coef, ck):
   #return (ck_decay_coef * auxin +
   return ck_base_decay_coef * (ck ** 2)
 
 
-def sl_synth(sl_base_synth_coef, sl_synth_coef,   auxin, sugar):
-  return ((sl_synth_coef * auxin ))  + sl_base_synth_coef
+def sl_synth(sl_base_synth_coef, sl_auxin_synth_coef, auxin):
+  return (sl_auxin_synth_coef * auxin )  + sl_base_synth_coef
 
-def sl_decay(sl_base_decay_coef, sl_decay_coef,  sugar, auxin,  sl):
+def sl_decay(sl_base_decay_coef,  sl):
   return  sl_base_decay_coef * sl
 
 
 
-def slp_synth(slp_synth_coef, sugar):
-  return slp_synth_coef* (1 - hill(sugar,0.9,2))
 
-def brc1_synth(brc1_synth_coef, brc1_base_synth_coef, slp, ck):
-  return (brc1_synth_coef * slp) + brc1_base_synth_coef
+def slp_synth( slp_sugar_synth_coef, slp_sugar_k_synth_coef, sugar, sl):
+  return slp_sugar_synth_coef* invhill(sugar,slp_sugar_k_synth_coef,2) * sl
 
-def brc1_decay(brc1_decay_coef, brc1_base_decay_coef, ck):
-  return (brc1_decay_coef * ck) + brc1_base_decay_coef
 
+def brc1_synth(brc1_base_synth_coef, brc1_slp_synth_coef, brc1_ck_synth_coef,brc1_ck_k_synth_coef, slp, ck):
+  return brc1_base_synth_coef + (brc1_slp_synth_coef * slp) + (brc1_ck_synth_coef * invhill(ck,brc1_ck_k_synth_coef,2))
 
 
 
@@ -312,19 +313,19 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   
   # citokinin
   dck = basediffusion('ck', p, pu, pd, pl, P.ck_diffusion_coef)
-  dck += ck_synth(p.ck_synth_coef, p.ck_base_synth_coef, p.sugar, p.auxin) 
-  dck -= ck_decay(p.ck_decay_coef, p.ck_base_decay_coef, p.ck, p.auxin)
+  dck += ck_synth(p.ck_base_synth_coef, p.ck_sugar_synth_coef, p.ck_sugar_k_synth_coef,  p.ck_auxin_k_synth_coef, p.sugar, p.auxin) 
+  dck -= ck_decay( p.ck_base_decay_coef, p.ck)
   
   p.ck += dck*P.dt
   
   #strigolactone
   dsl = basediffusion('sl', p, pu, pd, pl, P.sl_diffusion_coef)
-  dsl += sl_synth(p.sl_base_synth_coef,  p.sl_synth_coef, p.auxin, p.sugar) 
-  dsl -= sl_decay(p.sl_base_decay_coef,  p.sl_decay_coef, p.sugar, p.auxin, p.sl) 
+  dsl += sl_synth(p.sl_base_synth_coef,  p.sl_auxin_synth_coef, p.auxin) 
+  dsl -= sl_decay(p.sl_base_decay_coef,  p.sl) 
   p.sl += dsl*P.dt
   
   #perceived strigolactone
-  dslp = slp_synth(p.slp_synth_coef, p.sugar) * p.sl 
+  dslp = slp_synth(p.slp_sugar_synth_coef, p.slp_sugar_k_synth_coef, p.sugar, p.sl) 
   dslp -= p.slp_decay_coef * p.slp
   
   p.slp += dslp*P.dt
@@ -332,9 +333,8 @@ def process_transport(p, pu = None, pd = None, pl = None, verbose = False):
   # brc1
   if hasattr(p,'brc1'):
     brc1 = p.brc1
-    dbrc1 = brc1_synth(p.brc1_synth_coef,p.brc1_base_synth_coef,p.slp,p.ck) 
-    dbrc1 -= brc1_decay(p.brc1_decay_coef,p.brc1_base_decay_coef ,p.ck)*brc1
+    dbrc1 = brc1_synth(p.brc1_base_synth_coef,p.brc1_slp_synth_coef,p.brc1_ck_synth_coef,p.brc1_ck_k_synth_coef,p.slp,p.ck) 
+    dbrc1 -= p.brc1_base_decay_coef*brc1
     p.brc1 += dbrc1*P.dt
-  
   
   return p
