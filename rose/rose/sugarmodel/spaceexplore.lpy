@@ -22,7 +22,7 @@ A(s) --> A(s+ds)
 interpretation:
 
 A(s):
-  l = Lsystem('rosebudJan15-model1-v0.lpy', {'SUGAR':1*s,'AUXIN':s})
+  l = Lsystem('rosebudJan15-model1-v1.lpy', {'SUGAR':1*s,'AUXIN':s})
   ls = l.iterate()
   produce @g(l.sceneInterpretation(ls))
   
