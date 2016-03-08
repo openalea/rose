@@ -1,42 +1,33 @@
 
 
-# to have slower burst
 ck_init  = 0
 if 'CK' in globals():
   ck_base_synth_coef, ck_sugar_synth_coef, ck_sugar_k_synth_coef, ck_auxin_k_synth_coef, ck_base_decay_coef    = CK
 else:
-  ck_base_synth_coef    = %f 
-  ck_sugar_synth_coef   = %f 
-  ck_sugar_k_synth_coef = %f  
-  ck_auxin_k_synth_coef = %f
-  ck_base_decay_coef    = %f
+  ck_base_synth_coef    = {} 
+  ck_sugar_synth_coef   = {} 
+  ck_sugar_k_synth_coef = {}  
+  ck_auxin_k_synth_coef = {}
+  ck_base_decay_coef    = {}
 
 sl_init  = 0
 if 'SP' in globals():
-  sl_auxin_synth_coef, sl_base_synth_coef, sl_base_decay_coef = SL
+  sl_auxin_synth_coef, sl_base_synth_coef, sl_base_decay_coef  = SL
 else:
-  sl_auxin_synth_coef = %f
-  sl_base_synth_coef  = %f
-  sl_base_decay_coef  = %f
-
-
-slp_init = 0
-if 'SLP' in globals():
-  slp_sugar_synth_coef, slp_sugar_k_synth_coef, slp_decay_coef = SLP
-else:
-  slp_sugar_synth_coef   = %f
-  slp_sugar_k_synth_coef = %f
-  slp_decay_coef         = %f
-
+  sl_auxin_synth_coef = {}
+  sl_base_synth_coef  = {}
+  sl_base_decay_coef  = {}
 
 
 init_brc1 = 0
 if 'BRC1' in globals():
-  brc1_base_synth_coef, brc1_slp_synth_coef, brc1_ck_synth_coef, brc1_ck_k_synth_coef, brc1_base_decay_coef = BRC1
+  brc1_base_synth_coef, brc1_ck_synth_coef, brc1_ck_k_synth_coef, brc1_sl_synth_coef, brc1_sl_k_synth_coef, brc1_base_decay_coef  = BRC1
 else:
-  brc1_base_synth_coef = %f
-  brc1_slp_synth_coef  = %f
-  brc1_ck_synth_coef   = %f
-  brc1_ck_k_synth_coef = %f
-  brc1_base_decay_coef = %f
+  brc1_base_synth_coef = {}
+  brc1_ck_synth_coef   = {}
+  brc1_ck_k_synth_coef = {}
+  brc1_sl_synth_coef   = {}
+  brc1_sl_k_synth_coef = {}
+  brc1_base_decay_coef = {}
+
 

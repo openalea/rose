@@ -1,9 +1,11 @@
+import matplotlib
+matplotlib.use('Qt4Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 from openalea.lpy import Lsystem
 
-lsysfile = 'rosebudJan15-model1-v1.lpy'
-
+#lsysfile = 'rosebudJune15v2-model1.lpy'
+modelfile = 'model2.py'
 
 
 def generate_fig(target = 'ck', title = 'CK', targetvalues = None):
@@ -46,7 +48,7 @@ def generate_fig2(target = 'ck', title = 'CK'):
    
 def generate_fig_func2(func, title,legendpos = (1.07, 1)):
     auxincontents = [0,1,2.5,5]
-    sugarcontents = [0.1, 0.5, 1 , 2.5]
+    sugarcontents = [0, 0.1, 0.5, 1 , 2.5]
 
     N = len(sugarcontents)
     M = len(auxincontents)
@@ -83,21 +85,157 @@ def generate_fig_func2(func, title,legendpos = (1.07, 1)):
     plt.show()
 
 
+import cellproliferation; reload(cellproliferation) 
 from cellproliferation import burst_delay_law
 import optimize 
-#def generate_fig_func3(paramset = ['ck','sl','slp','brc1'], auxincontents = [0,1,2.5,5], sugarcontents = [0.1, 0.5, 1 , 2.5], legendpos = (1.07, 1)):
-def generate_fig_func3(paramset = ['sl','slp','ck','brc1','burst'], 
-                       # auxincontents = [0,1,2.5,5], sugarcontents = [0.1, 0.5, 1 , 2.5], 
-                       auxincontents = [0,2.5], sugarcontents = [0.0, 1 , 2.5], 
+
+def generate_fig_compound(paramset = ['sl','ck','brc1','burst'], 
+                       auxincontents = [0,1,2.5,5], sugarcontents = [0.0, 0.1, 0.5, 1 , 2.5], 
+                        # auxincontents = [0,2.5], sugarcontents = [0.0, 1 , 2.5], 
                        legendpos = (2, 1), 
-                       func = {'burst' : lambda res : burst_delay_law(res.brc1)}, 
-                       title = {'burst' : 'burst delay'} , 
-                       targets = {'sl' : optimize.sltargets, 'slp' : optimize.slptargets, 'ck' : optimize.cktargets, 'brc1' : optimize.brc1targets}):
+                       func = {'burst' : lambda res : burst_delay_law(res['brc1'])}, 
+                       title = {'burst' : 'simulated burst delay'} , 
+                       targets = {'sl' : optimize.sltargets, 
+                                  'slp' : optimize.slptargets, 
+                                  'ck' : optimize.cktargets, 
+                                  'brc1' : optimize.brc1targets }): # estimate_brc1_from_duration(True)
 
     N = len(sugarcontents)
     M = len(auxincontents)
     width = 1/float(N+1)       # the width of the bars
     ind = np.arange(N)  # the x locations for the groups
+
+    auxintargetcontents = [0, 2.5] 
+    sugartargetcontents = [0, 1 , 2.5]
+
+    stcind = []
+    for st in sugartargetcontents:
+       stcind.append(sugarcontents.index(st))
+    stcind = np.array(stcind)
+
+    atcind = []
+    for at in auxintargetcontents:
+       atcind.append(auxincontents.index(at))
+    atcind = np.array(atcind)
+
+    targetindices = None
+    for i in atcind:
+        v = i + 1
+        if targetindices is None : targetindices = stcind+v*width
+        else : targetindices = np.concatenate((targetindices,stcind+v*width))
+
+    targetcontents = dict([(pname, []) for pname in paramset])
+    for auxin in auxincontents:
+        for pname in paramset:
+            targetcontents[pname].append(list())
+        for sugar in sugarcontents:
+            namespace = { } 
+            execfile(modelfile, namespace)
+            eval_model = namespace['eval_model']
+            sl, ck, brc1 = eval_model(auxin, sugar)
+            resvalues = { 'sl' : sl , 'ck' : ck, 'brc1' : brc1 }
+
+            for pname in paramset:
+                if func.has_key(pname) : getval = func[pname]
+                else : getval = lambda r :  r[pname]
+                targetcontents[pname][-1].append(getval(resvalues))
+
+    print targetcontents
+
+    dc = 0.8/(M-1)
+    colors = [0.9]+[0.9-i*dc for i in xrange(1,M-1)]+[0.1]
+    nbparam = len(paramset)
+
+    from math import sqrt
+    nbrow = round(sqrt(nbparam))
+    nbcol = nbrow
+    if nbrow * (nbcol -1) > nbparam: nbcol -= 1
+    elif nbrow * nbcol  < nbparam: nbrow += 1
+
+    #plt.close('all')
+    fig, axes = plt.subplots(int(nbrow), int(nbcol))
+    for iparam, pname in enumerate(paramset):
+        # ax = plt.subplot(nbrow, nbcol,iparam+1)
+        ax = axes[iparam//nbcol][iparam%nbcol]
+        i = 0.5
+        rects = []
+        for target,color in zip(targetcontents[pname], colors):
+            rects.append(ax.bar(ind+i*width, target, width, color=[color,color,color]))
+            i += 1
+
+        if pname == 'brc1':
+                import optimize; reload(optimize)
+                from optimize import estimate_brc1_from_duration
+                tcolors = [[1,1,1],[0,0.4,0],[0,1,0]]
+                i = 0
+                for tval, tcond in  [estimate_brc1_from_duration(False, False, True),    # interpolationduration # white
+                                     estimate_brc1_from_duration(False, True,  False),   # measuredduration # dark green
+                                     estimate_brc1_from_duration(True,  False, False)]:  # brc1measure      # green
+                    tind = [ (auxincontents.index(aux) + 1) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
+                    ax.plot(tind,tval,'ro',color=tcolors[i], label = 'Target')
+                    print 'plot', tval, tcond
+                    i += 1
+
+        elif targets.has_key(pname):
+            if type(targets[pname]) == dict:
+                tval, tcond = targets[pname]
+                tind = [ (auxincontents.index(aux) + 1) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
+                ax.plot(tind,tval,'ro',color=[0,1,0], label = 'Target')
+            else:
+                ax.plot(targetindices,targets[pname],'ro',color=[0,1,0], label = 'Target')
+        
+        if pname == 'brc1':
+            from cellproliferation import brc1_threshold
+            ax.plot([0,N],[brc1_threshold,brc1_threshold])
+            ax.axis([0,N,0,15])
+
+
+        # add some text for labels, title and axes tic
+        ax.set_ylabel(title.get(pname,'Simulated relative '+pname+' contents'))
+        ax.set_xticks(ind+width*(0.5+len(auxincontents)/2))
+
+        ax.set_xticklabels( ['Manitol' if sugar == 0 else str(sugar*100)+' mM' for sugar in sugarcontents] )
+
+    plt.legend( rects, [str(aux)+' $\mu$M NAA' for aux in auxincontents] ,bbox_to_anchor=legendpos)
+    mngr = plt.get_current_fig_manager()
+    mngr.window.setGeometry(1000,100,800,800)
+    plt.show()
+
+
+def generate_fig_compound_old(paramset = ['sl','ck','brc1','burst'], 
+                       auxincontents = [0,1,2.5,5], sugarcontents = [0.0, 0.1, 0.5, 1 , 2.5], 
+                        # auxincontents = [0,2.5], sugarcontents = [0.0, 1 , 2.5], 
+                       legendpos = (2, 1), 
+                       func = {'burst' : lambda res : burst_delay_law(res.brc1)}, 
+                       title = {'burst' : 'simulated burst delay'} , 
+                       targets = {'sl' : optimize.sltargets, 
+                                  'slp' : optimize.slptargets, 
+                                  'ck' : optimize.cktargets, 
+                                  'brc1' : optimize.brc1targets }): # estimate_brc1_from_duration(True)
+
+    N = len(sugarcontents)
+    M = len(auxincontents)
+    width = 1/float(N+1)       # the width of the bars
+    ind = np.arange(N)  # the x locations for the groups
+
+    auxintargetcontents = [0, 2.5] 
+    sugartargetcontents = [0, 1 , 2.5]
+
+    stcind = []
+    for st in sugartargetcontents:
+       stcind.append(sugarcontents.index(st))
+    stcind = np.array(stcind)
+
+    atcind = []
+    for at in auxintargetcontents:
+       atcind.append(auxincontents.index(at))
+    atcind = np.array(atcind)
+
+    targetindices = None
+    for i in atcind:
+        v = i + 1
+        if targetindices is None : targetindices = stcind+v*width
+        else : targetindices = np.concatenate((targetindices,stcind+v*width))
 
     targetcontents = dict([(pname, []) for pname in paramset])
     for auxin in auxincontents:
@@ -112,7 +250,6 @@ def generate_fig_func3(paramset = ['sl','slp','ck','brc1','burst'],
                 else : getval = lambda r :  getattr(r,pname)
                 targetcontents[pname][-1].append(getval(res))
 
-    print targetcontents
     dc = 0.8/(M-1)
     colors = [0.9]+[0.9-i*dc for i in xrange(1,M-1)]+[0.1]
     nbparam = len(paramset)
@@ -123,17 +260,43 @@ def generate_fig_func3(paramset = ['sl','slp','ck','brc1','burst'],
     if nbrow * (nbcol -1) > nbparam: nbcol -= 1
     elif nbrow * nbcol  < nbparam: nbrow += 1
 
+    #plt.close('all')
+    fig, axes = plt.subplots(int(nbrow), int(nbcol))
     for iparam, pname in enumerate(paramset):
-        ax = plt.subplot(nbrow, nbcol,iparam+1)
+        # ax = plt.subplot(nbrow, nbcol,iparam+1)
+        ax = axes[iparam//nbcol][iparam%nbcol]
         i = 0.5
         rects = []
         for target,color in zip(targetcontents[pname], colors):
             rects.append(ax.bar(ind+i*width, target, width, color=[color,color,color]))
             i += 1
 
-        if targets.has_key(pname):
-            indices = np.concatenate((ind+width,ind+2*width))
-            ax.plot(indices,targets[pname],'ro',color=[0,1,0], label = 'Target')
+        if pname == 'brc1':            
+                import optimize; reload(optimize)
+                from optimize import estimate_brc1_from_duration
+                tcolors = [[0,1,1],[0,1,0],[1,0,0]]
+                i = 0
+                for tval, tcond in  [estimate_brc1_from_duration(False, False, True),    # interpolationduration #
+                                     estimate_brc1_from_duration(False, True,  False),   # measuredduration
+                                     estimate_brc1_from_duration(True,  False, False)]:  # brc1measure
+                    tind = [ (auxincontents.index(aux) + 1) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
+                    ax.plot(tind,tval,'ro',color=tcolors[i], label = 'Target')
+                    print 'plot', tval
+                    i += 1
+
+        elif targets.has_key(pname):
+            if type(targets[pname]) == dict:
+                tval, tcond = targets[pname]
+                tind = [ (auxincontents.index(aux) + 1) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
+                ax.plot(tind,tval,'ro',color=[0,1,0], label = 'Target')
+            else:
+                ax.plot(targetindices,targets[pname],'ro',color=[0,1,0], label = 'Target')
+        
+        if pname == 'brc1':
+            from cellproliferation import brc1_threshold
+            ax.plot([0,N],[brc1_threshold,brc1_threshold])
+            ax.axis([0,N,0,15])
+
 
         # add some text for labels, title and axes tic
         ax.set_ylabel(title.get(pname,'Simulated relative '+pname+' contents'))
@@ -214,5 +377,6 @@ if __name__ == '__main__':
         func = 'generate_fig_'+data
         globals()[func]()
     else:
+        generate_fig_compound()
         #generate_fig_func3()
-        generate_fig2('brc1','BRC1')
+        #generate_fig2('brc1','BRC1')

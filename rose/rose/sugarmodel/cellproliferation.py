@@ -61,10 +61,13 @@ def generate_brc1_levels():
     brc1levels =  targetcontents
     print brc1levels    
 
+import numpy as np
+brc1targets = np.array([1.,  0.5, 0.4, 2.9, 2.1, 1.])
 def generate_measured_brc1_levels():
     global brc1levels, sugarlevels, auxinlevels, durations
-    import optimize
-    t = optimize.brc1targets
+    #import optimize
+    #t = optimize.brc1targets
+    t = brc1targets
     brc1levels = [[t[0], t[1], t[2]  ],
                   [t[3], t[4], t[5]  ]]
     durations =  [[3 , 1.5, 1],
@@ -115,9 +118,10 @@ def showbrc1durationrelation():
     for i in xrange(nbauxcond):
         print '-',brc1values[i],durationvalues[i]
         #plt.plot(brc1values[i],durationvalues[i],'ro',color=colors[3-i], label = str(int(sugarlevels[i]*100))+' mM sucrose')
-        plt.plot(brc1values[i],durationvalues[i],'ro',color=colors[3-i], label = str(auxinlevels[i])+' $\mu$M NAA')
+        plt.plot(durationvalues[i],brc1values[i],'ro',color=colors[3-i], label = str(auxinlevels[i])+' $\mu$M NAA')
     print x
     print y
+    x,y = y,x
     x = np.array(x)
     slope, intercept, r_value, p_value, std_err = stats.linregress(x,y)
     print slope, intercept, r_value, p_value, std_err   
@@ -125,8 +129,8 @@ def showbrc1durationrelation():
     plt.plot( x, slope*x+intercept, '-k', label = ('$y=%.4f x '+('+ ' if intercept > 0 else '') +'%.4f, r^2=%.4f$') % (slope, intercept, r_value)) 
     plt.margins(0.2)
     plt.legend(loc=2)
-    plt.ylabel('Burst delay')
-    plt.xlabel('BRC1 level')
+    plt.xlabel('Burst delay')
+    plt.ylabel('BRC1 level')
     plt.show()    
 
 def estimate_param(param):
@@ -144,14 +148,21 @@ def normed_estimate_param(param):
     print param, res
     return res
 
+brc1_threshold = 2.5
+slope = 0.281857451404
+intercept = 0.630237580994
+#slope = 0.257019438445
+#intercept = 0.204967602592
+#slope = 4.6978021978
+#intercept = -1.0978021978
 
 def burst_delay_law(brc1):
-    slope = 4.6978021978
-    intercept = -1.0978021978
-    threshold = 2.1
-    if brc1 < threshold : return slope * brc1 + intercept
+    if brc1 < brc1_threshold : return  (brc1 - intercept)/ slope 
     return 0
 
+def brc1_law(duration):
+    if not duration is None : return  duration * slope + intercept # (duration - intercept)/ slope 
+    return None
 
 
 def generate_burst_delay_fig():
@@ -161,13 +172,13 @@ def generate_burst_delay_fig():
     generate_fig_func2(lambda res : burst_delay_law(res.brc1),'Burst Delay',legendpos=(0.92,1.1))
 
 if __name__ == '__main__':
-    generate_burst_delay_fig()
+    #generate_burst_delay_fig()
     #generate_brc1_levels()
-    #generate_measured_brc1_levels()
+    generate_measured_brc1_levels()
     #try:
     #    checkbrc1inhibitionlevel()
     #except:
     #    print 'No valid inhibition level'
-    #showbrc1durationrelation()
+    showbrc1durationrelation()
     #checkbrc1inhibitionlevel()
     # plot_cell_number_range(10,  10)
