@@ -30,7 +30,7 @@ def simu(params, attname, conditions=conditions, withgr24 = False):
 
 
 def get_param_init(paramnames):
-    from openalea.lpy import Lsystem
+    # from openalea.lpy import Lsystem
     namespace = {}
     execfile(paramfile, namespace)
     # lsys = Lsystem(lsysfile)
@@ -205,7 +205,7 @@ def estimate_brc1_duration_law():
 
 
 
-from cellproliferation import brc1_law
+from model2 import brc1_law
 
 
 def estimate_brc1_from_duration(includebrc1measure = True,  
@@ -233,7 +233,6 @@ def estimate_brc1_from_duration(includebrc1measure = True,
             sugi, sugval = sug
             duration = ldurations[auxi][sugi]
             brc1 = brc1_law(duration)
-            print duration, '-->', brc1
             if not brc1 is None: 
                 valres.append(brc1)
                 condres.append((auxval,sugval))

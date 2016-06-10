@@ -1,5 +1,6 @@
 from numpy import arange, array
 from numpy.linalg import norm
+from model2 import burst_delay_law, brc1_law
 
 def cell_number(nbcycle, proliferationratio, initialnumber):
     if proliferationratio > 1 : proliferationratio = 1
@@ -148,21 +149,7 @@ def normed_estimate_param(param):
     print param, res
     return res
 
-brc1_threshold = 2.5
-slope = 0.281857451404
-intercept = 0.630237580994
-#slope = 0.257019438445
-#intercept = 0.204967602592
-#slope = 4.6978021978
-#intercept = -1.0978021978
 
-def burst_delay_law(brc1):
-    if brc1 < brc1_threshold : return  (brc1 - intercept)/ slope 
-    return 0
-
-def brc1_law(duration):
-    if not duration is None : return  duration * slope + intercept # (duration - intercept)/ slope 
-    return None
 
 
 def generate_burst_delay_fig():

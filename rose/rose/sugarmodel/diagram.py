@@ -140,7 +140,7 @@ def generate_fig_compound(paramset = ['sl','ck','brc1','burst'],
                 else : getval = lambda r :  r[pname]
                 targetcontents[pname][-1].append(getval(resvalues))
 
-    print targetcontents
+    print 'Simulation:',targetcontents
 
     dc = 0.8/(M-1)
     colors = [0.9]+[0.9-i*dc for i in xrange(1,M-1)]+[0.1]
@@ -173,7 +173,6 @@ def generate_fig_compound(paramset = ['sl','ck','brc1','burst'],
                                      estimate_brc1_from_duration(True,  False, False)]:  # brc1measure      # green
                     tind = [ (auxincontents.index(aux) + 1) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
                     ax.plot(tind,tval,'ro',color=tcolors[i], label = 'Target')
-                    print 'plot', tval, tcond
                     i += 1
 
         elif targets.has_key(pname):
@@ -185,7 +184,7 @@ def generate_fig_compound(paramset = ['sl','ck','brc1','burst'],
                 ax.plot(targetindices,targets[pname],'ro',color=[0,1,0], label = 'Target')
         
         if pname == 'brc1':
-            from cellproliferation import brc1_threshold
+            from model2 import brc1_threshold
             ax.plot([0,N],[brc1_threshold,brc1_threshold])
             ax.axis([0,N,0,15])
 
