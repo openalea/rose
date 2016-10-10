@@ -11,8 +11,8 @@ from math import *
 
 
 def bratio(sugar, gr24 = 1.4):
-    ck = 1.4
-    sl = 1.2
+    ck = 0.4
+    sl = 0.2
     a = brc1_plateau(ck, sl, sugar, gr24, 0)
     b = brc1_plateau(ck, sl, sugar, 0, 0)
     return a / b, a, b
@@ -21,18 +21,11 @@ def bratioofratio(gr24 = 1.4):
     return bratio(0.5, gr24)[0] / bratio(1, gr24)[0]
 
 def test_gr24():
-    #for g in arange(0,10,0.1):
-    #    print g, bratioofratio(g), 'Sugar 0.5 :', bratio(0.5,g) , 'Sugar 1 :', bratio(1,g)
-    g = 0.5
+    g = 0.2
     print g, bratioofratio(g), bratio(0.5,g), bratio(1,g)
 
 
 
-#Auxin : 1, Sucre : 0.5
-#Sans GR24: 1.3 ; Avec GR24 : 2.2 : Ratio : 1.7
-
-#Auxin : 1, Sucre : 1
-#Sans GR24: 0.5 ; Avec GR24 : 0.7 : Ratio : 1.4
 def gr24simu(attname, condition, gr24value = 0, bapvalue = 0):
     from openalea.lpy import Lsystem
     targetcontents = []
@@ -52,26 +45,6 @@ def gr24simu(attname, condition, gr24value = 0, bapvalue = 0):
     return targetcontents
 
 
-#Auxin : 2.5, Sucre : 0.5
-#Sans BAP:  ; Avec BAP : : Ratio : 
-
-#Auxin : 2.5, Sucre : 1
-#Sans BAP:  ; Avec BAP :  : Ratio : 
-
-
-def test_gr24_simu():
-    sugarmax = 1.
-    conditions = [(1.,0.5),(1.,sugarmax)]
-    ref = gr24simu('brc1', conditions)
-    print 'Reference: ',ref
-    expected = (ref[0]*1.7,ref[1]*1.4)
-    print 'Expected:  ', expected, 'Ratio : 1.7, 1.4. Ratio of ratio : 1.2'
-    gr24 = 0.75
-    print 'GR24 :', gr24, #'(sugarmax=',sugarmax,')'
-    gr24exp = gr24simu('brc1', [(1,0.5),(1,sugarmax)], gr24)
-    r1, r2 = gr24exp[0]/ref[0],gr24exp[1]/ref[1]
-    print 'Obtained:  ', gr24exp, 'Ratio :',(r1, r2),'. Ratio of ratio :', r1/r2
-
 
 def plot_brc1_gr24():
     import matplotlib.pyplot as plt
@@ -80,12 +53,12 @@ def plot_brc1_gr24():
     possugar0_5 = [i for i,v in enumerate(sugar) if abs(v-0.5) < delta/2][0]
     possugar1 = [i for i,v in enumerate(sugar) if abs(v-1.0) < delta/2][0]
 
-    ck = 1.4
-    sl = 1.2
+    ck = 0.4
+    sl = 0.2
     gr24ev = lambda gr24 : map(lambda x : eval_model(1, x, gr24=gr24)[2], sugar )
     gr24ref = gr24ev(0)
     vmax = 0
-    for gr24 in arange(0,10.1,1):
+    for gr24 in arange(0,1.1,0.1):
         gr24v = gr24ev(gr24) 
         vmax = max(vmax,max(gr24v))
         plt.plot(sugar, gr24v , label=str(gr24)+' '+str(round(gr24v[possugar0_5]/gr24ref[possugar0_5],2))+' '+str(round(gr24v[possugar1]/gr24ref[possugar1],2)))
@@ -94,7 +67,7 @@ def plot_brc1_gr24():
     plt.plot([1,1],[0,ceil(vmax)],'r')
     plt.show()
 
-from cellproliferation import brc1_threshold
+from model2 import brc1_threshold
 def plot_brc1_bap():
     import matplotlib.pyplot as plt
     delta = 0.01
@@ -102,8 +75,8 @@ def plot_brc1_bap():
     possugar0_5 = [i for i,v in enumerate(sugar) if abs(v-0.5) < delta/2][0]
     possugar1 = [i for i,v in enumerate(sugar) if abs(v-1.0) < delta/2][0]
 
-    ck = 1.4
-    sl = 1.2
+    ck = 0.4
+    sl = 0.2
     bapev = lambda bapv : map(lambda x : eval_model(2.5, x, bap=bapv)[2], sugar )
     bapref = bapev(0)
     vmax = 0
@@ -118,11 +91,11 @@ def plot_brc1_bap():
     plt.show()
 
 
-from cellproliferation import burst_delay_law
+from model2 import burst_delay_law
 def compare_bap_desinhibition():
     sugar = 1
-    bap   = 0.7 # 1.3 # 1.5
-    gr24  = 10
+    bap   = 0.2 # 1.3 # 1.5
+    gr24  = 0.2
     auxin = 1 # 2.5
     for sugar in [0.5,1]:
         sl, ck, brc1a = eval_model(auxin = 0,   sugar = sugar)

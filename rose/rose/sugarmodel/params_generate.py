@@ -1,5 +1,4 @@
 
-#param_file = 'params4_init.py'
 
 def param_order(param_file):
     f = file(param_file,'r')

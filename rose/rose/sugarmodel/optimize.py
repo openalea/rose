@@ -2,7 +2,6 @@ import numpy as np
 from numpy.linalg import norm
 import itertools
 
-#lsysfile = 'rosebudJune15v2-model1.lpy'
 modelfile = 'model2.py'
 paramfile = 'params10_init.py'
 
@@ -30,10 +29,8 @@ def simu(params, attname, conditions=conditions, withgr24 = False):
 
 
 def get_param_init(paramnames):
-    # from openalea.lpy import Lsystem
     namespace = {}
     execfile(paramfile, namespace)
-    # lsys = Lsystem(lsysfile)
     return np.array([namespace[p] for p in paramnames])
 
 
@@ -68,61 +65,49 @@ from params_generate import *
 
 ######  CK #########
 
-#cktargets = np.array([1., 1.3, 2.1, 0.25, 0.4, 0.6])
-#cktargets = np.array([1., 1.9, 2.1, 0.25, 0.5, 0.6])
-cktargets = np.array([1., 1.9, 1.9, 0.25, 0.5, 0.5])
+cktargets = np.array([0.75, 0.97, 1., 1.1, 0.51, 0.59, 0.58, 0.59, 0.23, 0.36, 0.46, 0.51])
+ckconditions = list(itertools.product([0, 1, 2.5],[0.1, 0.5, 1 , 2.5]))
+
 def optimize_ck(generate = True):
     import diagram
-    paramnames = get_param_names('CK',paramfile) # ['ck_base_synth_coef', 'ck_sugar_k_synth_coef', 'ck_auxin_k_synth_coef', 'ck_base_decay_coef']
-    ckevalsimu = evalsimu(cktargets,'ck')
+    paramnames = get_param_names('CK',paramfile)
+    ckevalsimu = evalsimu(cktargets,'ck',ckconditions)
+    #ckevalsimu = evalsimu(cktargets,'ck')
     ckinit = get_param_init(paramnames)
     print 'Ck Init :',ckinit
     result, ok = optimize(ckevalsimu,ckinit)
     if generate: 
         update_param_file(paramfile,dict(zip(paramnames, result)))
         diagram.generate_fig_ck(cktargets)
+	
 
 ######  SL #########
 
-sltargets = (1., 1.5)
-sltargets = np.array([sltargets[0],sltargets[0],sltargets[0],sltargets[1],sltargets[1],sltargets[1]])
+sltargets = (0.1, 1.)
+sltargets = np.array([sltargets[0],sltargets[0],sltargets[1],sltargets[1]])
+slconditions = list(itertools.product([0,2.5],[1 , 2.5]))
 
 def optimize_sl(generate = True):
     import diagram
-    paramnames = get_param_names('SL',paramfile) # ['sl_auxin_synth_coef', 'sl_base_synth_coef', 'sl_base_decay_coef']
-    slevalsimu = evalsimu(sltargets,'sl')
+    paramnames = get_param_names('SL',paramfile)
+    slevalsimu = evalsimu(sltargets,'sl',slconditions)
     slinit = get_param_init(paramnames)
     result, ok = optimize(slevalsimu,slinit)
     if generate: 
         update_param_file(paramfile,dict(zip(paramnames, result)))
         diagram.generate_fig_sl(sltargets)
 
-######  SLP #########
-
-slptargets = np.array([1., 0.5, 0.2, 1.1, 0.6, 0.3])
-
-def optimize_slp(generate = True):
-    import diagram
-    paramnames = get_param_names('SLP',paramfile) # ['slp_sugar_synth_coef', 'slp_sugar_k_synth_coef', 'slp_decay_coef']
-    slpevalsimu = evalsimu(slptargets,'slp')
-    slpinit = get_param_init(paramnames)
-    result, ok = optimize(slpevalsimu,slpinit)
-    if generate: 
-        update_param_file(paramfile,dict(zip(paramnames, result)))
-        diagram.generate_fig_slp(slptargets)
 
 ######  BRC1 #########
 
 brc1targets = np.array([1.,  0.8, 3.11, 1.5])
 brc1conditions = list(itertools.product([0,2.5],[1 , 2.5]))
 
-#brc1targets = np.array([1.,  0.5, 0.4, 2.9, 2.1, 1.])
-#brc1conditions = conditions # 
 
-def optimize_brc1(generate = True, brc1targets = brc1targets, conditions = brc1conditions, randomseed = True):
+def optimize_brc1(generate = True, brc1targets = brc1targets, conditions = brc1conditions, randomseed = False):
     import diagram; reload(diagram)
     from random import uniform
-    paramnames =  get_param_names('BRC1',paramfile) # ['brc1_base_synth_coef', 'brc1_slp_synth_coef', 'brc1_ck_synth_coef', 'brc1_ck_k_synth_coef','brc1_base_decay_coef']
+    paramnames =  get_param_names('BRC1',paramfile)
     print paramnames
     brc1evalsimu = evalsimu(np.array(brc1targets),'brc1',conditions)
     if randomseed:
@@ -139,7 +124,7 @@ def optimize_brc1(generate = True, brc1targets = brc1targets, conditions = brc1c
     result = bestresult[0]
     if generate: 
         update_param_file(paramfile,dict(zip(paramnames, result)))
-        diagram.generate_fig_compound()
+        diagram.generate_fig_brc1()
 
 sugarlevels = [0.1, 0.5, 1 ,  2.5]
 auxinlevels = [0,   1,   2.5]
@@ -149,20 +134,11 @@ measureddurations =  [[3.2 , 2.7, 1, 0.9],
                       [None, None, None, 3.1]]
 
 interpolateddurations = [[None ,  None, None, None],
-                         [25, None, None, None],
-                         [50, 22, None, None]]
+                         [14, None, None, None],
+                         [40, 14, None, None]]
 
-
-#durations =  [[3 ,  2, 1.5, 1],
-#              [7.4, 6, 3.3, 2],
-#              [14, 12, 9, 3.7],
-#              [25, 22, 16, 7]]
 
 completedurations =  [[measureddurations[i][j] if not measureddurations[i][j] is None else interpolateddurations[i][j] for j in xrange(len(measureddurations[i])) ] for i in xrange(len(measureddurations)) ]
-#              [3 ,  2, 1.5, 1],
-#              [7.4, 6, 3.3, 2],
-#              [14, 12, 9, 3.7],
-#              [30, 25, 16, 7]]
 
 def estimate_brc1_duration_law():
     import numpy as np
@@ -214,8 +190,6 @@ def estimate_brc1_from_duration(includebrc1measure = True,
     if includebrc1measure:
         valres  = list(brc1targets)
         condres = list(brc1conditions)
-        #del valres[0]; del condres[0] # remove auxin = 0, sugar = manitol
-        #del valres[2]; del condres[2] # remove auxin = 2.5, sugar = manitol
     else:
         valres  = []
         condres = []
@@ -240,6 +214,7 @@ def estimate_brc1_from_duration(includebrc1measure = True,
 
 
 ######### TOTAL ########
+## obsolete
 
 def optimize_all(generate = True):
     import diagram
