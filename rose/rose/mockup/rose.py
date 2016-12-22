@@ -158,6 +158,7 @@ def files2MTGs(cropdict):
     - shift of the real plant as 1st value for each key
     - shift and rotation as further values, if any
     @return a list of MTG objects that were build from the dict
+    @TODO  ajouter la propriété plantName qui peut comporter le fait qu'il s'agit d'une plante de remplissage
     '''
     listofmtgs = []; 
     # write the node code here.

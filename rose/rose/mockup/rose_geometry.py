@@ -1758,8 +1758,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
         pt = position(n)
         symbol = n.label[0]
         turtle.setId(v)
-        currentColor=turtle.getColor()
-        
+        currentColor=turtle.getColor()        
 
         if symbol in ['E', 'R']:
             if n.Diameter is None:
@@ -1789,7 +1788,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             
             lSepalStore.append(points)
             #print "lSepalStore.APPEND"
-            #sepal_computer(points,turtle)
+            #sepal_computer(points,turtle) # unused ?
 	    
         elif n.label == "B1" :
             #print "list(n.children())[0].Diameter=%s" % list(n.children())[0].Diameter
@@ -1917,7 +1916,8 @@ def traverse_with_turtle(g, vid, visitor, turtle=None):
  
 ######################################################
 def TurtleFrame(g, visitor):
-    """ The function that sets the turtle up and calls the function traverse_with_turtle that walks through the MTG tree, with  "visitor" as a parameter.
+    """ The function that sets the turtle up and calls the function traverse_with_turtle
+    that walks through the MTG tree, with  "visitor" as a parameter.
 
     :param g: an MTG object to explore.
     :param visitor: the function to be called at every node of the "g" MTG.
@@ -1925,6 +1925,7 @@ def TurtleFrame(g, visitor):
     :calls: the traverse_with_turtle function, with the turtle as an argument
     :return: the scene collected by the turtle during the walkthrough.
     """
+    debug = True
     n = g.max_scale()
     turtle = pgl.PglTurtle()
     ## we want to change the default color
@@ -1933,6 +1934,8 @@ def TurtleFrame(g, visitor):
 
     for plant_id in g.vertices(scale=1):
         plant_node = g.node(plant_id)
+        if debug :
+            print "plant_node = %s" % plant_id
         # moved the "position" function away
         origin = pgl.Vector3(plant_node.XX, plant_node.YY, plant_node.ZZ)
         turtle.move(origin)
