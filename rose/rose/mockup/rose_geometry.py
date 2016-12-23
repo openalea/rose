@@ -1999,31 +1999,33 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam):
     :todo: Add some constant in the arguments
     """
     # Compute the radius with pipe model
-    theScene=None
-    diameter = mtg.property('Diameter')
-    for v in mtg:
-        if mtg.class_name(v) == 'R':
-            diameter[v] = 0.75 
-        # done in msd2MTG 
-        elif mtg.class_name(v) == 'B':
-            diameter[mtg.parent(v)] = 1.75 
-        elif mtg.class_name(v) in ['O','C']:
-            diameter[mtg.parent(v)] = 2.
+    theScenes=[] 
+    for mtg in mtgs :
+        diameter = mtg.property('Diameter')
+        for v in mtg:
+            if mtg.class_name(v) == 'R':
+                diameter[v] = 0.75 
+            # done in msd2MTG 
+            elif mtg.class_name(v) == 'B':
+                diameter[mtg.parent(v)] = 1.75 
+            elif mtg.class_name(v) in ['O','C']:
+                diameter[mtg.parent(v)] = 2.
 
-    drf = DressingData(LeafClass=['F', 'S'], 
-        FlowerClass='O', FruitClass='C',
-        MinTopDiameter=dict(E=0.5))
-    pf = PlantFrame(mtg, TopDiameter='Diameter', 
-                    DressingData=drf, 
-                    Exclude = 'F S T O B C'.split()) 
-    #diameter = pf.algo_diameter(power=powerParam)
-    #mtg.properties()['Diameter'] = diameter 
-    #test : 
-    mtg.properties()['Diameter'] = pf.algo_diameter(power=powerParam)
+        drf = DressingData(LeafClass=['F', 'S'], 
+            FlowerClass='O', FruitClass='C',
+            MinTopDiameter=dict(E=0.5))
+        pf = PlantFrame(mtg, TopDiameter='Diameter', 
+                        DressingData=drf, 
+                        Exclude = 'F S T O B C'.split()) 
+        #diameter = pf.algo_diameter(power=powerParam)
+        #mtg.properties()['Diameter'] = diameter 
+        #test : 
+        mtg.properties()['Diameter'] = pf.algo_diameter(power=powerParam)
 
-    theScene=TurtleFrame(mtg, visitor)
+        theScene=TurtleFrame(mtg, visitor)
+        theScenes.append(theScene)
     # return outputs
-    return theScene,
+    return theScenes,
 # fin reconstructionsWithTurtle(mtgs, visitor, powerParam)
 
 class ReconstructWithTurtle(Node):
@@ -2050,10 +2052,10 @@ class ReconstructionsWithTurtle(Node):
         self.add_output(name = 'TheScenes', interface = ISequence)
 
     def __call__( self, inputs ):
-        g = self.get_input( 'g' )
+        MTGs = self.get_input( 'MTGs' )
         Visitor = self.get_input( 'Visitor' )
         powerParam = self.get_input( 'powerParam' )
-        return reconstructWithTurtle(g, Visitor, powerParam)
+        return reconstructionsWithTurtle(MTGs, Visitor, powerParam)
 #end ReconstructWithTurtle
 
 
