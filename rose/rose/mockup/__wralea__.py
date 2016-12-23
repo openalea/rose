@@ -17,7 +17,7 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['drawLeaflets', 'rose_geometry_VertexVisitor', 'rose_process_RunXV', 'rose_geometry_ReconstructWithTurtle', 'roseMtgDataDir', 'rose_geometry_computeLeaflet4pts', 'rose_process_Decode_liste', 'rose_file_readXls', 'rose_CropGeneration_2011', 'rose_MTG_union', 'testMTGs', 'rose_geometry_Flower', 'rose_HttpDir2DictOfFiles', 'iterOnce', 'rose_Files2MTGs', 'rose_GetGrid', 'rose_geometry_RawBud', 'GetLocalFiles', 'rose_LocalDir2DictOfFiles', 'Canopy2011PhotoNames', '_140189324059600', 'rose_file_RootName', 'rose_geometry_RawFruit', 'rose_geometry_PetalMatrix', 'CanopyReconstruction2011', 'rose_file_IntSort', 'rose_file_scene2Can01', 'rose_geometry_BuiltBud', 'drawFlowers', '_140189324324240', 'rose_geometry_PolygonLeaflet', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', '_140189324324432', 'rose_geometry_RevolutionBud', 'drawBuds', 'rose_geometry_RevolutionFig', '_140189324059856', 'rose_GetOrigin', 'ChooseOnePlant', '_140189324060048', 'GetWebFiles', 'rose_geometry_BudArray', 'rose_geometry_BezierPatchFlower', 'Canopy2011Filenames', 'tempPickleFile_tempPickleFile', 'rose_colors_ColorFuncs', 'rose_geometry_FineBudArray', 'rose_file_readCsv', '_140189324059536']
+__all__ = ['drawLeaflets', 'rose_geometry_VertexVisitor', 'rose_process_RunXV', 'rose_geometry_ReconstructWithTurtle', 'ReconstructionsWithTurtle', 'roseMtgDataDir', 'rose_geometry_computeLeaflet4pts', 'rose_process_Decode_liste', 'rose_file_readXls', 'rose_CropGeneration_2011', 'rose_MTG_union', 'testMTGs', 'rose_geometry_Flower', 'rose_HttpDir2DictOfFiles', 'iterOnce', 'rose_Files2MTGs', 'rose_GetGrid', 'rose_geometry_RawBud', 'GetLocalFiles', 'rose_LocalDir2DictOfFiles', 'Canopy2011PhotoNames', '_140189324059600', 'rose_file_RootName', 'rose_geometry_RawFruit', 'rose_geometry_PetalMatrix', 'CanopyReconstruction2011', 'rose_file_IntSort', 'rose_file_scene2Can01', 'rose_geometry_BuiltBud', 'drawFlowers', '_140189324324240', 'rose_geometry_PolygonLeaflet', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', '_140189324324432', 'rose_geometry_RevolutionBud', 'drawBuds', 'rose_geometry_RevolutionFig', '_140189324059856', 'rose_GetOrigin', 'ChooseOnePlant', '_140189324060048', 'GetWebFiles', 'rose_geometry_BudArray', 'rose_geometry_BezierPatchFlower', 'Canopy2011Filenames', 'tempPickleFile_tempPickleFile', 'rose_colors_ColorFuncs', 'rose_geometry_FineBudArray', 'rose_file_readCsv', '_140189324059536']
 
 
 
@@ -207,6 +207,18 @@ rose_geometry_ReconstructWithTurtle = Factory(name='ReconstructWithTurtle',
                 nodeclass='ReconstructWithTurtle',
                 inputs=[{'interface': IData, 'name': 'g', 'value': None, 'desc': 'a "Sagah2011" MTG'}, {'interface': IFunction, 'name': 'Visitor', 'value': None, 'desc': 'A function that builds the scene while walking throught the nodes of the MTG'}, {'interface': IFloat, 'name': 'powerParam', 'value': None, 'desc': 'the power parameter of the pipe model'}],
                 outputs=[{'interface': IData, 'name': 'TheScene', 'desc': 'A 3D scene'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+ReconstructionsWithTurtle = Factory(name='ReconstructionsWithTurtle',
+                authors=' (wralea authors)',
+                description='builds a list of scenes using the plantgl Turtle',
+                category='data processing',
+                nodemodule='rose_geometry',
+                nodeclass='ReconstructionsWithTurtle',
+                inputs=[{'interface': ISequence, 'name': 'MTGs', 'value': None, 'desc': 'a list of "Sagah2011" MTG'}, {'interface': IFunction, 'name': 'Visitor', 'value': None, 'desc': 'A function that builds the scene while walking throught the nodes of the MTG'}, {'interface': IFloat, 'name': 'powerParam', 'value': None, 'desc': 'the power parameter of the pipe model'}],
+                outputs=[{'interface': ISequence, 'name': 'TheScenes', 'desc': 'A list of 3D scenes'}],
                 widgetmodule=None,
                 widgetclass=None,
                )

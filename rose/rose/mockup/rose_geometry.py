@@ -1844,10 +1844,11 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             pass
 
         turtle.setColor(currentColor)
+    # end visitor
 
     # return outputs
     return visitor
-    # end VertexVisitor
+# end VertexVisitor
 
 class VertexVisitor(Node):
     def __init__(self):
@@ -1983,6 +1984,47 @@ def reconstructWithTurtle(mtg, visitor, powerParam):
     theScene=TurtleFrame(mtg, visitor)
     # return outputs
     return theScene,
+# fin reconstructWithTurtle(mtg, visitor, powerParam)
+
+
+def reconstructionsWithTurtle(mtgs, visitor, powerParam):
+    """ Builds a scene from an MTG object using a « vertex visitor »
+    function and a number to help compute the diameter of the nodes of the trunk.
+    
+    :param mtg: an MTG object
+    :param visitor: The visitor function  walks through the nodes of the MTG and checks for the symbols of the nodes to call the display function that fits this organ
+    :param powerParam: The numerical exponent helps to compute the diameters where they have not been measured, using a pipe model.
+    :calls: the TurtleFrame function
+    :return: the 3D scene that was collected by TurtleFrame during the walk through the MTG.
+    :todo: Add some constant in the arguments
+    """
+    # Compute the radius with pipe model
+    theScene=None
+    diameter = mtg.property('Diameter')
+    for v in mtg:
+        if mtg.class_name(v) == 'R':
+            diameter[v] = 0.75 
+        # done in msd2MTG 
+        elif mtg.class_name(v) == 'B':
+            diameter[mtg.parent(v)] = 1.75 
+        elif mtg.class_name(v) in ['O','C']:
+            diameter[mtg.parent(v)] = 2.
+
+    drf = DressingData(LeafClass=['F', 'S'], 
+        FlowerClass='O', FruitClass='C',
+        MinTopDiameter=dict(E=0.5))
+    pf = PlantFrame(mtg, TopDiameter='Diameter', 
+                    DressingData=drf, 
+                    Exclude = 'F S T O B C'.split()) 
+    #diameter = pf.algo_diameter(power=powerParam)
+    #mtg.properties()['Diameter'] = diameter 
+    #test : 
+    mtg.properties()['Diameter'] = pf.algo_diameter(power=powerParam)
+
+    theScene=TurtleFrame(mtg, visitor)
+    # return outputs
+    return theScene,
+# fin reconstructionsWithTurtle(mtgs, visitor, powerParam)
 
 class ReconstructWithTurtle(Node):
     def __init__(self):
@@ -1998,6 +2040,22 @@ class ReconstructWithTurtle(Node):
         powerParam = self.get_input( 'powerParam' )
         return reconstructWithTurtle(g, Visitor, powerParam)
 #end ReconstructWithTurtle
+
+class ReconstructionsWithTurtle(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name = 'MTGs', interface=ISequence)
+        self.add_input( name = 'Visitor', interface=IFunction)
+        self.add_input( name = 'powerParam', value=2.2, interface=IFloat)
+        self.add_output(name = 'TheScenes', interface = ISequence)
+
+    def __call__( self, inputs ):
+        g = self.get_input( 'g' )
+        Visitor = self.get_input( 'Visitor' )
+        powerParam = self.get_input( 'powerParam' )
+        return reconstructWithTurtle(g, Visitor, powerParam)
+#end ReconstructWithTurtle
+
 
 #if __name__ == '__main__' :
 #    print inSector(2.4999999999,2.0,0.5)
