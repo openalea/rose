@@ -1986,21 +1986,88 @@ def reconstructWithTurtle(mtg, visitor, powerParam):
     return theScene,
 # fin reconstructWithTurtle(mtg, visitor, powerParam)
 
+def buildCanPath(path ):
+    """ we comute the path to write CAN files in 
+    """
+    import os, re
 
-def reconstructionsWithTurtle(mtgs, visitor, powerParam):
-    """ Builds a scene from an MTG object using a « vertex visitor »
+    if re.search("^/", path): # absolute path
+        return path
+    else:
+        tmp= os.getenv("TEMP")
+        if tmp is None :
+            tmp='/tmp'
+        return tmp
+    
+        ## this would feed up the target dir of useless files
+        #newPath=re.sub("(?i)MTG/", "CAN/", plantPath)
+        #if not os.path.exists(newPath):
+        #    os.makedirs( newPath)
+        #return newPath
+    return None    
+    # fin buildCanPath
+
+def clearCanPath(path ):
+    import os
+    os.system( "rm %s/*.can" % buildCanPath(path ))
+# fin clearCanPath
+    
+def openCanFile(path, plantPath, plantName):
+    """
+    we open a file whose name is built wether the path is absolute or relative
+    and with plantName.can as its basename
+    """
+    retVal=None
+    realPath=buildCanPath(path)
+    retVal=open("%s/%s.can" % (realPath, plantName),"w")
+    retVal.write("CAN02\n")
+    return retVal
+# fin openCanFile
+
+
+def writeCanFile(fOut, numTri, organNum, organType, plantNum, jour=1, geometrie=[]):
+    """
+    We  write a line of data.
+    This is for test at this level (i.e called out of plantFrame)
+    """
+    
+    fOut.write("%d %d %d %d %d %s\n" % (jour, organType, plantNum, organNum, numTri, geometrie))
+# fin writeCanFile
+
+def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
+    """ Builds a list of scenes from a liste of MTG object using a « vertex visitor »
     function and a number to help compute the diameter of the nodes of the trunk.
     
-    :param mtg: an MTG object
+    :param mtgs: a list of MTG objects
     :param visitor: The visitor function  walks through the nodes of the MTG and checks for the symbols of the nodes to call the display function that fits this organ
     :param powerParam: The numerical exponent helps to compute the diameters where they have not been measured, using a pipe model.
+    :param canFilesOutPath: a path to write can files to, either absolute, relative or empty. 
+        If absolute, can files are written there,
+        If relative, it plugs into the dirname of the MTG file, 
+        If empty, no can files are generated.
     :calls: the TurtleFrame function
     :return: the 3D scene that was collected by TurtleFrame during the walk through the MTG.
     :todo: Add some constant in the arguments
     """
     # Compute the radius with pipe model
-    theScenes=[] 
+
+    fOut=None # to write CAN files
+    theScenes=[]
+    makeCan=False
+    canPath=''
+    if not canFilesOutPath == "" :
+        makeCan=True
+        clearCanPath(canFilesOutPath)
+
     for mtg in mtgs :
+        # if we have to write a can file, we'll do it organ by organ in each MTG
+        if makeCan :
+            #check we can get two interesting properties
+            if 'dirName' in mtg.properties() and 'plantNum' in mtg.properties():
+                fOut=openCanFile(canFilesOutPath,
+                                 mtg.properties()['dirName'],
+                                 mtg.properties()['plantNum'])
+        
         diameter = mtg.property('Diameter')
         for v in mtg:
             if mtg.class_name(v) == 'R':
@@ -2024,6 +2091,17 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam):
 
         theScene=TurtleFrame(mtg, visitor)
         theScenes.append(theScene)
+
+        # Now, we are going to tessellate theScene
+        
+        # write out the geometry : to do in turtleFrame
+
+        if fOut:
+            fOut.close()
+            
+        #print "canFilesOutPath : %s " % canFilesOutPath
+        
+        
     # return outputs
     return theScenes,
 # fin reconstructionsWithTurtle(mtgs, visitor, powerParam)
@@ -2049,13 +2127,15 @@ class ReconstructionsWithTurtle(Node):
         self.add_input( name = 'MTGs', interface=ISequence)
         self.add_input( name = 'Visitor', interface=IFunction)
         self.add_input( name = 'powerParam', value=2.2, interface=IFloat)
+        self.add_input( name = 'canFilesOutPath', value="", interface=IStr)
         self.add_output(name = 'TheScenes', interface = ISequence)
 
     def __call__( self, inputs ):
         MTGs = self.get_input( 'MTGs' )
         Visitor = self.get_input( 'Visitor' )
         powerParam = self.get_input( 'powerParam' )
-        return reconstructionsWithTurtle(MTGs, Visitor, powerParam)
+        canFilesOutPath = self.get_input( 'canFilesOutPath' )
+        return reconstructionsWithTurtle(MTGs, Visitor, powerParam, canFilesOutPath)
 #end ReconstructWithTurtle
 
 

@@ -163,6 +163,8 @@ def files2MTGs(cropdict):
     listofmtgs = []; 
     # write the node code here.
 
+    import os # path.(base|dir)name
+    
     def BaseOfPlant(nodeOfMTG):
         """ returns the coordinates of the anchorage of the plant in the XY plane"""
         return (nodeOfMTG.XX, nodeOfMTG.YY)
@@ -192,11 +194,13 @@ def files2MTGs(cropdict):
         noeud.YY = y1 + shifty
         noeud.ZZ += shiftz
 
-     # creates output list (to be improved with rotates and shifts)
+    # creates output list (to be improved with rotates and shifts)
     for plante in cropdict.keys():
+
+        index=0 # la première rep est la plante d'intérêt
         for shiftRot in cropdict[plante]:
             
-            #print shift
+             #print shift
 
             # get prepared for rotations
             shift=shiftRot[0]
@@ -218,7 +222,24 @@ def files2MTGs(cropdict):
             for vtx in mtg.vertices(scale=2): # the rest of the plant
                 noeud = mtg.node(vtx)
                 PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
-            listofmtgs += [mtg] 
+
+            # nom du fichier pour créer les fichiers CAN
+            mtg.properties()['dirName']=os.path.dirname(plante)
+            # on distingue les plantes d'intérêt en leur donnant un numéro entier
+            # Si la répétition d'un numéro ne devrait pas poser pb dans Sec2,
+            # les noms de fichiers doivent distiguer les plantes de remplissage
+            # car les positions diffèrent
+            # Le numéro de plante est alors incrémenté de 2000 * le numéro de répétition
+            # (la numérotation s'arrêtait avant 2000 pour les manips de 2011)
+
+            nom=os.path.basename(plante).split('.')[0].split('-')[0].split("_")[-1]
+            plantNum=int(re.sub("[^0-9]*([0-9]+)$","\\1",nom))
+            if index > 0 :
+                plantNum += 2000*index
+            mtg.properties()['plantNum']=plantNum
+            
+            listofmtgs += [mtg]
+            index += 1 # distinguer la première occurrence des suivantes
 
     # return outputs
     return listofmtgs,
