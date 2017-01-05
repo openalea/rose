@@ -7,24 +7,14 @@
 
 import math
 
-#from openalea.mtg.plantframe import turtle
-#from openalea.mtg import DressingData, PlantFrame, MTG
-
 from openalea.mtg import DressingData, PlantFrame, MTG
-#from amlPy import
-
-
-#from openalea.mtg.aml import MTG # dans cet ordre ?
-
 from openalea.plantgl.math import * # Vector4, Vector3, Vector2, norm, cross
-
 
 from openalea.core.external import * 
 from openalea.core.logger  import *
 
 # for TurtleFrame
 import openalea.plantgl.all as pgl
-
 
 # walk through MTG trees
 #from openalea.mtg.plantframe.turtle import pre_order2_with_filter
@@ -58,7 +48,7 @@ def computeHeading(points):
     
     #print "computeHeading:DISTANCE = %s" % distance
     return (axis, distance)
-
+# end computeHeading(points)
 
 def computeLateralAxis(front, up):
     """ 
@@ -74,7 +64,7 @@ def computeLateralAxis(front, up):
     Lateral=front^up
     Lateral.normalize()
     return Lateral
-# end computeLateralAxis
+# end computeLateralAxis(front, up)
 
 def computeFacingFromUp(Up): 
     """ 
@@ -108,7 +98,7 @@ def computeFacingFromUp(Up):
     # Now, let's compute Facing
     Facing= cross(Horiz,Up)
     return Facing
-# end computeLateralAxis
+# end computeFacingFromUp(Up)
 
 def computeUpAxis(front,side):
     """ Computes and returns a vector that is normal to front and
@@ -125,7 +115,7 @@ def computeUpAxis(front,side):
     Up=front^side
     Up.normalize()
     return Up
-# end computeUpAxis
+# end computeUpAxis(front,side)
 
 def faceTo(turtle, facingDirection):
     """ This routine makes the turtle point its face to facingDirection,
@@ -147,6 +137,7 @@ def faceTo(turtle, facingDirection):
     if abs(norm(upAxis)) < 0.001 :
         upAxis=computeUpAxis(facingDirection, Vector3(0,1,0))
     turtle.setHead(facingDirection,upAxis)
+# end faceTo(turtle, facingDirection)
 
 def getSiCo(angle):
     """ Computes sine and cosine of the angle in radians 
@@ -155,7 +146,7 @@ def getSiCo(angle):
     :return: a pair (sin(angle), cos(angle))
     """
     return (math.sin(angle), math.cos(angle))
-
+# end fgetSiCo(angle)
 
 def printPoints(points):
     """ prints the z coordinate of the points
@@ -164,6 +155,7 @@ def printPoints(points):
     :note: this a debugging purpose routine.
     """
     print "Zs : %7.3f  %7.3f %7.3f %7.3f"%(points[0][2],points[1][2],points[2][2],points[3][2])
+# end printPoints(points)
 
 def inSector(candidat, center, marge) :
     """ We check if candidat is in the neighborhood of center modulo 2.Pi
@@ -190,7 +182,7 @@ def inSector(candidat, center, marge) :
         return True
     #print "%f does NOT belong to [%f - %f[" % (candidat , center-marge, center+marge)
     return False
-    # end inSector
+# end inSector(candidat, center, marge)
     
 
 ################################################ BUD
@@ -233,6 +225,7 @@ def rawBud():
     # end computeRawBud
 
     return computeRawBud
+#end rawBud()
 
 class RawBud(Node): 
     def __init__(self):
@@ -318,7 +311,7 @@ def builtBud(stride=10):
     # end computeBuiltBud
         
     return computeBuiltBud
-    # end builtBud
+# end builtBud(stride)
 
 
 class BuiltBud(Node):
@@ -389,6 +382,7 @@ def pointArray():
          Vector2(0.30, 0.84),
          Vector2(1.00, 1.00)] 
     return pts
+# end pointArray()
 
 def budArray():
     """ We define a list of points to feed a revolution object.
@@ -410,6 +404,7 @@ def budArray():
          Vector2(0.30, 0.84),
          Vector2(0.00, 1.00)]
     return pts
+#end budArray()
 
 def fineBudArray():
     """ We define an array of 17 points to feed a revolution object 
@@ -436,6 +431,7 @@ def fineBudArray():
          Vector2( 0.10, 0.96),
          Vector2( 0.00,1.00 )]
     return pts
+#endef fineBudArray()
 
 def revolution(points=None, stride=8):
     """ 
@@ -456,6 +452,7 @@ def revolution(points=None, stride=8):
     pl=pgl.Polyline2D(pa)
     rev=pgl.Revolution(pl,stride)
     return rev
+#endef revolution(points=None, stride=8)
 
 def revolutionBud(revVol=None ):
     """ We define a nested function (drawRevBud) that returns a function that draws a bud from a revolution volume 
@@ -504,6 +501,7 @@ def revolutionBud(revVol=None ):
 
         turtle.pop()
     return drawRevBud
+#endef revolutionBud(revVol=None )
 
 class PointArray(Node):
     def __init__(self):
@@ -576,6 +574,7 @@ def  displayNormalVector(turtle,points,color):
     turtle.setColor(color)
     turtle.customGeometry(Cone(2,13), 1)
     turtle.pop()
+#endef  displayNormalVector(turtle,points,color)
 
 def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1], 
                        yMesh=[0.81, 0.92 , 0.94, 0]):
@@ -712,6 +711,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
         
     # return outputs
     return meshedLeaflet
+#endef computeLeaflet4pts(xMesh=..., yMesh=...)
 
 class ComputeLeaflet4pts(Node):
     def __init__(self):
@@ -742,7 +742,7 @@ def rawLeaflet(points, turtle=None):
     turtle.lineTo(points[0])
     turtle.stopPolygon()
     turtle.pop()
-# end rawleaflet
+#endef rawleaflet
 
 ########################################
 def polygonLeaflet():
@@ -884,6 +884,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
         ## successful @20111003 : sphere in flower axis
         turtle.pop()
     return bpFlower
+#endef bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None)
 
 class BezierPatchFlower(Node):
     ## This function sets up the BezierPatchFlower node within OpenAlea
@@ -1109,7 +1110,7 @@ def fruitParameters(points, stade=None, PcStade=0):
 
     return(Heading, height, Radius, lSepalAngles, lSepalDims,
      lPetalAngles, lPetalDims)
-    # end fruitParameters
+# end fruitParameters
     
 
 def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
@@ -1435,7 +1436,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         turtle.customGeometry( thisPetal,1)
 
     turtle.pop()
-    #end floralOrgan
+#endef floralOrgan(Heading, height, Radius, lSepalAngles=[],...)
 
 def getSepalsAzimuts(lSepales, Heading, Radius):
     """ We compute the azimut in the local coordinate system of the sepals that has been digitized.
@@ -1482,7 +1483,7 @@ def getSepalsAzimuts(lSepales, Heading, Radius):
 
         #print "getSepalsAzimuts::angles= %s" % angles
     return angles
-    # end getSepalsAzimuts
+# end getSepalsAzimuts
 
 def drawFloralOrgan(colorFunc=None):
     """ A function to return the function that draws floral organs
@@ -1493,6 +1494,7 @@ def drawFloralOrgan(colorFunc=None):
     if colorFunc is None:
         myColorFunc=setTurtlePink # custom 
     return floralOrgan
+# endef drawFloralOrgan(colorFunc=None)
 
 class FloralOrgan (Node):
     """ FIXME : inside implemantation not to be shown """
@@ -1620,6 +1622,7 @@ def noThing(points, turtle=None, dummy=None):
     :param turtle: unused
     """
     pass
+#endef noThing(points, turtle=None, dummy=None)
 
 def makeNoOrgan():
     """  
@@ -1630,7 +1633,7 @@ def makeNoOrgan():
     # write the node code here.
     # return outputs
     return noThing
-# end makeNoLeaflet
+# end makeNoOrgan()
 
 class NoOrgan(Node):
     def __init__(self):
@@ -1699,6 +1702,7 @@ def petalMatrix():
             [V4(0.95, -0.1,    0.95, 1), V4(1, 0,  1,        1),  V4(0.95, 0.1,   0.95, 1)]]
     # return outputs
     return ctpm,
+#endef petalMatrix()
 
 class PetalMatrix(Node):
     def __init__(self):
@@ -1717,6 +1721,7 @@ def position(n):
     :returns: the position
     """
     return Vector3(n.XX, n.YY, n.ZZ)
+#endef position(n)
     
 ########################################
 def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None ):
@@ -1745,14 +1750,15 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
     if fruit_factory is None:
         fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None 
 
-
-    def visitor(g, v, turtle, \
-                    leaf_computer=leaf_factory, \
-                    bud_computer=bud_factory,\
-                    sepal_computer=sepal_factory,\
-                    flower_computer=flower_factory,\
-                    fruit_computer=fruit_factory):
-        """ a function that analyses the code of a vertex then takes decisions about the ways to display it
+    def visitor(g, v, turtle, 
+                leaf_computer=leaf_factory, 
+                bud_computer=bud_factory,
+                sepal_computer=sepal_factory,
+                flower_computer=flower_factory,
+                fruit_computer=fruit_factory):
+        """ 
+        a function that analyses the code of a vertex then takes decisions about the ways to display it
+        it may possibly write CAN02 file accordingly to Sec2/Sources/Canopy/Organ.hpp's codification.
         """
         n = g.node(v)
         pt = position(n)
@@ -1760,18 +1766,16 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
         turtle.setId(v)
         currentColor=turtle.getColor()        
 
+        
         if symbol in ['E', 'R']:
             if n.Diameter is None:
                 logging.error('ERROR: vertex %d (name: %s, line around %d)'%(v,n.label,n._line))
-                n.Diameter = 0.75 
-
-            #if n.edge_type() == '+'  or not n.parent():
-            #    turtle.setWidth(n.Diameter / 2.)
+                n.Diameter = 0.75
 
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
 
-        elif n.label ==  'F1' :
+        elif n.label ==  'F1' :            
             turtle.setColor(2) # internode
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
@@ -1780,7 +1784,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             leaf_computer(points,turtle)
 
         elif n.label == 'S1' :
-            #turtle.setColor(4) # apple green
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -1844,11 +1847,171 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             pass
 
         turtle.setColor(currentColor)
+
     # end visitor
 
     # return outputs
     return visitor
-# end VertexVisitor
+# endef vertexVisitor(leaf_factory=None, bud_factory=None, ...)
+
+########################################
+def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None ):
+    """ We define here a function (visitor) that is used visit MTG nodes.
+
+    :param leaf_factory: the function that draws the leaves
+    :param bud_factory: the function that draws the buds
+    :param sepal_factory: the function that draws the sepals
+    :param flower_factory: the function that draws the flowers
+    :param fruit_factory: the function that draws the fruits
+    :return: the visitor function
+    :todo: check the arity of all the versions of bud_factory
+    """  
+    # write the node code here.   
+    visitor = None; 
+    lSepalStore=[]
+
+    if leaf_factory is None:
+        leaf_factory=rawLeaflet
+    if bud_factory is None:
+        bud_factory=rawBud
+    if sepal_factory is None:
+        sepal_factory=polygonLeaflet() # rawLeaflet
+    if flower_factory is None:
+        flower_factory=coneFlower() # bug when flower_factory is None
+    if fruit_factory is None:
+        fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None 
+
+    def visitor(g, v, turtle, 
+                leaf_computer=leaf_factory, 
+                bud_computer=bud_factory,
+                sepal_computer=sepal_factory,
+                flower_computer=flower_factory,
+                fruit_computer=fruit_factory):
+        """ 
+        a function that analyses the code of a vertex then takes decisions about the ways to display it
+        it may possibly write CAN02 file accordingly to Sec2/Sources/Canopy/Organ.hpp's codification.
+        """
+        n = g.node(v)
+        pt = position(n)
+        symbol = n.label[0]
+        turtle.setId(v)
+        currentColor=turtle.getColor()        
+
+        plantNum=None
+        orgNum=None
+        canFacts=None
+        if canFacts: 
+            plantNum=g.properties()['plantNum']
+        
+        if symbol in ['E', 'R']:
+            if n.Diameter is None:
+                logging.error('ERROR: vertex %d (name: %s, line around %d)'%(v,n.label,n._line))
+                n.Diameter = 0.75
+                
+            orgNum=n.label[1] # arbitrairement : numéro d'entre-noeud. TODO: un compteur rémanent
+            if symbol=='E':
+                orgType=2 # Sec2/Sources/Canopy/CANReader.cpp
+            else :
+                orgType=4 # rachis ou petiole
+
+            #if n.edge_type() == '+'  or not n.parent():
+            #    turtle.setWidth(n.Diameter / 2.)
+
+            turtle.oLineTo(pt)
+            turtle.setWidth(n.Diameter / 2.)
+
+        elif n.label ==  'F1' :            
+            orgType=1 # feuille
+            turtle.setColor(2) # internode
+            points = [position(n.parent()), pt]
+            while n.nb_children() == 1:
+                n = list(n.children())[0]
+                points.append(position(n))
+            leaf_computer(points,turtle)
+
+        elif n.label == 'S1' :
+            orgType=6 # sepale
+            #turtle.setColor(4) # apple green
+            points = [position(n.parent()), pt]
+            while n.nb_children() == 1:
+                n = list(n.children())[0]
+                points.append(position(n))
+            
+            lSepalStore.append(points)
+            #print "lSepalStore.APPEND"
+            #sepal_computer(points,turtle) # unused ?
+	    
+        elif n.label == "B1" :
+            orgType=7 # bouton
+            #print "list(n.children())[0].Diameter=%s" % list(n.children())[0].Diameter
+            points = [n.parent(), n]
+            while n.nb_children() == 1:
+                n = list(n.children())[0]
+                points.append(n)
+            bud_computer(points,turtle,lSepalStore) 
+
+            # process digitized sepals 
+            turtle.setColor(4) # apple green
+            while lSepalStore:
+               sepal_computer(lSepalStore.pop(),turtle)
+
+        elif n.label == "O1" :
+            orgType=8 # fleur
+            turtle.setColor(4) # apple green
+
+            points=[n.parent(),n]
+            #print "n.Diameter=%s" % n.Diameter
+            flower_computer (points, turtle, lSepalStore, n.Diameter)
+
+            # process digitized sepals (if any)
+            #turtle.setColor(len(lSepalStore)) # apple green 
+            turtle.setColor(4) # apple green 
+            while lSepalStore:
+                #turtle.setColor(couleur)
+                #couleur +=1
+                #turtle.decColor()
+                #sepale=lSepalStore.pop()      # 2 clear data (requested)
+                #sepal_computer(sepale,turtle) # 2 draw sepal
+                sepal_computer(lSepalStore.pop(),turtle)
+
+        elif n.label == "C1" :
+            orgType=9 # fruit ou cynorrhodon
+            turtle.setColor(4) # apple green
+            # process sepals
+            #points=[[position(n.parent()),n.parent().Diameter], [None,None], [pt, None]] # old way
+            points=[n.parent(),n]
+            fruit_computer (points, turtle, lSepalStore, -1)
+            while lSepalStore:
+                sepal_computer(lSepalStore.pop(),turtle)
+                #print "lSepalStore:USED in FRUIT"
+
+            # process terminator
+        elif n.label == "T1":
+            orgType=10 # terminateur
+            # The turtle is supposed to be at the top of the previous vertex
+            #turtle.stopGC() # not useful anymore
+            turtle.setColor(2) # green
+            #turtle.startGC()
+            turtle.oLineTo(pt)
+            turtle.setWidth(0.01) 
+
+        elif symbol == 'H' : # hidden vertex
+            pass
+
+        turtle.setColor(currentColor)
+
+        #inclure ici le code CAN02 ?
+        numTri=1
+        if canFacts :
+            nomFic="%s.can" % (g.properties()['plantNum'])
+            fOut=open(nomFic,"a")
+            fOut.write('coucou\n')
+            fOut.close()
+    # end visitor
+
+    # return outputs
+    return visitor
+# endef vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, ...)
 
 class VertexVisitor(Node):
     def __init__(self):
@@ -1872,12 +2035,37 @@ class VertexVisitor(Node):
         sepal_factory=self.get_input('sepal_factory')
         flower_factory=self.get_input('flower_factory')
         fruit_factory=self.get_input('fruit_factory')
-        return vertexVisitor(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory)
+        return vertexVisitor(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory )
+#end class VertexVisitor(Node)
 
+class VertexVisitor4CAN02(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name = 'leaf_factory',
+                        interface = IFunction)
+        self.add_input( name = 'bud_factory',
+                        interface = IFunction)
+        self.add_input( name = 'sepal_factory',
+                        interface = IFunction)
+        self.add_input( name = 'flower_factory',
+                        interface = IFunction)
+        self.add_input( name = 'fruit_factory',
+                        interface = IFunction)
+        self.add_output( name = 'VertexVisitor', 
+                         interface = IFunction )
+
+    def __call__( self, inputs ):
+        leaf_factory=self.get_input('leaf_factory')
+        bud_factory=self.get_input('bud_factory')
+        sepal_factory=self.get_input('sepal_factory')
+        flower_factory=self.get_input('flower_factory')
+        fruit_factory=self.get_input('fruit_factory')
+        return vertexVisitor4CAN02(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory )
+#end class VertexVisitor4CAN02(Node)
 
 
 #### Copy from mtg.turtle ###
-def traverse_with_turtle(g, vid, visitor, turtle=None):
+def traverse_with_turtle(g, vid, visitor, turtle=None ):
     """ 
     This function is called from within TurtleFrame. It explores the part of a MTG tree being under the node number "vid". It walks through that sub-MTG using the pre_order2_with_filter algorithm.
     
@@ -1914,6 +2102,47 @@ def traverse_with_turtle(g, vid, visitor, turtle=None):
         turtle.stopGC()
     turtle.pop()
     return turtle.getScene()
+ #endef traverse_with_turtle(g, vid, visitor, turtle=None)
+ 
+#### Copy from mtg.turtle ###
+def traverse_with_turtle4CAN02(g, vid, visitor, turtle=None, canFacts={}):
+    """ 
+    This function is called from within TurtleFrame. It explores the part of a MTG tree being under the node number "vid". It walks through that sub-MTG using the pre_order2_with_filter algorithm.
+    
+    :param g: the MTG object we are working on
+    :param vid: the vertex ID inside the MTG
+    :param visitor: the function that visits the nodes of the sub-MTG
+    :see: openalea/mtg/traversal.py
+    :note: this function was copied from OpenAlea.Mtg-0.9.5-py2.6.egg/openalea/mtg/turtle.py 
+"""
+    if turtle is None:
+        turtle = PglTurtle()
+
+    def push_turtle(v):
+        if g.edge_type(v) == '+':
+            turtle.push()
+            #turtle.startGC()
+            turtle.setId(v)
+        return True
+
+    def pop_turtle(v):
+        if g.edge_type(v) == '+':
+            #turtle.stopGC()
+            turtle.pop()
+
+    turtle.push()
+    turtle.startGC()
+
+    visitor(g,vid,turtle)
+    turtle.stopGC()
+    for v in pre_order2_with_filter(g, vid, None, push_turtle, pop_turtle):
+        if v == vid: continue
+        turtle.startGC()
+        visitor(g,v,turtle)
+        turtle.stopGC()
+    turtle.pop()
+    return turtle.getScene()
+ #endef traverse_with_turtle4CAN02(g, vid, visitor, turtle=None, canFacts=[])
  
 ######################################################
 def TurtleFrame(g, visitor):
@@ -1946,6 +2175,41 @@ def TurtleFrame(g, visitor):
 
         traverse_with_turtle(g, vid, visitor, turtle)
     return turtle.getScene()
+#endef TurtleFrame(g, visitor)
+
+######################################################
+def TurtleFrame4CAN02(g, visitor, plantFacts):
+    """ The function that sets the turtle up and calls the function traverse_with_turtle
+    that walks through the MTG tree, with  "visitor" as a parameter.
+
+    :param g: an MTG object to explore.
+    :param visitor: the function to be called at every node of the "g" MTG.
+    :calls: pgl.PglTurtle that makes a brand new turtle. 
+    :calls: the traverse_with_turtle function, with the turtle as an argument
+    :return: the scene collected by the turtle during the walkthrough.
+    """
+    debug = True
+    n = g.max_scale()
+    turtle = pgl.PglTurtle()
+    ## we want to change the default color
+    ## let's wait to have scanned some photographs to set this
+    #setTurtleStrand(turtle)
+
+    for plant_id in g.vertices(scale=1):
+        plant_node = g.node(plant_id)
+        if debug :
+            print "plant_node = %s" % plant_id
+        # moved the "position" function away
+        origin = pgl.Vector3(plant_node.XX, plant_node.YY, plant_node.ZZ)
+        turtle.move(origin)
+        #vid =  g.component_roots_at_scale(plant_id, scale=n).next() # does not run 
+        tmp= iter(g.component_roots_at_scale(plant_id, scale=n))
+        vid = tmp.next()
+
+        plantFacts={}
+        traverse_with_turtle4CAN02(g, vid, visitor, turtle, plantFacts)
+    return turtle.getScene()
+#endef TurtleFrame(g, visitor)
 
 def reconstructWithTurtle(mtg, visitor, powerParam):
     """ Builds a scene from an MTG object using a « vertex visitor »
@@ -1963,8 +2227,7 @@ def reconstructWithTurtle(mtg, visitor, powerParam):
     diameter = mtg.property('Diameter')
     for v in mtg:
         if mtg.class_name(v) == 'R':
-            diameter[v] = 0.75 
-        # done in msd2MTG 
+            diameter[v] = 0.75  
         elif mtg.class_name(v) == 'B':
             diameter[mtg.parent(v)] = 1.75 
         elif mtg.class_name(v) in ['O','C']:
@@ -2005,7 +2268,7 @@ def buildCanPath(path ):
         #    os.makedirs( newPath)
         #return newPath
     return None    
-    # fin buildCanPath
+# fin buildCanPath
 
 def clearCanPath(path ):
     import os
@@ -2055,6 +2318,10 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
     theScenes=[]
     makeCan=False
     canPath=''
+    fOut=None
+    canFacts={}
+    numJour= 42 # on verra
+    
     if not canFilesOutPath == "" :
         makeCan=True
         clearCanPath(canFilesOutPath)
@@ -2067,12 +2334,14 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
                 fOut=openCanFile(canFilesOutPath,
                                  mtg.properties()['dirName'],
                                  mtg.properties()['plantNum'])
+                canFacts['outStream']=fOut
+                canFacts['numJour']=numJour
+                
         
         diameter = mtg.property('Diameter')
         for v in mtg:
             if mtg.class_name(v) == 'R':
                 diameter[v] = 0.75 
-            # done in msd2MTG 
             elif mtg.class_name(v) == 'B':
                 diameter[mtg.parent(v)] = 1.75 
             elif mtg.class_name(v) in ['O','C']:
@@ -2089,7 +2358,7 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
         #test : 
         mtg.properties()['Diameter'] = pf.algo_diameter(power=powerParam)
 
-        theScene=TurtleFrame(mtg, visitor)
+        theScene=TurtleFrame4CAN02(mtg, visitor,canFacts)
         theScenes.append(theScene)
 
         # Now, we are going to tessellate theScene

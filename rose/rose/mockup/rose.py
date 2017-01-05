@@ -223,21 +223,6 @@ def files2MTGs(cropdict):
                 noeud = mtg.node(vtx)
                 PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
 
-            # nom du fichier pour créer les fichiers CAN
-            mtg.properties()['dirName']=os.path.dirname(plante)
-            # on distingue les plantes d'intérêt en leur donnant un numéro entier
-            # Si la répétition d'un numéro ne devrait pas poser pb dans Sec2,
-            # les noms de fichiers doivent distiguer les plantes de remplissage
-            # car les positions diffèrent
-            # Le numéro de plante est alors incrémenté de 2000 * le numéro de répétition
-            # (la numérotation s'arrêtait avant 2000 pour les manips de 2011)
-
-            nom=os.path.basename(plante).split('.')[0].split('-')[0].split("_")[-1]
-            plantNum=int(re.sub("[^0-9]*([0-9]+)$","\\1",nom))
-            if index > 0 :
-                plantNum += 2000*index
-            mtg.properties()['plantNum']=plantNum
-            
             listofmtgs += [mtg]
             index += 1 # distinguer la première occurrence des suivantes
 
@@ -256,6 +241,119 @@ class Files2MTGs(Node):
     def __call__( self, inputs ):
         cropdict= self.get_input( 'cropdict' )
         return files2MTGs(cropdict)
+# end class Files2MTGs(Node)
+
+    #################################################################
+def files2MTGs4CAN2(cropdict):
+    '''  
+    @brief Creates a list of MTG object from a dict of {MTG files:list of coordinates} pairs.
+    The procedure reads the MTG files, then places them both onto their coordinates, 
+    Then it uses the files again to fill up empty spaces, with a random rotation angle.
+    @param cropdict : a dictionary built with 
+    - MTG files names as keys,
+    - shift of the real plant as 1st value for each key
+    - shift and rotation as further values, if any
+    @return a list of MTG objects that were build from the dict
+    @TODO  ajouter la propriété plantName qui peut comporter le fait qu'il s'agit d'une plante de remplissage
+    '''
+    listofmtgs = []; 
+    # write the node code here.
+
+    import os # path.(base|dir)name
+    
+    def BaseOfPlant(nodeOfMTG):
+        """ returns the coordinates of the anchorage of the plant in the XY plane"""
+        return (nodeOfMTG.XX, nodeOfMTG.YY)
+
+    def PositionIt(noeud, orx, ory, rotc, rots, shiftx, shifty, shiftz):
+        """ positions the node "noeud"
+        the node gets
+        - moved to the origin point as (orx, ory)
+        - rotated around this point by the values (rot cos, rot sin) 
+        - moved along the "shift" vector
+        @param noeud the MTG node
+        @param orx origin.x
+        @param ory origin.y
+        @param rotc cosine of the rotation angle
+        @param rots sine of the rotation angle
+        @param shiftx the x displacement to apply onto "noeud"
+        @param shifty the y displacement to apply onto "noeud"
+        @param shiftz the z displacement to apply onto "noeud"
+
+        Note : the parameters are scalars rather than structures in order to speed up the process.
+        """
+        x0=noeud.XX - orx
+        y0=noeud.YY - ory
+        x1 = x0*rotc - y0*rots
+        y1 = y0*rotc + x0*rots
+        noeud.XX = x1 + shiftx
+        noeud.YY = y1 + shifty
+        noeud.ZZ += shiftz
+
+    # creates output list (to be improved with rotates and shifts)
+    for plante in cropdict.keys():
+
+        index=0 # la première rep est la plante d'intérêt
+        for shiftRot in cropdict[plante]:
+            
+             #print shift
+
+            # get prepared for rotations
+            shift=shiftRot[0]
+            sx=shift[0]
+            sy=shift[1]
+            sz=shift[2]
+
+            angle=shiftRot[1]
+            #angle= 1. # DBG 1 rad.
+            (rc,rs)=(math.cos(angle), math.sin(angle))
+
+            # load the MTG
+            mtg=MTG(plante)
+
+            noeud = mtg.node(1)      # the anchorage of the plant
+            (ox,oy)= BaseOfPlant(noeud)
+            
+            PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
+            for vtx in mtg.vertices(scale=2): # the rest of the plant
+                noeud = mtg.node(vtx)
+                PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
+
+            # nom du fichier pour créer les fichiers CAN
+            mtg.properties()['dirName']=str(os.path.dirname(plante))
+            # TODO : donner le chemin pour le CAN2
+            
+            # on distingue les plantes d'intérêt en leur donnant un numéro entier
+            # Si la répétition d'un numéro ne devrait pas poser pb dans Sec2,
+            # les noms de fichiers doivent distiguer les plantes de remplissage
+            # car les positions diffèrent
+            # Le numéro de plante est alors incrémenté de 2000 * le numéro de répétition
+            # (la numérotation s'arrêtait avant 2000 pour les manips de 2011)
+
+            nom=os.path.basename(plante).split('.')[0].split('-')[0].split("_")[-1]
+            plantNum=int(re.sub("[^0-9]*([0-9]+)$","\\1",nom))
+            if index > 0 :
+                plantNum += 2000*index
+            mtg.properties()['plantNum']=plantNum
+            
+            listofmtgs += [mtg]
+            index += 1 # distinguer la première occurrence des suivantes
+
+    # return outputs
+    return listofmtgs,
+# end files2MTGs4CAN2
+
+class Files2MTGs4CAN2(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name = 'cropdict', 
+                        interface = IDict )
+        self.add_output( name = 'listofmtgs', 
+                         interface = ISequence )
+
+    def __call__( self, inputs ):
+        cropdict= self.get_input( 'cropdict' )
+        return files2MTGs4CAN2(cropdict)
 
 #################################################################
 def getMTG(dirname, IDplant):
