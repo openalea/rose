@@ -1854,8 +1854,32 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
     return visitor
 # endef vertexVisitor(leaf_factory=None, bud_factory=None, ...)
 
+def mesh(geometry):
+    #d = pgl.Tesselator()
+    #geometry.apply(d)
+    #return d.result
+    tessel = pgl.Tesselator()
+    geometry.apply(tessel)
+    mesh_ = tessel.triangulation
+    return mesh_
+
+
+def canline(ind, label,p):
+    return "p 2 %s 9 3 %s"%(str(label), ' '.join(str(x) for i in ind for x in p[i]))
+
+def can02line(
+        numJour,
+        typeOrg,
+        numPlante,
+        numOrg
+):
+    return "%s %s %s %s " % (numJour, typeOrg, numPlante, numOrg)
+
+numeroPlante=0 # debug (quoique...)
+numApp= 0      # debug    //
+
 ########################################
-def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None ):
+def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None, canFacts=None ):
     """ We define here a function (visitor) that is used visit MTG nodes.
 
     :param leaf_factory: the function that draws the leaves
@@ -1870,6 +1894,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
     visitor = None; 
     lSepalStore=[]
 
+
     if leaf_factory is None:
         leaf_factory=rawLeaflet
     if bud_factory is None:
@@ -1879,27 +1904,49 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
     if flower_factory is None:
         flower_factory=coneFlower() # bug when flower_factory is None
     if fruit_factory is None:
-        fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None 
+        fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None
+    if canFacts is None:
+        canFacts={'toto':0}
+    elif canFacts=={} :
+        canFacts={'titi':1}
 
     def visitor(g, v, turtle, 
                 leaf_computer=leaf_factory, 
                 bud_computer=bud_factory,
                 sepal_computer=sepal_factory,
                 flower_computer=flower_factory,
-                fruit_computer=fruit_factory):
+                fruit_computer=fruit_factory,
+                canFacts=canFacts):
         """ 
-        a function that analyses the code of a vertex then takes decisions about the ways to display it
-        it may possibly write CAN02 file accordingly to Sec2/Sources/Canopy/Organ.hpp's codification.
+        a function that analyses the code of a vertex then 
+        takes decisions about the ways to display it.
+        if canFacts is a python dict, it will write CAN02 file accordingly to 
+        Sec2/Sources/Canopy/Organ.hpp's codification.
         """
+
+        # pour dupliquer les géométries afin de ne
+        # les écrire qu'une fois dans le can02
+        maTortue=pgl.PglTurtle()
+        maTortue.move(turtle.getPosition()) 
+        maTortue.startGC()
+        maTortue.setWidth(turtle.getWidth())
+            
         n = g.node(v)
         pt = position(n)
         symbol = n.label[0]
+        
         turtle.setId(v)
-        currentColor=turtle.getColor()        
+        maTortue.setId(v)
+
+        currentColor=turtle.getColor()
+        
+        global numeroPlante # mémo du numéro de plante pour gérer numApp
+        global numApp       # compteur rémanent d'appels à fonction
 
         plantNum=None
         orgNum=None
-        canFacts=None
+        orgType=None
+        
         if canFacts: 
             plantNum=g.properties()['plantNum']
         
@@ -1908,38 +1955,37 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 logging.error('ERROR: vertex %d (name: %s, line around %d)'%(v,n.label,n._line))
                 n.Diameter = 0.75
                 
-            orgNum=n.label[1] # arbitrairement : numéro d'entre-noeud. TODO: un compteur rémanent
+            orgNum=n.label[1] # arbitrairement : numéro d'entre-noeud. 
             if symbol=='E':
                 orgType=2 # Sec2/Sources/Canopy/CANReader.cpp
             else :
                 orgType=4 # rachis ou petiole
 
-            #if n.edge_type() == '+'  or not n.parent():
-            #    turtle.setWidth(n.Diameter / 2.)
-
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
-
+            maTortue.oLineTo(pt)
+            maTortue.setWidth(n.Diameter / 2.)
+            
         elif n.label ==  'F1' :            
             orgType=1 # feuille
             turtle.setColor(2) # internode
+            maTortue.setColor(2) # internode
+            
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
             leaf_computer(points,turtle)
+            leaf_computer(points,maTortue)
 
         elif n.label == 'S1' :
             orgType=6 # sepale
-            #turtle.setColor(4) # apple green
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
             
             lSepalStore.append(points)
-            #print "lSepalStore.APPEND"
-            #sepal_computer(points,turtle) # unused ?
 	    
         elif n.label == "B1" :
             orgType=7 # bouton
@@ -1949,64 +1995,90 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 n = list(n.children())[0]
                 points.append(n)
             bud_computer(points,turtle,lSepalStore) 
+            bud_computer(points,maTortue,lSepalStore) 
 
             # process digitized sepals 
             turtle.setColor(4) # apple green
+            maTortue.setColor(4) # apple green
             while lSepalStore:
+               sepal_computer(lSepalStore[-1],maTortue)
                sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "O1" :
             orgType=8 # fleur
             turtle.setColor(4) # apple green
+            maTortue.setColor(4) # apple green
 
             points=[n.parent(),n]
             #print "n.Diameter=%s" % n.Diameter
             flower_computer (points, turtle, lSepalStore, n.Diameter)
+            flower_computer (points, maTortue, lSepalStore, n.Diameter)
 
             # process digitized sepals (if any)
             #turtle.setColor(len(lSepalStore)) # apple green 
             turtle.setColor(4) # apple green 
+            maTortue.setColor(4) # apple green 
             while lSepalStore:
-                #turtle.setColor(couleur)
-                #couleur +=1
-                #turtle.decColor()
-                #sepale=lSepalStore.pop()      # 2 clear data (requested)
-                #sepal_computer(sepale,turtle) # 2 draw sepal
+                sepal_computer(lSepalStore[-1],maTortue)
                 sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "C1" :
             orgType=9 # fruit ou cynorrhodon
             turtle.setColor(4) # apple green
-            # process sepals
-            #points=[[position(n.parent()),n.parent().Diameter], [None,None], [pt, None]] # old way
+            maTortue.setColor(4) # apple green
             points=[n.parent(),n]
             fruit_computer (points, turtle, lSepalStore, -1)
+            fruit_computer (points, maTortue, lSepalStore, -1)
             while lSepalStore:
+                sepal_computer(lSepalStore[-1],maTortue)
                 sepal_computer(lSepalStore.pop(),turtle)
-                #print "lSepalStore:USED in FRUIT"
 
             # process terminator
         elif n.label == "T1":
             orgType=10 # terminateur
             # The turtle is supposed to be at the top of the previous vertex
-            #turtle.stopGC() # not useful anymore
             turtle.setColor(2) # green
             #turtle.startGC()
             turtle.oLineTo(pt)
-            turtle.setWidth(0.01) 
+            turtle.setWidth(0.01)
+            
+            maTortue.setColor(2) # green
+            maTortue.oLineTo(pt)
+            maTortue.setWidth(0.01) 
 
         elif symbol == 'H' : # hidden vertex
             pass
 
         turtle.setColor(currentColor)
+        maTortue.setColor(currentColor)
 
-        #inclure ici le code CAN02 ?
-        numTri=1
+        # code CAN02
+        # tracer le nombre d'appels (debug)
+        if not numeroPlante == plantNum :
+            numApp=1
+            numeroPlante = plantNum
         if canFacts :
-            nomFic="%s.can" % (g.properties()['plantNum'])
-            fOut=open(nomFic,"a")
-            fOut.write('coucou\n')
-            fOut.close()
+            canFacts['canStream'].write("#Appel %d\n" % numApp)
+            numApp += 1
+            # copied from alinea.topvine
+            out = []
+            # local invariants
+            debutLigne=can02line(canFacts['numJour'], orgType, plantNum,orgNum )
+            
+            maTortue.stopGC();
+            maScene=maTortue.getScene()
+            for obj in range (len(maScene)):
+                geometry = mesh(maScene[obj])
+                p = geometry.pointList
+                index = geometry.indexList
+                numTri=1
+                for ind in index:
+                    canFacts['canStream'].write(
+                        "%s %d %s\n" % (
+                            debutLigne, numTri,' '.join(str(x) for i in ind for x in p[i])))
+                    numTri += 1
+        else:
+            print("canFacts: %s" % canFacts)
     # end visitor
 
     # return outputs
@@ -2051,6 +2123,8 @@ class VertexVisitor4CAN02(Node):
                         interface = IFunction)
         self.add_input( name = 'fruit_factory',
                         interface = IFunction)
+        self.add_input( name = 'canFacts',
+                        interface = IDict)
         self.add_output( name = 'VertexVisitor', 
                          interface = IFunction )
 
@@ -2060,7 +2134,8 @@ class VertexVisitor4CAN02(Node):
         sepal_factory=self.get_input('sepal_factory')
         flower_factory=self.get_input('flower_factory')
         fruit_factory=self.get_input('fruit_factory')
-        return vertexVisitor4CAN02(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory )
+        canFacts=self.get_input('canFacts')
+        return vertexVisitor4CAN02(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory, canFacts )
 #end class VertexVisitor4CAN02(Node)
 
 
@@ -2133,12 +2208,12 @@ def traverse_with_turtle4CAN02(g, vid, visitor, turtle=None, canFacts={}):
     turtle.push()
     turtle.startGC()
 
-    visitor(g,vid,turtle)
+    visitor(g,vid,turtle, canFacts=canFacts)
     turtle.stopGC()
     for v in pre_order2_with_filter(g, vid, None, push_turtle, pop_turtle):
         if v == vid: continue
         turtle.startGC()
-        visitor(g,v,turtle)
+        visitor(g,v,turtle, canFacts=canFacts)
         turtle.stopGC()
     turtle.pop()
     return turtle.getScene()
@@ -2206,7 +2281,6 @@ def TurtleFrame4CAN02(g, visitor, plantFacts):
         tmp= iter(g.component_roots_at_scale(plant_id, scale=n))
         vid = tmp.next()
 
-        plantFacts={}
         traverse_with_turtle4CAN02(g, vid, visitor, turtle, plantFacts)
     return turtle.getScene()
 #endef TurtleFrame(g, visitor)
@@ -2262,7 +2336,7 @@ def buildCanPath(path ):
             tmp='/tmp'
         return tmp
     
-        ## this would feed up the target dir of useless files
+        ## this could fill up the target dir of useless files
         #newPath=re.sub("(?i)MTG/", "CAN/", plantPath)
         #if not os.path.exists(newPath):
         #    os.makedirs( newPath)
@@ -2284,6 +2358,7 @@ def openCanFile(path, plantPath, plantName):
     realPath=buildCanPath(path)
     retVal=open("%s/%s.can" % (realPath, plantName),"w")
     retVal.write("CAN02\n")
+    retVal.write("#Debugging\n");
     return retVal
 # fin openCanFile
 
@@ -2296,6 +2371,13 @@ def writeCanFile(fOut, numTri, organNum, organType, plantNum, jour=1, geometrie=
     
     fOut.write("%d %d %d %d %d %s\n" % (jour, organType, plantNum, organNum, numTri, geometrie))
 # fin writeCanFile
+
+def numeroJour(dirName) :
+    """ renvoie le numéro de jour julien de la digitalisation. 
+    C'est très limitant pour gérer des manips sur différentes années
+    TODO : utiliser le numero de jour de python::time
+    """
+    return 42 # pour tests
 
 def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
     """ Builds a list of scenes from a liste of MTG object using a « vertex visitor »
@@ -2320,7 +2402,7 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
     canPath=''
     fOut=None
     canFacts={}
-    numJour= 42 # on verra
+    numJour= None
     
     if not canFilesOutPath == "" :
         makeCan=True
@@ -2334,8 +2416,8 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
                 fOut=openCanFile(canFilesOutPath,
                                  mtg.properties()['dirName'],
                                  mtg.properties()['plantNum'])
-                canFacts['outStream']=fOut
-                canFacts['numJour']=numJour
+                canFacts['canStream']=fOut
+                canFacts['numJour']= numeroJour(mtg.properties()['dirName'])
                 
         
         diameter = mtg.property('Diameter')
@@ -2358,12 +2440,8 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
         #test : 
         mtg.properties()['Diameter'] = pf.algo_diameter(power=powerParam)
 
-        theScene=TurtleFrame4CAN02(mtg, visitor,canFacts)
+        theScene=TurtleFrame4CAN02(mtg, visitor, canFacts)
         theScenes.append(theScene)
-
-        # Now, we are going to tessellate theScene
-        
-        # write out the geometry : to do in turtleFrame
 
         if fOut:
             fOut.close()
@@ -2407,6 +2485,36 @@ class ReconstructionsWithTurtle(Node):
         return reconstructionsWithTurtle(MTGs, Visitor, powerParam, canFilesOutPath)
 #end ReconstructWithTurtle
 
+def scene_union(somescenes=[]):
+    '''    glue MTGs' scenes together in a big scene
+    '''
+    thescene = None; 
+    # write the node code here.
+    if isinstance (somescenes, list):
+        if len(somescenes) >= 2 :
+            #print "type(scene) = %s" %  type(somescenes[0])
+            thescene = somescenes[0] + somescenes[1]
+            for somescene in somescenes[2:]:
+                thescene = thescene + somescene
+        else:
+            thescene = somescenes[0]
+    else : # we take the a risk to return something not being an MTG
+        thescene = somescenes
+
+    # return outputs
+    return thescene,
+#end scene_union(somescenes)
+
+class Scene_union(Node):
+    def __init__(self):
+        Node.__init__(self)
+        self.add_input( name = 'somescenes', interface=ISequence)
+        self.add_output(name = 'ascene', interface = IData )
+
+    def __call__( self, inputs ):
+        someScenes=self.get_input( 'somescenes')
+        return scene_union(someScenes)
+        
 
 #if __name__ == '__main__' :
 #    print inSector(2.4999999999,2.0,0.5)
