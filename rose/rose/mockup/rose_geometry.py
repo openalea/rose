@@ -1877,6 +1877,7 @@ def can02line(
 
 numeroPlante=0 # debug (quoique...)
 numApp= 0      # debug    //
+plantNum = None # rémanence du num d'EN
 
 ########################################
 def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None, canFacts=None ):
@@ -1944,7 +1945,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         global numApp       # compteur rémanent d'appels à fonction
 
         plantNum=None
-        orgNum=None
+        global orgNum       # conserver le numéro d'EN
         orgType=None
         
         if canFacts: 
@@ -1955,9 +1956,9 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 logging.error('ERROR: vertex %d (name: %s, line around %d)'%(v,n.label,n._line))
                 n.Diameter = 0.75
                 
-            orgNum=n.label[1] # arbitrairement : numéro d'entre-noeud. 
             if symbol=='E':
                 orgType=2 # Sec2/Sources/Canopy/CANReader.cpp
+                orgNum=n.label[1] # arbitrairement : numéro d'entre-noeud. 
             else :
                 orgType=4 # rachis ou petiole
 
@@ -2063,7 +2064,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             # copied from alinea.topvine
             out = []
             # local invariants
-            debutLigne=can02line(canFacts['numJour'], orgType, plantNum,orgNum )
+            debutLigne=can02line(canFacts['numJour'], orgType, plantNum, orgNum )
             
             maTortue.stopGC();
             maScene=maTortue.getScene()
