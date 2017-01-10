@@ -2328,21 +2328,25 @@ def buildCanPath(path ):
     """ we comute the path to write CAN files in 
     """
     import os, re
-
-    if re.search("^/", path): # absolute path
-        return path
+    retPath=None
+    if path is None or path == "":
+        retPath= os.getenv("TEMP")
+        if retPath is None :
+            retPath='/tmp'
+    elif re.search("/MTG/", path):
+        # limiter les risques d'erreur en associant fichiers/manips
+        retPath=re.sub("/MTG/", "/CAN/", path)
     else:
-        tmp= os.getenv("TEMP")
-        if tmp is None :
-            tmp='/tmp'
-        return tmp
-    
+        retPath = path 
+    if not os.path.exists(retPath):
+        os.makedirs( retPath)
+            
         ## this could fill up the target dir of useless files
-        #newPath=re.sub("(?i)MTG/", "CAN/", plantPath)
-        #if not os.path.exists(newPath):
-        #    os.makedirs( newPath)
-        #return newPath
-    return None    
+        #retPath=re.sub("(?i)MTG/", "CAN/", plantPath)
+        #if not os.path.exists(retPath):
+        #    os.makedirs( retPath)
+        #return retPath
+    return retPath
 # fin buildCanPath
 
 def clearCanPath(path ):
