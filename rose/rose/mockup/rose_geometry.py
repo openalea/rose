@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+#
+# $Id$
+#
 """
 .. module rose_geometry 
 .. moduleauthor:: H. Autret <hautret@angers.inra.fr>
@@ -1758,7 +1761,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
                 fruit_computer=fruit_factory):
         """ 
         a function that analyses the code of a vertex then takes decisions about the ways to display it
-        it may possibly write CAN02 file accordingly to Sec2/Sources/Canopy/Organ.hpp's codification.
         """
         n = g.node(v)
         pt = position(n)
@@ -1877,7 +1879,7 @@ def can02line(
 
 numeroPlante=0 # debug (quoique...)
 numApp= 0      # debug    //
-plantNum = None # rémanence du num d'EN
+orgNum = 1 # rémanence du num d'EN
 
 ########################################
 def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None, canFacts=None ):
@@ -1958,7 +1960,10 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 
             if symbol=='E':
                 orgType=2 # Sec2/Sources/Canopy/CANReader.cpp
-                orgNum=n.label[1] # arbitrairement : numéro d'entre-noeud. 
+                # temporairement : le numéro d'organe est le numéro du noeud porteur
+                #orgNum=n.label[1:] 
+                # TODO : prendre en compte la ramification
+                orgNum += 1
             else :
                 orgType=4 # rachis ou petiole
 
@@ -2058,6 +2063,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         if not numeroPlante == plantNum :
             numApp=1
             numeroPlante = plantNum
+            orgNum=0
         if canFacts :
             canFacts['canStream'].write("#Appel %d\n" % numApp)
             numApp += 1

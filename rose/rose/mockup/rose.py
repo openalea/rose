@@ -106,8 +106,12 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
                         randAngle = random.uniform(-1,1) * math.pi
                     else :
                         randAngle = 0
-                    dictOfPositions[mtgFiles[randPlant]] += [[Index2Coord(coords),randAngle]]
-                #print "plante %s <- %s" % (plante, randPlant)
+
+                    if mtgFiles[randPlant] in dictOfPositions.keys():
+                        dictOfPositions[mtgFiles[randPlant]] += [[Index2Coord(coords),randAngle]]
+                    else:
+                        # Cas des MTGs ajoutés arbitrairement dans le dossier
+                        dictOfPositions[mtgFiles[randPlant]] = [[Index2Coord(coords),randAngle]]
 
     # returns output
     return dictOfPositions,
