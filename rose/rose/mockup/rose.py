@@ -23,6 +23,13 @@ from openalea.core.logger  import *
 
 def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDef=[], origin=(0, 0, 800), DoFill=True, DoRotate=True):
     '''    Generates a dictionnary of filenames associated with one or more position and orientation.
+    @param plantlist : 'the dispatching grid of the plant numbers on the table'
+    @param existingmtglist : 'the dictionnary of the existing pairs <plant_number:filename>'
+    @param excludelist : 'a list of plants not to use for filling (if any)'
+    @param gridDef : 'the dimensions of the grid used for this experiment : nX, nY, sizeX, sizeY'
+    @param origin : 'the 3D global coordinates of the local 0,0,0 position within the grid'
+    @param DoFill : 'Should we fill empty places with existing data ?'
+    @param DoRotate : 'Should or should we not rotate the plants used for filling'
     '''
     plant_mtgs = []; 
     if gridDef :
@@ -76,9 +83,8 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
         for clef in  mtgFiles.keys() :
             listOfNums += [clef]
         # there may be plants we do not want to use for filling.
-        if len(excludelist) > 0:
-            for noClef in excludelist:
-                listOfNums.remove(noClef)
+        for noClef in excludelist:
+            listOfNums.remove(noClef)
 
         # the length of the list of existing MTG files, for random choice
         randRange=len(listOfNums)-1
@@ -87,7 +93,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
         # in the existingmtglist, and we append the coordinates of P to the
         # list of coordinates of P'
         # We can process a missing plant with several coordinates
-        # so we can use dummy numbers for missing plants
+        # so we may have used dummy numbers for missing plants
         for plante in plantlist.keys():
             # if we have no data for this plant
             if not int(plante) in mtgFiles.keys() :
@@ -97,11 +103,8 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
                     randPlantNum = random.randint(0,randRange)
                     # get a plant from this index
                     randPlant = listOfNums[randPlantNum]
-                    # we give a random rotation by 1/4 of tour 
-                    # say : -1/4, 0, 1/4, 1/2 tour
+                    # we give a random rotation 
                     if DoRotate == True :
-                        ## random 1/4 tour angle
-                        #randAngle = random.randint(-1, 2) * 0.5 * math.pi
                         # random angle in one tour
                         randAngle = random.uniform(-1,1) * math.pi
                     else :
