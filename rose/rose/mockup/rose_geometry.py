@@ -238,6 +238,7 @@ class RawBud(Node):
 
     def __call__( self, inputs ):
         return rawBud()
+# end RawBud      (rawBud wrapper)
 
 ################################################ BILTBUD
 def builtBud(stride=10):
@@ -326,8 +327,9 @@ class BuiltBud(Node):
     def __call__( self, inputs ):
         stride=self.get_input('stride')
         return builtBud(stride)
+#end BuiltBud    (builtBud wrapper)
 
-############################################# Fin Generic _BUD_
+############################################# End Generic _BUD_
 
 
 def flower(points, turtle=None, lSepales=[], diameter=None):
@@ -361,6 +363,7 @@ def flower(points, turtle=None, lSepales=[], diameter=None):
     # All the angles are known, now we draw the thing.
     floralOrgan(Heading, height, Radius, lSepalAngles, lSepalDims,
                   lPetalAngles,  lPetalDims, turtle, lNoSepals)
+#end flower
 
 class Flower(Node):
     def __init__(self):
@@ -369,6 +372,7 @@ class Flower(Node):
                          interface = IFunction )
     def __call__( self, inputs ):
         return flower
+# end Flower     (flower wrapper)
 
 ###################################### Revolution Bud
 def pointArray():
@@ -513,6 +517,7 @@ class PointArray(Node):
                          interface = ISequence )
     def __call__( self, inputs ):
         return pointArray()
+# end PointArray   (pointArray wrapper)
   
 class BudArray(Node):
     def __init__(self):
@@ -521,6 +526,7 @@ class BudArray(Node):
                          interface = ISequence )
     def __call__( self, inputs ):
         return budArray()
+#end BudArray     (budArray wrapper)
   
 class FineBudArray(Node):
     def __init__(self):
@@ -529,6 +535,7 @@ class FineBudArray(Node):
                          interface = ISequence )
     def __call__( self, inputs ):
         return fineBudArray()
+#end FineBudArray     (fineBudArray wrapper)
   
 
 class RevolutionFig(Node):
@@ -542,6 +549,7 @@ class RevolutionFig(Node):
         pointArray=self.get_input('pointArray')
         stride=self.get_input('stride')
         return revolution(pointArray, stride)
+# end RevolutionFig    (revolution  wrapper)
 
 class RevolutionBud(Node):
     def __init__(self):
@@ -552,9 +560,10 @@ class RevolutionBud(Node):
     def __call__( self, inputs ):
         revFig=self.get_input('revFig')
         return (revolutionBud(revFig))
-   
- ## GROUPING items for buds
+# end RevolutionBud  (revolutionBud wrapper)
+
 class drawBuds(Node):
+    """ :return: a list of drawing bud functions """
     def __init__(self):
         Node.__init__(self)
         self.add_output( name = 'budsComputers', 
@@ -562,7 +571,7 @@ class drawBuds(Node):
 
     def __call__( self, inputs ):
         return (noThing, rawBud(), builtBud(), revolutionBud(), bud )
-    
+#end drawBuds   
 
 ################################################ LEAFLET
 def  displayNormalVector(turtle,points,color):
@@ -730,6 +739,7 @@ class ComputeLeaflet4pts(Node):
         xMesh=self.get_input('xMesh')
         yMesh=self.get_input('yMesh')
         return computeLeaflet4pts(xMesh,yMesh)
+# end ComputeLeaflet4pts   (computeLeaflet4pts  wrapper)
 
 #########################################
 def rawLeaflet(points, turtle=None):
@@ -766,9 +776,10 @@ class PolygonLeaflet(Node):
 
     def __call__( self, inputs ):
         return polygonLeaflet()
+# endpolygonLeaflet
 
- ## GROUPING items for leaves
 class drawLeaves(Node):
+    """ :return: a list of the leaves drawing functions"""
     def __init__(self):
         Node.__init__(self)
         self.add_output( name = 'leavesComputers', 
@@ -776,6 +787,7 @@ class drawLeaves(Node):
 
     def __call__( self, inputs ):
         return (noThing, rawLeaflet, computeLeaflet4pts() )
+# end drawLeaves  
     
 
 ######################################## FLOWER
@@ -906,7 +918,7 @@ class BezierPatchFlower(Node):
         colorFunc=self.get_input('colorFunc')
         
         return bezierPatchFlower(controlpointmatrix, ustride, vstride, colorFunc)
-        #return bezierPatchFlower()
+#end BezierPatchFlower   (bezierPatchFlower wrapper)
     
 ################################## GENERIC _FLOWER_
 
@@ -1038,7 +1050,7 @@ def flowerParameters(points, stade=None, PcStade=0, lSepales=[], flowerDiameter=
 
             #print "flowerParameters::flowerRay= %s" % flowerRay
             # we compute the angle(s)
-            lPetalAngles.append (math.atan2(flowerRay, height)) # todo : height/0.9 ?
+            lPetalAngles.append (math.atan2(flowerRay, height)) 
             #lPetalDims.append(height / math.cos(lPetalAngles[0]))
             lPetalDims.append(math.sqrt(height*height + flowerRay*flowerRay) )
 
@@ -1104,7 +1116,7 @@ def fruitParameters(points, stade=None, PcStade=0):
     # we get the diameter
     flowerRay=  mtg.property('Diameter')[top]*0.5
     # we compute the angle(s)
-    lPetalAngles[0]= math.atan2(height,flowerRay) # todo : height/0.9 ?
+    lPetalAngles[0]= math.atan2(height,flowerRay) 
     lPetalDims[0]=height / math.cos(lPetalAngles[0])
 
     lPetalAngles[0] /= deg2rad 
@@ -1227,19 +1239,14 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         :param angleInt: the angle of the inner sepal
         :param numero: the number of the sepal, that defines their position around the main axis
         :warning: the 1st point is supposed to be at [0,0,0] 
+        :return: a new petal matrix
         """
 
-        #(sina,cosa) = (0,1)
-        # say stage is supposed to be inside [3/4 - 1]
-        #stage = checkIfIn(0,1,stage)
         newPetalMatrix =  [[]]
-        # TODO  if 0 <= stage < 0.3 : return a fine cone     
-        # TODO shift the sigmoid rather than interpolate to get quick moves
-        # TODO NOW fold petals as cones
  
         # the opening angle of each crown of petals is computed accordingly to
         # the observations on a rose bud.  
-        # see fitting curves in ~/manips/rose/boutons/chronogramme.ods
+        # see fitting curves in $ROSEDIR/doc/user/chronogramme.ods
 
         # fit by estimated MEAN values
         angle = angleInt
@@ -1258,21 +1265,16 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         #facteur = min(max(angle/0.2, 0.2),1)
         facteur = math.sqrt(facteur)
 
-        #if angle > 0.1 : # opening petals
-            # recopie de la matrice
         for line in petalMatrix:
             newLine=[]
             for point in line:
                 newLine.append(point)
             newPetalMatrix.append(newLine)
         newPetalMatrix.remove([]) # python
-        ################ pivoter les derniers groupes de points pour ouvrir la fleur
-        # N O T E Visuellement ça plonge plus que le sépale 
-        # pour le même angle => on limite l'angle à 90°
-        # On dépile la matrice, on modifie les points 
-        # de la derniere rangée et l'antépénultième
-        # avec 1 angle différent pour "onduler" le pétale
-        # puis on rempile la matrice
+        ################ 
+        # we rotate the last groups of points in order to open the flower
+        # N O T E Visually, petals bend more than sepal for large angles,
+        # so we must limit the angle below 90°.
         lignes=[]
         for numRang in range(2):
             ligne=newPetalMatrix.pop()
@@ -1287,25 +1289,22 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
                 newPoint=V4(newx, point[1]*facteur, newz , point[3])
                 newPoints.append(newPoint)
             lignes.append(newPoints)
-        #lignes.append(newPetalMatrix.pop())
 
         lignes.reverse()
-
         for points in lignes :
             newPetalMatrix.append(points)
           
         return newPetalMatrix
-    # fin TransformPetal
+    # end TransformPetal
 
 
     # P R O C E S S I N G
     turtle.push()
-    turtle.setHead(Heading, Radius) # -Radius ?
-    taille = height / 9. # 9.0 empirique
+    turtle.setHead(Heading, Radius)
+    taille = height / 9. # 9.0 empirical
     taille_fruit=taille*2.5
-    #print "floralOrgan:TAILLE = %s" % taille
-    # ready to draw 
 
+    # ready to draw 
     # we prolongate the ped along the heading direction : 
     turtle.push()
     turtle.oLineRel(Heading *taille_fruit  ) 
@@ -1352,10 +1351,6 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         # has this sepal been digitized ?
         Go=True 
         if lNoSepals:
-            # T O D O : process here  Sabine's idea
-            # gap = lNoSepals[-1] # note : won't run if+than 2 sepals
-            # if gap > 4* angle72 ... 
-            # design, please...
             for az in lNoSepals:
                 if inSector(rotationAngle,az, angle72*.5) :
                     Go = False
@@ -1363,33 +1358,24 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         if Go : # the sepal was not digitized
             sepalMatrix=TransformSepal(sepalmatrix2, angleSepExt, angleSepInt, index)        
             thisSepal=pgl.BezierPatch(sepalMatrix, ustride, vstride)
-            #localHeight = thisHeight * (index+1) #*index 4 DBG
-            #thisSepal=pgl.Scaled(Vector3(localHeight,localHeight,localHeight), thisSepal) 
             thisSepal=pgl.Scaled(Vector3(thisHeight,thisHeight,thisHeight), thisSepal) 
-            # répartition tous les 144° : aspect ouverture 1 peu aléatoire
-            newSepal=pgl.AxisRotated((0,0,1),rotationAngle+math.pi,thisSepal) # test (0,0,1)
+            newSepal=pgl.AxisRotated((0,0,1),rotationAngle+math.pi,thisSepal) #
             groupe.geometryList.append(newSepal)
-        #else:           print "turtle.customGeometry( Cone(),1)"
-        # Debug
-        if False:        #if lSepalAngles:
-            turtle.push()
 
-            turtle.setColor(0)
-            turtle.setHead(Radius, Heading) # DBG
-            turtle.customGeometry( Cone(3,100),1) 
-
-            turtle.setColor(index)
-            #rayon=cross(Heading,Radius)
-            rayon=Vector3([x for x in Radius]) 
-            #turtle.setHead(rayon, Heading) # DBG
-            (leSin,leCos)=getSiCo(rotationAngle)
-            print "getSiCo(%s) = (%s,%s)" % (rotationAngle, leSin, leCos)
-            rayon=Vector3(rayon[0]*leCos -rayon[1]*leSin, rayon[1]*leCos+rayon[0]*leSin, 0)
-            turtle.setHead(rayon, Heading) # DBG
-            #cone= AxisRotated(cross(Heading,Radius ), math.pi *0.5 ,cone)
-            #cone= AxisRotated(Heading, rotationAngle,cone)
-            turtle.customGeometry( Cone(3,100),1) 
-            turtle.pop()
+#        if False:        #if lSepalAngles:
+#            turtle.push()
+#
+#            turtle.setColor(0)
+#            turtle.setHead(Radius, Heading) # DBG
+#            turtle.customGeometry( Cone(3,100),1) 
+#            turtle.setColor(index)
+#            rayon=Vector3([x for x in Radius]) 
+#            (leSin,leCos)=getSiCo(rotationAngle)
+#            print "getSiCo(%s) = (%s,%s)" % (rotationAngle, leSin, leCos)
+#            rayon=Vector3(rayon[0]*leCos -rayon[1]*leSin, rayon[1]*leCos+rayon[0]*leSin, 0)
+#            turtle.setHead(rayon, Heading) # DBG
+#            turtle.customGeometry( Cone(3,100),1) 
+#            turtle.pop()
                 
         thisHeight -= heightInc
 
@@ -1407,7 +1393,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     # check for FF stage
     # WARNING : digitization errors may lead to this case
     if  anglePetExt == anglePetInt and anglePetExt > 80. :
-        #print "FleurFannee"
+        #print "Faded flower..."
         turtle.pop()
         return
     
@@ -1415,10 +1401,6 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     angleRepartition = angle72 * 2.1
     setTurtleKoPink(turtle)
 
-    #turtle.pop() ; return #DEBUG 
-
-    #print "floralOrgan::lPetalDims= %s" % lPetalDims
-    #print "floralOrgan::lSepalDims= %s" % lSepalDims
     thisLength=lPetalDims[0]
     thisInc=(lPetalDims[0]-lPetalDims[-1])/ (numPetals -1)
     for index in xrange(int(numPetals)):
@@ -1427,15 +1409,12 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         petal=pgl.Scaled(Vector3(thisLength,thisLength,thisLength), petal) 
         thisLength -= thisInc
         ##newPetal=petal
-        #couleur= 5 +  index # pour repérer les pétales par numéro
-        # A  P A R A M E T R E R
+        #couleur= 5 +  index # test to visualize petal nuber by their color
         thisAngle=angleRepartition* index
         (thisSin, thisCos)= getSiCo(thisAngle)
         thisPetal=pgl.AxisRotated((0,0,1), thisAngle, petal) # orientation
-        thisPetal=pgl.Translated(-0.33 *taille *thisCos, -0.33 *taille *thisSin, taille*2., thisPetal) # placement
-        #thisPetal=AxisRotated((thisCos,thisSin,0), 0.1* stage, thisPetal) # twist
-        #turtle.setColor(couleur)
-    #groupe.geometryList.append(newPetal)
+        thisPetal=pgl.Translated(-0.33 *taille *thisCos, -0.33 *taille *thisSin,
+                                 taille*2., thisPetal) # placement
         turtle.customGeometry( thisPetal,1)
 
     turtle.pop()
@@ -1455,12 +1434,8 @@ def getSepalsAzimuts(lSepales, Heading, Radius):
     :param Radius: the Front (or local x) direction of the floral organ.
     :return: the list of angles.
     """
-    ##angles=[]
     angles=[0]   # 1st angle is null by construction (checked)
     
-    #print "getSepalsAzimuts::Heading = %s" % Heading
-    #print "getSepalsAzimuts::Radius = %s" % Radius
-
     # if there are 5 digitized sepals, we assume that they are correct
     if len(lSepales)==5:
         for a in xrange(73,360,72):        
@@ -1510,6 +1485,7 @@ class FloralOrgan (Node):
     def __call__( self, inputs ):
         colorFunc=self.get_input('colorFunc')
         return drawFloralOrgan(colorFunc)
+# end FloralOrgan (drawFloralOrgan  wrapper)
 
 ######################################## CONE FLOWER
 def coneFlower(colorFunc=None):
@@ -1551,6 +1527,7 @@ class RawFlower(Node):
     def __call__( self, inputs ):
         colorFunc=self.get_input('colorFunc')
         return coneFlower(colorFunc)
+# end RawFlower   (coneFlower wrapper)
 
 
 ######################################## Fruit
@@ -1613,7 +1590,7 @@ class RawFruit(Node):
     def __call__( self, inputs ):
         colorFunc=self.get_input('colorFunc')
         return simpleFruit(colorFunc)
-
+#end RawFruit  (simpleFruit  wrapper)
 
 
 ########################################
@@ -1646,6 +1623,7 @@ class NoOrgan(Node):
 
     def __call__( self, inputs ):
         return makeNoOrgan()
+# end NoOrgan  (makeNoOrgan   wrapper)
 
 ########################################
 
@@ -1674,6 +1652,7 @@ def ctrlpointMatrix():
             [Vector4(1,-0.10,1,1),Vector4(1,0.10,1,1)]]
     # return outputs
     return ctpm,
+# end ctrlpointMatrix
 
 class ControlPointsMatrix(Node):
     def __init__(self):
@@ -1683,6 +1662,7 @@ class ControlPointsMatrix(Node):
 
     def __call__( self, inputs ):
         return ctrlpointMatrix()
+# end ControlPointsMatrix   (ctrlpointMatrix  wrapper)
 
 def petalMatrix():
     """  
@@ -1715,6 +1695,7 @@ class PetalMatrix(Node):
 
     def __call__( self, inputs ):
         return petalMatrix()
+# end PetalMatrix  (petalMatrix  wrapper)
 
 ########################################
 def position(n):
@@ -1857,29 +1838,42 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
 # endef vertexVisitor(leaf_factory=None, bud_factory=None, ...)
 
 def mesh(geometry):
-    #d = pgl.Tesselator()
-    #geometry.apply(d)
-    #return d.result
+    """ 
+    :param geometry: an PlantFrame geometry
+    :return: the meshed (triangulated) geometry """
     tessel = pgl.Tesselator()
     geometry.apply(tessel)
     mesh_ = tessel.triangulation
     return mesh_
-
+# end mesh
 
 def canline(ind, label,p):
+    """
+    Write a triangle in the can formalism (version 01)
+    :param ind: geometry.indexList, i.e la liste des index adressant les points 3D
+    :param label: the label of the triangle
+    :param p: geometry.pointList, i.e la liste des points 3D constituant le polygone
+    :return: a can 02 line 
+    """ 
     return "p 2 %s 9 3 %s"%(str(label), ' '.join(str(x) for i in ind for x in p[i]))
+#end canline
 
-def can02line(
-        numJour,
-        typeOrg,
-        numPlante,
-        numOrg
-):
+def can02line( numJour, typeOrg, numPlante, numOrg):
+    """
+    :param numJour: the day number 
+    :param typeOrg: the type of organ
+    :param numPlante: thye plant number
+    :param numOrg:  the id of the organ
+    :return: a can02 line heading fields 
+    :note: all these fields will be read as integers by Sec2
+    """
     return "%s %s %s %s " % (numJour, typeOrg, numPlante, numOrg)
+# end can02line
 
-numeroPlante=0 # debug (quoique...)
-numApp= 0      # debug    //
-orgNum = 1 # rémanence du num d'EN
+# global variables whose values remains unchanged between successive calls of vertexVisitor4CAN02
+numeroPlante=0 # the plant number, to detect when a new plant is processed
+numApp= 0      # the number of callings within a plant (debug purposes)
+orgNum = 1     # the organ Id
 
 ########################################
 def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None, canFacts=None ):
@@ -1943,11 +1937,11 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
         currentColor=turtle.getColor()
         
-        global numeroPlante # mémo du numéro de plante pour gérer numApp
-        global numApp       # compteur rémanent d'appels à fonction
+        global numeroPlante # we test the plant number to deal with  numApp
+        global numApp       # dbg: the number of times we called this fuction within a plant
 
         plantNum=None
-        global orgNum       # conserver le numéro d'EN
+        global orgNum       # keep the node number between 2 calls
         orgType=None
         
         if canFacts: 
@@ -1960,12 +1954,11 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 
             if symbol=='E':
                 orgType=2 # Sec2/Sources/Canopy/CANReader.cpp
-                # temporairement : le numéro d'organe est le numéro du noeud porteur
-                #orgNum=n.label[1:] 
-                # TODO : prendre en compte la ramification
+                # test : the node number is the organ number : orgNum=n.label[1:] 
+                # TODO : deal with branching
                 orgNum += 1
             else :
-                orgType=4 # rachis ou petiole
+                orgType=4 # rachis or petiole
 
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
@@ -1973,7 +1966,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             maTortue.setWidth(n.Diameter / 2.)
             
         elif n.label ==  'F1' :            
-            orgType=1 # feuille
+            orgType=1 # leaf
             turtle.setColor(2) # internode
             maTortue.setColor(2) # internode
             
@@ -1985,7 +1978,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             leaf_computer(points,maTortue)
 
         elif n.label == 'S1' :
-            orgType=6 # sepale
+            orgType=6 # sepal
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -1994,7 +1987,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             lSepalStore.append(points)
 	    
         elif n.label == "B1" :
-            orgType=7 # bouton
+            orgType=7 # floawer button
             #print "list(n.children())[0].Diameter=%s" % list(n.children())[0].Diameter
             points = [n.parent(), n]
             while n.nb_children() == 1:
@@ -2029,7 +2022,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "C1" :
-            orgType=9 # fruit ou cynorrhodon
+            orgType=9 # fruit or cynorrhodon
             turtle.setColor(4) # apple green
             maTortue.setColor(4) # apple green
             points=[n.parent(),n]
@@ -2041,7 +2034,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
             # process terminator
         elif n.label == "T1":
-            orgType=10 # terminateur
+            orgType=10 # terminator
             # The turtle is supposed to be at the top of the previous vertex
             turtle.setColor(2) # green
             #turtle.startGC()
@@ -2059,13 +2052,13 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         maTortue.setColor(currentColor)
 
         # code CAN02
-        # tracer le nombre d'appels (debug)
+        # tracking the number of calls (debug)
         if not numeroPlante == plantNum :
             numApp=1
             numeroPlante = plantNum
             orgNum=0
         if canFacts :
-            canFacts['canStream'].write("#Appel %d\n" % numApp)
+            #canFacts['canStream'].write("#Appel %d\n" % numApp)
             numApp += 1
             # copied from alinea.topvine
             out = []
@@ -2090,7 +2083,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
     # return outputs
     return visitor
-# endef vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, ...)
+# end vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, ...)
 
 class VertexVisitor(Node):
     def __init__(self):
@@ -2115,7 +2108,7 @@ class VertexVisitor(Node):
         flower_factory=self.get_input('flower_factory')
         fruit_factory=self.get_input('fruit_factory')
         return vertexVisitor(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory )
-#end class VertexVisitor(Node)
+#end class VertexVisitor   (wrapper for vertexVisitor)
 
 class VertexVisitor4CAN02(Node):
     def __init__(self):
@@ -2143,10 +2136,10 @@ class VertexVisitor4CAN02(Node):
         fruit_factory=self.get_input('fruit_factory')
         canFacts=self.get_input('canFacts')
         return vertexVisitor4CAN02(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory, canFacts )
-#end class VertexVisitor4CAN02(Node)
+#end class VertexVisitor4CAN02  (wrapper for vertexVisitor4CAN02)
 
 
-#### Copy from mtg.turtle ###
+#### Copied from mtg.turtle ###
 def traverse_with_turtle(g, vid, visitor, turtle=None ):
     """ 
     This function is called from within TurtleFrame. It explores the part of a MTG tree being under the node number "vid". It walks through that sub-MTG using the pre_order2_with_filter algorithm.
@@ -2186,7 +2179,7 @@ def traverse_with_turtle(g, vid, visitor, turtle=None ):
     return turtle.getScene()
  #endef traverse_with_turtle(g, vid, visitor, turtle=None)
  
-#### Copy from mtg.turtle ###
+#### Copied from traverse_with_turtle() ###
 def traverse_with_turtle4CAN02(g, vid, visitor, turtle=None, canFacts={}):
     """ 
     This function is called from within TurtleFrame. It explores the part of a MTG tree being under the node number "vid". It walks through that sub-MTG using the pre_order2_with_filter algorithm.
@@ -2195,7 +2188,7 @@ def traverse_with_turtle4CAN02(g, vid, visitor, turtle=None, canFacts={}):
     :param vid: the vertex ID inside the MTG
     :param visitor: the function that visits the nodes of the sub-MTG
     :see: openalea/mtg/traversal.py
-    :note: this function was copied from OpenAlea.Mtg-0.9.5-py2.6.egg/openalea/mtg/turtle.py 
+    :note: this function was derived from OpenAlea.Mtg-0.9.5-py2.6.egg/openalea/mtg/turtle.py 
 """
     if turtle is None:
         turtle = PglTurtle()
@@ -2290,7 +2283,7 @@ def TurtleFrame4CAN02(g, visitor, plantFacts):
 
         traverse_with_turtle4CAN02(g, vid, visitor, turtle, plantFacts)
     return turtle.getScene()
-#endef TurtleFrame(g, visitor)
+#endef TurtleFrame4CAN02(g, visitor)
 
 def reconstructWithTurtle(mtg, visitor, powerParam):
     """ Builds a scene from an MTG object using a « vertex visitor »
@@ -2319,16 +2312,14 @@ def reconstructWithTurtle(mtg, visitor, powerParam):
         MinTopDiameter=dict(E=0.5))
     pf = PlantFrame(mtg, TopDiameter='Diameter', 
                     DressingData=drf, 
-                    Exclude = 'F S T O B C'.split()) 
-    #diameter = pf.algo_diameter(power=powerParam)
-    #mtg.properties()['Diameter'] = diameter 
-    #test : 
+                    Exclude = 'F S T O B C'.split())
+    
     mtg.properties()['Diameter'] = pf.algo_diameter(power=powerParam)
 
     theScene=TurtleFrame(mtg, visitor)
     # return outputs
     return theScene,
-# fin reconstructWithTurtle(mtg, visitor, powerParam)
+# end reconstructWithTurtle(mtg, visitor, powerParam)
 
 def buildCanPath(path ):
     """ we comute the path to write CAN files in 
@@ -2340,26 +2331,25 @@ def buildCanPath(path ):
         if retPath is None :
             retPath='/tmp'
     elif re.search("/MTG/", path):
-        # limiter les risques d'erreur en associant fichiers/manips
+        # we want to avoid errors when we associate filenames/experiments
         retPath=re.sub("/MTG/", "/CAN/", path)
     else:
         retPath = path 
     if not os.path.exists(retPath):
         os.makedirs( retPath)
             
-        ## this could fill up the target dir of useless files
-        #retPath=re.sub("(?i)MTG/", "CAN/", plantPath)
-        #if not os.path.exists(retPath):
-        #    os.makedirs( retPath)
-        #return retPath
     return retPath
-# fin buildCanPath
+# end buildCanPath
+
 
 def clearCanPath(path ):
-    import os
-    os.system( "rm %s/*.can" % buildCanPath(path ))
-# fin clearCanPath
-    
+    """ we clear all the *.can files within the directory "path"  """
+    import glob, os
+    for can in glob.glob(u'%s/*.can'%buildCanPath(path )):
+        os.unlink (can)   
+#end clearCanPath()
+
+
 def openCanFile(path, plantPath, plantName):
     """
     we open a file whose name is built wether the path is absolute or relative
@@ -2369,26 +2359,31 @@ def openCanFile(path, plantPath, plantName):
     realPath=buildCanPath(path)
     retVal=open("%s/%s.can" % (realPath, plantName),"w")
     retVal.write("CAN02\n")
-    retVal.write("#Debugging\n");
+    retVal.write("#numJour\ttypeOrgane\tnumPlante\tnumOrgane\tnumTri\tx1 y1 z1\tx2 y2 z2\tx3 y3 z3\n")
+    #retVal.write("#Debugging\n");
     return retVal
-# fin openCanFile
+# end openCanFile
 
 
 def writeCanFile(fOut, numTri, organNum, organType, plantNum, jour=1, geometrie=[]):
     """
     We  write a line of data.
-    This is for test at this level (i.e called out of plantFrame)
+    This is test stuff ; i.e  to be called called out of plantFrame
     """
-    
     fOut.write("%d %d %d %d %d %s\n" % (jour, organType, plantNum, organNum, numTri, geometrie))
-# fin writeCanFile
+# end writeCanFile
+
 
 def numeroJour(dirName) :
-    """ renvoie le numéro de jour julien de la digitalisation. 
-    C'est très limitant pour gérer des manips sur différentes années
-    TODO : utiliser le numero de jour de python::time
+    """ 
+    we return the date when this computation was made
+    :TODO: we want to compute the number of the day when the digitization was made,
+     this data could become deductible from the dirname if the associated knowledge 
+    were be made available here. 
     """
-    return 42 # pour tests
+    import time
+    return time.strftime('%d/%m/%y',time.localtime()) 
+# end numeroJour
 
 def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
     """ Builds a list of scenes from a liste of MTG object using a « vertex visitor »
@@ -2429,8 +2424,7 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
                                  mtg.properties()['plantNum'])
                 canFacts['canStream']=fOut
                 canFacts['numJour']= numeroJour(mtg.properties()['dirName'])
-                
-        
+                        
         diameter = mtg.property('Diameter')
         for v in mtg:
             if mtg.class_name(v) == 'R':
@@ -2446,9 +2440,6 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
         pf = PlantFrame(mtg, TopDiameter='Diameter', 
                         DressingData=drf, 
                         Exclude = 'F S T O B C'.split()) 
-        #diameter = pf.algo_diameter(power=powerParam)
-        #mtg.properties()['Diameter'] = diameter 
-        #test : 
         mtg.properties()['Diameter'] = pf.algo_diameter(power=powerParam)
 
         theScene=TurtleFrame4CAN02(mtg, visitor, canFacts)
@@ -2456,13 +2447,10 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
 
         if fOut:
             fOut.close()
-            
-        #print "canFilesOutPath : %s " % canFilesOutPath
-        
-        
+                    
     # return outputs
     return theScenes,
-# fin reconstructionsWithTurtle(mtgs, visitor, powerParam)
+# end reconstructionsWithTurtle(mtgs, visitor, powerParam)
 
 class ReconstructWithTurtle(Node):
     def __init__(self):
@@ -2477,7 +2465,7 @@ class ReconstructWithTurtle(Node):
         Visitor = self.get_input( 'Visitor' )
         powerParam = self.get_input( 'powerParam' )
         return reconstructWithTurtle(g, Visitor, powerParam)
-#end ReconstructWithTurtle
+#end ReconstructWithTurtle   (reconstructionsWithTurtle  wrapper)
 
 class ReconstructionsWithTurtle(Node):
     def __init__(self):
@@ -2494,7 +2482,7 @@ class ReconstructionsWithTurtle(Node):
         powerParam = self.get_input( 'powerParam' )
         canFilesOutPath = self.get_input( 'canFilesOutPath' )
         return reconstructionsWithTurtle(MTGs, Visitor, powerParam, canFilesOutPath)
-#end ReconstructWithTurtle
+#end ReconstructionsWithTurtle   (reconstructionsWithTurtle  wrapper)
 
 def scene_union(somescenes=[]):
     '''    glue MTGs' scenes together in a big scene
@@ -2525,7 +2513,5 @@ class Scene_union(Node):
     def __call__( self, inputs ):
         someScenes=self.get_input( 'somescenes')
         return scene_union(someScenes)
+# end Scene_union      (scene_union  wrapper)
         
-
-#if __name__ == '__main__' :
-#    print inSector(2.4999999999,2.0,0.5)

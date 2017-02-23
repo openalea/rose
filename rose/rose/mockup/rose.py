@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
-
+#
+# $Id$
+#
 """
 .. module:: rose
    :platform: Unix, Windows
@@ -22,14 +24,14 @@ from openalea.core.logger  import *
 
 
 def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDef=[], origin=(0, 0, 800), DoFill=True, DoRotate=True):
-    '''    Generates a dictionnary of filenames associated with one or more position and orientation.
-    @param plantlist : 'the dispatching grid of the plant numbers on the table'
-    @param existingmtglist : 'the dictionnary of the existing pairs <plant_number:filename>'
-    @param excludelist : 'a list of plants not to use for filling (if any)'
-    @param gridDef : 'the dimensions of the grid used for this experiment : nX, nY, sizeX, sizeY'
-    @param origin : 'the 3D global coordinates of the local 0,0,0 position within the grid'
-    @param DoFill : 'Should we fill empty places with existing data ?'
-    @param DoRotate : 'Should or should we not rotate the plants used for filling'
+    '''   :brief: Generates a dictionnary of filenames associated with one or more position and orientation.
+    :param plantlist: 'the dispatching grid of the plant numbers on the table'
+    :param existingmtglist: 'the dictionnary of the existing pairs <plant_number:filename>'
+    :param excludelist: 'a list of plants not to use for filling (if any)'
+    :param gridDef: 'the dimensions of the grid used for this experiment : nX, nY, sizeX, sizeY'
+    :param origin: 'the 3D global coordinates of the local 0,0,0 position within the grid'
+    :param DoFill: 'Should we fill empty places with existing data ?'
+    :param DoRotate: 'Should or should we not rotate the plants used for filling'
     '''
     plant_mtgs = []; 
     if gridDef :
@@ -42,7 +44,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
         n_y=6
         s_x=150.
         s_y=150.
-    # write the node code here.
+        
     def Index2Coord(ix,iy=None):
         if isinstance (ix,list):
             if len(ix) > 1:
@@ -113,7 +115,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
                     if mtgFiles[randPlant] in dictOfPositions.keys():
                         dictOfPositions[mtgFiles[randPlant]] += [[Index2Coord(coords),randAngle]]
                     else:
-                        # Cas des MTGs ajoutés arbitrairement dans le dossier
+                        # If extra MTGs are found in the directory, me may use them
                         dictOfPositions[mtgFiles[randPlant]] = [[Index2Coord(coords),randAngle]]
 
     # returns output
@@ -122,6 +124,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
 
 ###################################### ALEA WRAPPER
 class CropGeneration_2011(Node):
+    """ Yields the cropGeneration_2011(...) function  """
     def __init__(self):
         Node.__init__(self)
         self.add_input( name = 'plantlist',
@@ -152,23 +155,21 @@ class CropGeneration_2011(Node):
         DoRotate= self.get_input( 'DoRotate' )
         return cropGeneration_2011(plantlist, existingmtglist, excludelist, \
                                   gridDef, origin, DoFill, DoRotate)
-
+# end CropGeneration_2011 (cropGeneration_2011 wrapper)
 
 #################################################################
 def files2MTGs(cropdict):
     '''  
-    @brief Creates a list of MTG object from a dict of {MTG files:list of coordinates} pairs.
+    :brief: Creates a list of MTG object from a dict of {MTG files:list of coordinates} pairs.
     The procedure reads the MTG files, then places them both onto their coordinates, 
     Then it uses the files again to fill up empty spaces, with a random rotation angle.
-    @param cropdict : a dictionary built with 
+    :param cropdict : a dictionary built with 
     - MTG files names as keys,
     - shift of the real plant as 1st value for each key
     - shift and rotation as further values, if any
-    @return a list of MTG objects that were build from the dict
-    @TODO  ajouter la propriété plantName qui peut comporter le fait qu'il s'agit d'une plante de remplissage
+    :return: a list of MTG objects that were build from the dict
     '''
     listofmtgs = []; 
-    # write the node code here.
 
     import os # path.(base|dir)name
     
@@ -182,14 +183,14 @@ def files2MTGs(cropdict):
         - moved to the origin point as (orx, ory)
         - rotated around this point by the values (rot cos, rot sin) 
         - moved along the "shift" vector
-        @param noeud the MTG node
-        @param orx origin.x
-        @param ory origin.y
-        @param rotc cosine of the rotation angle
-        @param rots sine of the rotation angle
-        @param shiftx the x displacement to apply onto "noeud"
-        @param shifty the y displacement to apply onto "noeud"
-        @param shiftz the z displacement to apply onto "noeud"
+        :param noeud: the MTG node
+        :param orx: origin.x
+        :param ory: origin.y
+        :param rotc: cosine of the rotation angle
+        :param rots: sine of the rotation angle
+        :param shiftx: the x displacement to apply onto "noeud"
+        :param shifty: the y displacement to apply onto "noeud"
+        :param shiftz: the z displacement to apply onto "noeud"
 
         Note : the parameters are scalars rather than structures in order to speed up the process.
         """
@@ -204,11 +205,8 @@ def files2MTGs(cropdict):
     # creates output list (to be improved with rotates and shifts)
     for plante in cropdict.keys():
 
-        index=0 # la première rep est la plante d'intérêt
         for shiftRot in cropdict[plante]:
             
-             #print shift
-
             # get prepared for rotations
             shift=shiftRot[0]
             sx=shift[0]
@@ -231,7 +229,6 @@ def files2MTGs(cropdict):
                 PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
 
             listofmtgs += [mtg]
-            index += 1 # distinguer la première occurrence des suivantes
 
     # return outputs
     return listofmtgs,
@@ -248,23 +245,21 @@ class Files2MTGs(Node):
     def __call__( self, inputs ):
         cropdict= self.get_input( 'cropdict' )
         return files2MTGs(cropdict)
-# end class Files2MTGs(Node)
+# end class Files2MTGs  (files2MTGs wrapper)
 
     #################################################################
 def files2MTGs4CAN2(cropdict):
     '''  
-    @brief Creates a list of MTG object from a dict of {MTG files:list of coordinates} pairs.
+    :brief: Creates a list of MTG object from a dict of {MTG files:list of coordinates} pairs.
     The procedure reads the MTG files, then places them both onto their coordinates, 
     Then it uses the files again to fill up empty spaces, with a random rotation angle.
-    @param cropdict : a dictionary built with 
+    :param cropdict : a dictionary built with 
     - MTG files names as keys,
     - shift of the real plant as 1st value for each key
     - shift and rotation as further values, if any
-    @return a list of MTG objects that were build from the dict
-    @TODO  ajouter la propriété plantName qui peut comporter le fait qu'il s'agit d'une plante de remplissage
+    :return: a list of MTG objects that were build from the dict
     '''
     listofmtgs = []; 
-    # write the node code here.
 
     import os # path.(base|dir)name
     
@@ -278,14 +273,14 @@ def files2MTGs4CAN2(cropdict):
         - moved to the origin point as (orx, ory)
         - rotated around this point by the values (rot cos, rot sin) 
         - moved along the "shift" vector
-        @param noeud the MTG node
-        @param orx origin.x
-        @param ory origin.y
-        @param rotc cosine of the rotation angle
-        @param rots sine of the rotation angle
-        @param shiftx the x displacement to apply onto "noeud"
-        @param shifty the y displacement to apply onto "noeud"
-        @param shiftz the z displacement to apply onto "noeud"
+        :param noeud: the MTG node
+        :param orx: origin.x
+        :param ory: origin.y
+        :param rotc: cosine of the rotation angle
+        :param rots: sine of the rotation angle
+        :param shiftx: the x displacement to apply onto "noeud"
+        :param shifty: the y displacement to apply onto "noeud"
+        :param shiftz: the z displacement to apply onto "noeud"
 
         Note : the parameters are scalars rather than structures in order to speed up the process.
         """
@@ -300,11 +295,9 @@ def files2MTGs4CAN2(cropdict):
     # creates output list (to be improved with rotates and shifts)
     for plante in cropdict.keys():
 
-        index=0 # la première rep est la plante d'intérêt
+        index=0 # the 1st occurence is the plant we're interested in
         for shiftRot in cropdict[plante]:
             
-             #print shift
-
             # get prepared for rotations
             shift=shiftRot[0]
             sx=shift[0]
@@ -326,16 +319,12 @@ def files2MTGs4CAN2(cropdict):
                 noeud = mtg.node(vtx)
                 PositionIt(noeud, ox, oy, rc, rs, sx, sy, sz )
 
-            # nom du fichier pour créer les fichiers CAN
+            # the path to the can file
             mtg.properties()['dirName']=str(os.path.dirname(plante))
-            # TODO : donner le chemin pour le CAN2
-            
-            # on distingue les plantes d'intérêt en leur donnant un numéro entier
-            # Si la répétition d'un numéro ne devrait pas poser pb dans Sec2,
-            # les noms de fichiers doivent distiguer les plantes de remplissage
-            # car les positions diffèrent
-            # Le numéro de plante est alors incrémenté de 2000 * le numéro de répétition
-            # (la numérotation s'arrêtait avant 2000 pour les manips de 2011)
+
+            # we mark up filling plants by giving them a number higher then 2000:
+            # the plant number gets increased by 2000 * repetition_number
+            # (the numbering was always lower than 2000 in the 2011 experiments)
 
             nom=os.path.basename(plante).split('.')[0].split('-')[0].split("_")[-1]
             plantNum=int(re.sub("[^0-9]*([0-9]+)$","\\1",nom))
@@ -344,7 +333,7 @@ def files2MTGs4CAN2(cropdict):
             mtg.properties()['plantNum']=plantNum
             
             listofmtgs += [mtg]
-            index += 1 # distinguer la première occurrence des suivantes
+            index += 1 # Is there more than one repetition of this plant ?
 
     # return outputs
     return listofmtgs,
@@ -361,6 +350,7 @@ class Files2MTGs4CAN2(Node):
     def __call__( self, inputs ):
         cropdict= self.get_input( 'cropdict' )
         return files2MTGs4CAN2(cropdict)
+# end Files2MTGs4CAN2 (files2MTGs4CAN2 wrapper)
 
 #################################################################
 def getMTG(dirname, IDplant):
@@ -371,10 +361,6 @@ def getMTG(dirname, IDplant):
     and the string ".mtg" is concatenated to it.
    
     '''
-    # write the node code here.
-    """ default argument must follows non-default arguments
-    # so GetMTG(dirname='.', IDplant) is uncorrect
-    # and there is no satisfying default IDplant """
     if dirname is None:
         dirname = "."
     IDplantsplit=IDplant.partition('-')
@@ -383,6 +369,7 @@ def getMTG(dirname, IDplant):
     mtg=MTG(mtg_file)
     # return outputs
     return mtg
+# end getMTG
 
 class GetMTG(Node):
     def __init__(self):
@@ -398,6 +385,7 @@ class GetMTG(Node):
         dirname= self.get_input( 'dirname' )
         IDplant= self.get_input( 'IDplant' )
         return getMTG(dirname,IDplant)
+# end GetMTG  (getMTG wrapper)
 
 #################################################################
 def getOrigin(originFilename):
@@ -430,7 +418,7 @@ def getGrid(gridfilename):
     '''    Makes a dictionnary from file that contains plants indexes inside a 2D grid.
     '''
     dictofindices = None; 
-    # write the node code here.
+
     def getGridSpecs(coords_file):
         """ we read the 1st line of the file and return it as a list """
         ligne = coords_file.readline()
@@ -474,7 +462,7 @@ def httpDir2DictOfFiles(url, filtre='.mtg') :
     dictoffiles = {}
     listoffiles=[]
     htmlfile=""
-    # write the node code here.
+    
     (htmlFileName, h) = urllib.urlretrieve ( url +"/", None, urllib.reporthook)
     htmlfile=open(htmlFileName,"r")
     htmlfileContent=htmlfile.read()
@@ -498,6 +486,7 @@ def httpDir2DictOfFiles(url, filtre='.mtg') :
         
     # return outputs
     return dictoffiles,
+#end httpDir2DictOfFiles
 
 class HttpDir2DictOfFiles(Node):
     def __init__(self):
@@ -513,15 +502,13 @@ class HttpDir2DictOfFiles(Node):
         url = self.get_input( 'url' )
         filtre= self.get_input( 'filtre' )
         return httpDir2DictOfFiles(url, filtre)
-
-#end HttpDir2DictOfFiles
+#end HttpDir2DictOfFiles (httpDir2DictOfFiles wrapper)
 
 #################################################################
 def localDir2DictOfFiles(listoffiles):
     '''    makes a dict of names: complete_path from a dirname and a name filter
     '''
     dictoffiles = {} ; 
-    # write the node code here.
     # downloads files from a web server in temp. files, then return the dictionnary that associates temp files and filenames.
     from os import path as oPath
     for fichier in listoffiles:
@@ -549,7 +536,7 @@ def mTG_union(mtgsin):
     '''    make the union of MTGs
     '''
     mtgout = None; 
-    # write the node code here.
+
     # print "len(mtgsin)=%d" % len(mtgsin)
     if isinstance (mtgsin, list):
         if len(mtgsin) >= 2 :
@@ -563,6 +550,7 @@ def mTG_union(mtgsin):
 
     # return outputs
     return mtgout,
+# end mTG_union
 
 class MTG_union(Node):
     def __init__(self):
@@ -575,5 +563,5 @@ class MTG_union(Node):
     def __call__( self, inputs ):
         mtgsin= self.get_input( 'mtgsin' )
         return mTG_union(mtgsin)
-#end mTG_union
+#end MTG_union  (mTG_union wrapper)
 
