@@ -1031,7 +1031,7 @@ def flowerParameters(points, stade=None, PcStade=0, lSepales=[], flowerDiameter=
         (lSepalAngles,lSepalDims,Radius ) = getValuesFromSepals(lSepales, Heading)
         lRealSepalsAzimuts=getSepalsAzimuts(lSepales, Heading, Radius) 
     else :
-        # if no sepals, we check for "stade" notations
+        # if no sepals, we guess the radius
         Radius=computeFacingFromUp(Heading)
         
     #print "lSepalAngles: %s" % lSepalAngles
@@ -1077,7 +1077,6 @@ def flowerParameters(points, stade=None, PcStade=0, lSepales=[], flowerDiameter=
     elif stade: # may check for only BVF and CPV here (SR ?)
         lSepalAngles,lDummyDims = notation2flowerAngles(stade, PcStade)
         
-
     # check petal angles from sepal ones
 
     return(Heading, height, Radius, lSepalAngles, lSepalDims,
@@ -1749,7 +1748,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
         turtle.setId(v)
         currentColor=turtle.getColor()        
 
-        
         if symbol in ['E', 'R']:
             if n.Diameter is None:
                 logging.error('ERROR: vertex %d (name: %s, line around %d)'%(v,n.label,n._line))
@@ -1873,8 +1871,9 @@ def can02line( numJour, typeOrg, numPlante, numOrg):
 # global variables whose values remains unchanged between successive calls of vertexVisitor4CAN02
 numeroPlante=0 # the plant number, to detect when a new plant is processed
 numApp= 0      # the number of callings within a plant (debug purposes)
-orgNum = 1     # the organ Id
-
+#orgNum = 1     # the organ Id
+sOn = [] # ?? todo : unerstand y # None         # the stack of nodes that carry a branch
+oldOrdre=0                                      # did we branch or debranch ?
 ########################################
 def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None, canFacts=None ):
     """ We define here a function (visitor) that is used visit MTG nodes.
@@ -1907,6 +1906,24 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
     elif canFacts=={} :
         canFacts={'titi':1}
 
+    def orgNumFromStack(stack):
+        """
+        Computing the organ number from the stack of nodes that bear the node :
+        stack[-1] is the curent node ; stack[-2] is the last branching node (lbn), &.so
+        local node has a weight of 1 ; lbn has a weigh of 1000, &.so
+        """
+        retVal=0
+        if stack :
+            factor=1
+            localStack=stack[0:3]
+            while localStack:
+                retVal += localStack.pop()*factor
+                factor *= 1000
+        else :
+            return 1 # wtf ?
+        return retVal
+    # fin orgNumFromStack
+
     def visitor(g, v, turtle, 
                 leaf_computer=leaf_factory, 
                 bud_computer=bud_factory,
@@ -1920,9 +1937,10 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         if canFacts is a python dict, it will write CAN02 file accordingly to 
         Sec2/Sources/Canopy/Organ.hpp's codification.
         """
+        from openalea.mtg import algo
 
-        # pour dupliquer les géométries afin de ne
-        # les écrire qu'une fois dans le can02
+        # A 2nd turtle to duplicate the local geometry, so we still
+        # know the organ number when writing it into the CAN file
         maTortue=pgl.PglTurtle()
         maTortue.move(turtle.getPosition()) 
         maTortue.startGC()
@@ -1931,7 +1949,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         n = g.node(v)
         pt = position(n)
         symbol = n.label[0]
-        
+
         turtle.setId(v)
         maTortue.setId(v)
 
@@ -1941,7 +1959,9 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         global numApp       # dbg: the number of times we called this fuction within a plant
 
         plantNum=None
-        global orgNum       # keep the node number between 2 calls
+        global oldOrdre     # keep the order between 2 calls
+        global sOn          # keep the stack of node number between 2 calls
+        
         orgType=None
         
         if canFacts: 
@@ -1954,9 +1974,22 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 
             if symbol=='E':
                 orgType=2 # Sec2/Sources/Canopy/CANReader.cpp
-                # test : the node number is the organ number : orgNum=n.label[1:] 
-                # TODO : deal with branching
-                orgNum += 1
+                # To deal with branching :
+                numNode=int(n.label[1:])
+                ordre=algo.order(g,v) # vplants doc 0.8 p.83
+                if ordre-oldOrdre > 0:
+                    sOn.append(numNode)
+                elif ordre-oldOrdre < 0:
+                    sOn.pop()
+                    sOn[-1]=numNode
+                else:
+                    if sOn:
+                        sOn[-1]=numNode
+                    else:
+                        sOn.append(numNode)
+                        
+                oldOrdre=ordre
+                    
             else :
                 orgType=4 # rachis or petiole
 
@@ -2014,7 +2047,6 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             flower_computer (points, maTortue, lSepalStore, n.Diameter)
 
             # process digitized sepals (if any)
-            #turtle.setColor(len(lSepalStore)) # apple green 
             turtle.setColor(4) # apple green 
             maTortue.setColor(4) # apple green 
             while lSepalStore:
@@ -2047,22 +2079,28 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
         elif symbol == 'H' : # hidden vertex
             pass
+        elif symbol == 'J' : # pédoncule 
+            pass
+        # A  CAN02 file may contain several plants, but we don't use this here
+        elif symbol == 'P':
+            pass
 
         turtle.setColor(currentColor)
         maTortue.setColor(currentColor)
 
         # code CAN02
-        # tracking the number of calls (debug)
         if not numeroPlante == plantNum :
+            # tracking the number of calls (debug)
             numApp=1
             numeroPlante = plantNum
-            orgNum=0
+            sOn=[]
+            
+        orgNum=orgNumFromStack(sOn)
+
         if canFacts :
             #canFacts['canStream'].write("#Appel %d\n" % numApp)
             numApp += 1
-            # copied from alinea.topvine
             out = []
-            # local invariants
             debutLigne=can02line(canFacts['numJour'], orgType, plantNum, orgNum )
             
             maTortue.stopGC();
@@ -2075,7 +2113,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 for ind in index:
                     canFacts['canStream'].write(
                         "%s %d %s\n" % (
-                            debutLigne, numTri,' '.join(str(x) for i in ind for x in p[i])))
+                            debutLigne, numTri,'  '.join("%8.3f" % (x) for i in ind for x in p[i])))
                     numTri += 1
         else:
             print("canFacts: %s" % canFacts)
@@ -2382,7 +2420,7 @@ def numeroJour(dirName) :
     were be made available here. 
     """
     import time
-    return time.strftime('%d/%m/%y',time.localtime()) 
+    return time.strftime('%Y%m%d',time.localtime()) 
 # end numeroJour
 
 def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
