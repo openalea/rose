@@ -2418,9 +2418,10 @@ def numeroJour(dirName) :
     :TODO: we want to compute the number of the day when the digitization was made,
      this data could become deductible from the dirname if the associated knowledge 
     were be made available here. 
+    we shall use int(time.mktime((year, month, day, ...)))
     """
     import time
-    return time.strftime('%Y%m%d',time.localtime()) 
+    return time.strftime('%Y%m%d',time.localtime())
 # end numeroJour
 
 def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
