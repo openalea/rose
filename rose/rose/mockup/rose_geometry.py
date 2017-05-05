@@ -841,7 +841,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
         #ustride=5 
         #vstride=5 
         # pointsNdiamters is : [[base_pos, base_diam], [None,None], [top_pos, top_diam], [...]]
-        basePos=pointsnDiameters[0][0]
+        basePos=pointsnDiameters[0][0] # TypeError: '_ProxyNode' object does not support indexing
         topPos=pointsnDiameters[2][0]
         pedDiam=pointsnDiameters[0][1]
         flowerRay=pointsnDiameters[2][1] * 0.5
@@ -1144,7 +1144,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     :param lSepalAngles: the angles of the most and the less opened sepal, taken between the Heading direction and the axle of the sepal
     :param lSepalDims: the dimensions of opened sepals
     :param lPetalAngles: the angles of the most and the less opened petal, taken between the Heading direction and the axle of the petal
-    :param petalDim: the dimensions of opened petals
+    :param lpetalDims: the dimensions of opened petals
     :param turtle: the turtle to draw onto.
     :param lNoSepals: azimuts of real sepals (already drawn, so not to be created)
     :todo: add a param with the direction of existing sepals in the local mark, if any
@@ -1300,8 +1300,12 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     # P R O C E S S I N G
     turtle.push()
     turtle.setHead(Heading, Radius)
-    taille = height / 9. # 9.0 empirical
-    taille_fruit=taille*2.5
+    # this is empirical. It tends to make too small ovaries for wide opened flowers
+    taille = height / 10.
+    # The longer the petals, the bigger the ovary
+    if lPetalDims :
+        taille=max(height, lPetalDims[0])/10.
+    taille_fruit=taille*2. # was 2.5
 
     # ready to draw 
     # we prolongate the ped along the heading direction : 
@@ -1310,21 +1314,24 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     #setTurtleOrange(turtle)
     #turtle.setColor(4) 
 
+    ############################ O V A R Y   |   F R U I T
     anglePetExt =anglePetInt =0 
     if lPetalAngles :
         anglePetExt=lPetalAngles[0]
         anglePetInt=lPetalAngles[-1]
-    receptacle= pgl.Sphere( 1  )
+    receptacle= pgl.Sphere(1.) 
     if anglePetExt > 90. and anglePetExt == anglePetInt: # Faded flower
         setTurtleOrange(turtle)
         receptacle=pgl.Scaled(Vector3( 
-                taille_fruit*1.333, taille_fruit*1.333, taille_fruit), receptacle )         
+                taille_fruit*1.333, taille_fruit*1.333, taille_fruit), receptacle )
+        #receptacle= pgl.Translated(0, 0, -taille*0.5, receptacle) 
+
     else:
         turtle.setColor(4) 
         receptacle=pgl.Scaled(Vector3( taille, taille, taille),receptacle ) 
+        receptacle= pgl.Translated(0, 0, -taille*0.5, receptacle) 
 
-    receptacle= pgl.Translated(0,0,taille_fruit,receptacle) 
-    turtle.customGeometry(receptacle,1) #
+    turtle.customGeometry(receptacle,1) 
 
     turtle.pop()
 
@@ -1412,8 +1419,9 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         thisAngle=angleRepartition* index
         (thisSin, thisCos)= getSiCo(thisAngle)
         thisPetal=pgl.AxisRotated((0,0,1), thisAngle, petal) # orientation
-        thisPetal=pgl.Translated(-0.33 *taille *thisCos, -0.33 *taille *thisSin,
-                                 taille*2., thisPetal) # placement
+        thisPetal=pgl.Translated(-0.33 *taille *thisCos,
+                                 -0.33 *taille *thisSin,
+                                 taille*1., thisPetal) # placement # was : taille*2.
         turtle.customGeometry( thisPetal,1)
 
     turtle.pop()
