@@ -16,8 +16,8 @@ def simu(params, attname, conditions=conditions, withgr24 = False):
             namespace = { entry : tuple(params)} 
             execfile(modelfile, namespace)
             eval_model = namespace['eval_model']
-            sl, ck, brc1 = eval_model(auxin, sugar, gr24 = (0 if not withgr24 else 10.))
-            resvalues = { 'sl' : sl , 'ck' : ck, 'brc1' : brc1 }
+            sl, ck, Sck, Ssl, brc1 = eval_model(auxin, sugar, gr24 = (0 if not withgr24 else 0.1))
+            resvalues = { 'sl' : sl , 'ck' : ck, 'Sck': Sck, 'Ssl': Ssl, 'brc1' : brc1 }
             if type(attname) == str:
                 res = resvalues[attname]
                 targetcontents.append(res)
@@ -83,7 +83,7 @@ def optimize_ck(generate = True):
 
 ######  SL #########
 
-sltargets = (0.1, 1.)
+sltargets = (0.4, 1.)
 sltargets = np.array([sltargets[0],sltargets[0],sltargets[1],sltargets[1]])
 slconditions = list(itertools.product([0,2.5],[1 , 2.5]))
 
@@ -97,6 +97,20 @@ def optimize_sl(generate = True):
         update_param_file(paramfile,dict(zip(paramnames, result)))
         diagram.generate_fig_sl(sltargets)
 
+######  SL signal #########
+
+slsignaltargets = np.array([0.1,0.06,0.28,0.14])
+slsignalconditions = list(itertools.product([0,2.5],[1 , 2.5]))
+
+def optimize_slsignal(generate = True):
+    import diagram
+    paramnames = get_param_names('SLsignal',paramfile)
+    slpevalsimu = evalsimu(slsignaltargets,'slsignal',slsignalconditions)
+    slpinit = get_param_init(paramnames)
+    result, ok = optimize(slpevalsimu,slpinit)
+    if generate: 
+        update_param_file(paramfile,dict(zip(paramnames, result)))
+        diagram.generate_fig_slsignal(slsignaltargets)
 
 ######  BRC1 #########
 
@@ -133,9 +147,10 @@ measureddurations =  [[3.2 , 2.7, 1, 0.9],
                       [None, 5.8, 3.5, 2.1],
                       [None, None, None, 3.1]]
 
+
 interpolateddurations = [[None ,  None, None, None],
-                         [14, None, None, None],
-                         [40, 14, None, None]]
+                         [10.2, None, None, None],
+                         [54, 15.5, None, None]]
 
 
 completedurations =  [[measureddurations[i][j] if not measureddurations[i][j] is None else interpolateddurations[i][j] for j in xrange(len(measureddurations[i])) ] for i in xrange(len(measureddurations)) ]
@@ -218,11 +233,11 @@ def estimate_brc1_from_duration(includebrc1measure = True,
 
 def optimize_all(generate = True):
     import diagram
-    paramnames =  get_all_param_names(['CK','SL','BRC1'],paramfile) 
+    paramnames =  get_all_param_names(['CK','SL','SLsignal','BRC1'],paramfile) 
     print paramnames
-    targets = sum([[cktargets[i],sltargets[i],brc1targets[i]] for i in xrange(len(cktargets))],[])
+    targets = sum([[cktargets[i],sltargets[i],slsignaltargets[i],brc1targets[i]] for i in xrange(len(cktargets))],[])
     print targets
-    allevalsimu = evalsimu(np.array(targets),['ck','sl','brc1'],conditions)
+    allevalsimu = evalsimu(np.array(targets),['ck','sl','slsignal','brc1'],conditions)
     allinit = get_param_init(paramnames)
     result, ok = optimize(allevalsimu,allinit)
     if generate: 

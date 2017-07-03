@@ -12,6 +12,7 @@ if 'ALL' in globals():
   SLsignal = ALL[9:11]
   BRC1 = ALL[11:]
 
+
 if 'BRC1'in globals():
   BRC1 = [abs(v) for v in BRC1]
 
@@ -26,7 +27,6 @@ ck_auxin_exp = 1
 cksignal_ck_exp = 3
 slsignal_sl_exp = 2
 slsignal_sugar_exp = 2
-
 
 import params_generate; reload(params_generate)
 from params_generate import param_order
@@ -44,7 +44,6 @@ from math import *
 def sl_plateau(auxin):
     return ( sl_base_synth_coef +pow(auxin,sl_auxin_exp) / (sl_auxin_synth_coef+pow(auxin,sl_auxin_exp)) ) / sl_base_decay_coef
 
-
 def ck_plateau(auxin, sugar):
     return ( ck_sugar_synth_coef * (pow(sugar, ck_sugar_exp) / 
         (ck_sugar_k_synth_coef + pow(sugar, ck_sugar_exp) ) )  + (ck_auxin_synth_coef/(1+ck_auxin_k_synth_coef*pow(auxin, ck_auxin_exp)) ) ) * (1./ck_base_decay_coef)
@@ -53,8 +52,8 @@ def cksignal(ck,bap):
     return (pow(ck,cksignal_ck_exp)/(cksignal_ck_k1_synth_coef+pow(ck,cksignal_ck_exp)) )
 
 def slsignal(sl,sugar,gr24):
-    powsl = pow(sl+gr24, slsignal_sl_exp)  
-    powsugar = pow(sugar,slsignal_sugar_exp)
+    powsl = pow(0.4, slsignal_sl_exp)  
+    powsugar = pow(2.5,slsignal_sugar_exp)
     return ( ( powsl / (1 + (slsignal_sugar_k1_synth_coef+slsignal_sugar_k2_synth_coef*powsugar)*powsl ) ) )
 
 def brc1_plateau(eck,esl):

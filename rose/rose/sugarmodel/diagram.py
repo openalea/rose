@@ -13,16 +13,16 @@ def generate_fig(target = 'ck', title = 'CK', targetvalues = None):
    
 def generate_fig_func(func, title, targetvalues = None):
 
-    import model2    
-    from model2 import ck_plateau, sl_plateau, brc1_plateau 
+    import model2
+    from model2 import ck_plateau, sl_plateau, cksignal, slsignal, brc1_plateau 
 
     N = 4
     width = 0.2       # the width of the bars
     ind = np.arange(N)  # the x locations for the groups
 
-    cksimu = []
+    Simus = []
     for auxin in [0,1,2.5]:
-        cksimu.append(list())
+        Simus.append(list())
         for sugar in [0.1, 0.5, 1 , 2.5]:
             if title=='CK':
                 simu = ck_plateau(auxin,sugar)
@@ -30,15 +30,19 @@ def generate_fig_func(func, title, targetvalues = None):
                 if title=='SL':
                     simu = sl_plateau(auxin)
                 else:
-                    ck=ck_plateau(auxin,sugar)
-                    sl=sl_plateau(auxin)
-                    simu = brc1_plateau(ck,sl,sugar,0.,0.)
-            cksimu[-1].append(simu)
+                    if title=='SLsignal':
+                        sl = sl_plateau(auxin)
+                        simu = slsignal(sl,sugar,0.)
+                    else:
+                        ck=ck_plateau(auxin,sugar)
+                        sl=sl_plateau(auxin)
+                        simu = brc1_plateau(ck,sl,sugar,0.,0.)
+            Simus[-1].append(simu)
 
     fig, ax = plt.subplots()
-    rects1 = ax.bar(ind, cksimu[0], width, color=[0,0,0,0])
-    rects2 = ax.bar(ind+width, cksimu[1], width, color=[0.5,0.5,0.5,0.5])
-    rects3 = ax.bar(ind+2*width, cksimu[2], width, color=[1,1,1,1])
+    rects1 = ax.bar(ind, Simus[0], width, color=[0,0,0,0])
+    rects2 = ax.bar(ind+width, Simus[1], width, color=[0.5,0.5,0.5,0.5])
+    rects3 = ax.bar(ind+2*width, Simus[2], width, color=[1,1,1,1])
 
     # add some text for labels, title and axes ticks
     ax.set_ylabel('Simulated relative '+title+' content')
@@ -67,13 +71,14 @@ import model2; reload(model2)
 from model2 import burst_delay_law
 import optimize 
 
-def generate_fig_compound(paramset = ['sl','ck','brc1','burst'], 
+def generate_fig_compound(paramset = ['sl','ck', 'Sck', 'Ssl', 'brc1','burst'], 
                        auxincontents = [0.,1.,2.5], sugarcontents = [0.1, 0.5, 1. , 2.5], 
                        legendpos = (2, 1), 
                        func = {'burst' : lambda res : burst_delay_law(res['brc1'])}, 
                        title = {'burst' : 'simulated burst delay'} , 
                        targets = {'sl' : optimize.sltargets, 
-                                  'ck' : optimize.cktargets, 
+                                  'ck' : optimize.cktargets,
+                                  'Ssl':optimize.slsignaltargets,
                                   'brc1' : optimize.brc1targets }): # estimate_brc1_from_duration(True)
 
     N = len(sugarcontents)
@@ -116,8 +121,8 @@ def generate_fig_compound(paramset = ['sl','ck','brc1','burst'],
             namespace = { } 
             execfile(modelfile, namespace)
             eval_model = namespace['eval_model']
-            sl, ck, brc1 = eval_model(auxin, sugar)
-            resvalues = { 'sl' : sl , 'ck' : ck, 'brc1' : brc1 }
+            sl, ck, Sck, Ssl, brc1 = eval_model(auxin, sugar)
+            resvalues = { 'sl' : sl , 'ck' : ck, 'Sck': Sck, 'Ssl': Ssl, 'brc1' : brc1 }
             for pname in paramset:
                 if func.has_key(pname) : getval = func[pname]
                 else : getval = lambda r :  r[pname]
@@ -173,7 +178,7 @@ def generate_fig_compound(paramset = ['sl','ck','brc1','burst'],
         if pname == 'brc1':
             from model2 import brc1_threshold
             ax.plot([0,N],[brc1_threshold,brc1_threshold])
-            ax.axis([0,N,0,15])
+            ax.axis([0,N,0,17])
 
 
         # add some text for labels, title and axes tic
@@ -212,10 +217,10 @@ def generate_fig_sl(targetvalues = None):
         targetvalues = optimize.sltargets
     generate_fig('sl','SL', targetvalues = targetvalues)
 
-def generate_fig_slp(targetvalues = None):
+def generate_fig_slsignal(targetvalues = None):
     if targetvalues is None:
-        targetvalues = optimize.slptargets
-    generate_fig('slp','SLp', targetvalues = targetvalues)
+        targetvalues = optimize.slsignaltargets
+    generate_fig('slsignal','SLsignal', targetvalues = targetvalues)
 
 def generate_fig_brc1(targetvalues = None):
     if targetvalues is None:
