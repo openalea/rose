@@ -5,17 +5,32 @@ def param_order(param_file):
     result = []
     for l in f:
         if '=' in l and l[0] == ' ' and (not ',' in l):
-            var = l.split('=')[0].strip()
-            result.append(var)
+            lsplit = l.split('=')
+            var = lsplit[0].strip()
+            value = lsplit[1]
+            if isfloat(value):
+                result.append(var)
     return result
+
+def isfloat(txt):
+    try:
+        float(txt.strip())
+        return True
+    except ValueError, ve:
+        return False
 
 def generate_template(param_file):
     f = file(param_file,'r')
     result = ''
     for l in f:
         if '=' in l and l[0] == ' ' and (not ',' in l):
-            var = l.split('=')[0]
-            result += var+'= {}\n'
+            lsplit = l.split('=')
+            var = lsplit[0]
+            value = lsplit[1]
+            if isfloat(value):
+                result += var+'= {}\n'
+            else:
+                result += l                
         else: result += l
     return result
 
@@ -26,6 +41,8 @@ def generate_params(params, param_file):
     for p in paramnames:
         pvalues.append(params[p])
         del params[p]
+
+
 
     content = generate_template(param_file)
     #content = file(template,'r').read()

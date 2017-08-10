@@ -4,11 +4,11 @@ ck_init  = 0
 if 'CK' in globals():
   ck_auxin_synth_coef, ck_auxin_k_synth_coef, ck_sugar_synth_coef, ck_sugar_k_synth_coef, ck_base_decay_coef    = CK
 else:
-  ck_auxin_synth_coef    = 0.735
-  ck_auxin_k_synth_coef = 0.735
-  ck_sugar_synth_coef   = 0.236
-  ck_sugar_k_synth_coef = 0.015
-  ck_base_decay_coef    = 1
+  ck_auxin_synth_coef    = 0.790015255143
+  ck_auxin_k_synth_coef = 0.9596872476
+  ck_sugar_synth_coef   = 0.245916756979
+  ck_sugar_k_synth_coef = 0.190883693373
+  ck_base_decay_coef    = 1.0
 
 sl_init  = 0
 if 'SL' in globals():
@@ -20,9 +20,9 @@ else:
 
 cksignal_init  = 0
 if 'CKsignal' in globals():
-  cksignal_ck_k1_synth_coef  = CKsignal
+   cksignal_ck_k1_synth_coef   = CKsignal
 else:
-  cksignal_ck_k1_synth_coef   = 1.0
+   cksignal_ck_k1_synth_coef   = 1.0
 
 slsignal_init  = 0
 if 'SLsignal' in globals():

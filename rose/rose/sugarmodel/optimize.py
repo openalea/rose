@@ -71,11 +71,13 @@ ckconditions = list(itertools.product([0, 1, 2.5],[0.1, 0.5, 1 , 2.5]))
 def optimize_ck(generate = True):
     import diagram
     paramnames = get_param_names('CK',paramfile)
+    print paramnames
     ckevalsimu = evalsimu(cktargets,'ck',ckconditions)
     #ckevalsimu = evalsimu(cktargets,'ck')
     ckinit = get_param_init(paramnames)
     print 'Ck Init :',ckinit
     result, ok = optimize(ckevalsimu,ckinit)
+    print dict(zip(paramnames, result))
     if generate: 
         update_param_file(paramfile,dict(zip(paramnames, result)))
         diagram.generate_fig_ck(cktargets)
