@@ -8,59 +8,75 @@ from openalea.lpy import Lsystem
 modelfile = 'model2.py'
 
 
-def generate_fig(target = 'ck', title = 'CK', targetvalues = None):
-   generate_fig_func(lambda res : getattr(res,target),title,targetvalues=targetvalues)
    
-def generate_fig_func(func, title, targetvalues = None):
+def generate_fig(title, targetvalues = None, conditions = None, gr24 = 0, bap = 0, paramfamily = None, values = None):
 
     import model2
-    from model2 import ck_plateau, sl_plateau, cksignal, slsignal, brc1_plateau 
+    from model2 import eval_model 
+    from runmodel import runmodel
 
-    N = 4
+    print targetvalues
+    print conditions
+
+    auxinvalues = [0,1,2.5]
+    sugarvalues = [0.1, 0.5, 1 , 2.5]
+
     width = 0.2       # the width of the bars
-    ind = np.arange(N)  # the x locations for the groups
-
-    Simus = []
-    for auxin in [0,1,2.5]:
-        Simus.append(list())
-        for sugar in [0.1, 0.5, 1 , 2.5]:
-            if title=='CK':
-                simu = ck_plateau(auxin,sugar)
-            else:
-                if title=='SL':
-                    simu = sl_plateau(auxin)
-                else:
-                    if title=='SLsignal':
-                        sl = sl_plateau(auxin)
-                        simu = slsignal(sl,sugar,0.)
-                    else:
-                        ck=ck_plateau(auxin,sugar)
-                        sl=sl_plateau(auxin)
-                        simu = brc1_plateau(ck,sl,sugar,0.,0.)
-            Simus[-1].append(simu)
-
-    fig, ax = plt.subplots()
-    rects1 = ax.bar(ind, Simus[0], width, color=[0,0,0,0])
-    rects2 = ax.bar(ind+width, Simus[1], width, color=[0.5,0.5,0.5,0.5])
-    rects3 = ax.bar(ind+2*width, Simus[2], width, color=[1,1,1,1])
-
-    # add some text for labels, title and axes ticks
-    ax.set_ylabel('Simulated relative '+title+' content')
-    ax.set_title(title)
-    ax.set_xticks(ind+width)
-    ax.set_xticklabels( ('10', '50', '100', '250') )
-
-    if not targetvalues is None:
-        # il faudrait faire quelque chose de plus generique
-        if title=='CK':
-            indices = np.concatenate((ind+width/2,ind+3*width/2,ind+5*width/2))
-            ax.plot(indices,targetvalues,'ro',color=[0,1,0], label = 'Target')
-        else:
-            ind2=np.array([2,3])
-            indices=np.concatenate((ind2+width/2,ind2+5*width/2))
-            ax.plot(indices,targetvalues,'ro',color=[0,1,0], label = 'Target')
+    ind = np.arange(len(sugarvalues))  # the x locations for the groups
     
-    ax.legend( (rects1[0], rects2[0], rects3[0]), ('NAA 0', 'NAA 1', 'NAA 2.5') )
+
+    def myplot(paramfamily = None, values = None):
+        Simus = []
+        ax = plt.gca()
+
+        for auxin in auxinvalues:
+            Simus.append(list())
+            for sugar in sugarvalues:
+                resvalues = runmodel(auxin, sugar, gr24, bap, paramfamily, values)
+                Simus[-1].append(resvalues[title.lower()])
+
+        rects1 = ax.bar(ind, Simus[0], width, color=[0.2,0.2,0.2])
+        rects2 = ax.bar(ind+width, Simus[1], width, color=[0.5,0.5,0.5])
+        rects3 = ax.bar(ind+2*width, Simus[2], width, color=[0.8,0.8,0.8])
+
+        # add some text for labels, title and axes ticks
+        ax.set_ylabel('Simulated relative '+title+' content')
+        ax.set_title(title)
+        ax.set_xticks(ind+width)
+        ax.set_xticklabels( ('10', '50', '100', '250') )
+
+        if not targetvalues is None and not conditions is None:
+            # il faudrait faire quelque chose de plus generique
+            ptargetindices = []
+            ptargetvalues  = []
+            for target, (auxc, sugarc, gr24c, bapc) in zip(targetvalues, conditions):
+                if gr24c == gr24 and bapc == bap:
+                    pos = ind[sugarvalues.index(sugarc)] + width * auxinvalues.index(auxc)
+                    ptargetindices.append(pos)
+                    ptargetvalues.append(target)
+            ax.plot(ptargetindices,ptargetvalues,'ro',color=[0,1,0], label = 'Target')
+
+            #if title=='CK':
+            #    indices = np.concatenate((ind,ind+width,ind+2*width))
+            #    ax.plot(indices,targetvalues,'ro',color=[0,1,0], label = 'Target')
+            #else:
+            #    ind2=np.array([2,3])
+            #    indices=np.concatenate((ind2+width/2,ind2+5*width/2))
+            #    ax.plot(indices,targetvalues,'ro',color=[0,1,0], label = 'Target')
+        
+        ax.legend( (rects1[0], rects2[0], rects3[0]), ('NAA 0', 'NAA 1', 'NAA 2.5') )
+
+    if paramfamily is None  :   
+        fig, ax = plt.subplots()
+        myplot()
+    else:
+        #fig, axes = plt.subplots(1, 2)
+        plt.subplot(211)
+        myplot()
+        plt.subplot(212)
+        myplot(paramfamily, values)
+
+
     plt.show()
 
 
@@ -88,7 +104,7 @@ def generate_fig_compound(paramset = ['sl','ck', 'Sck', 'Ssl', 'brc1','burst'],
 
     targetindices_ck=None
     for i in auxincontents:
-        v = i + 1
+        v = i + 0.5
         if targetindices_ck is None : targetindices_ck = ind+v*width
         else : targetindices_ck = np.concatenate((targetindices_ck,ind+v*width))
         
@@ -108,7 +124,7 @@ def generate_fig_compound(paramset = ['sl','ck', 'Sck', 'Ssl', 'brc1','burst'],
 
     targetindices = None
     for i in atcind:
-        v = i + 1
+        v = i + 0.5
         if targetindices is None : targetindices = stcind+v*width
         else : targetindices = np.concatenate((targetindices,stcind+v*width))
     
@@ -144,7 +160,9 @@ def generate_fig_compound(paramset = ['sl','ck', 'Sck', 'Ssl', 'brc1','burst'],
     fig, axes = plt.subplots(int(nbrow), int(nbcol))
     for iparam, pname in enumerate(paramset):
         # ax = plt.subplot(nbrow, nbcol,iparam+1)
-        ax = axes[iparam//nbcol][iparam%nbcol]
+        irow = int(iparam//nbcol)
+        icol = int(iparam%nbcol)
+        ax = axes[irow][icol]
         i = 0.5
         rects = []
         for target,color in zip(targetcontents[pname], colors):
@@ -154,19 +172,19 @@ def generate_fig_compound(paramset = ['sl','ck', 'Sck', 'Ssl', 'brc1','burst'],
         if pname == 'brc1':
                 import optimize; reload(optimize)
                 from optimize import estimate_brc1_from_duration
-                tcolors = [[1,1,1],[0,0.4,0],[0,1,0]]
+                tcolors = [[0,0,0],[0,0.4,0],[0,1,0]]
                 i = 0
                 for tval, tcond in  [estimate_brc1_from_duration(False, False, True),    # interpolationduration # white
                                      estimate_brc1_from_duration(False, True,  False),   # measuredduration # dark green
                                      estimate_brc1_from_duration(True,  False, False)]:  # brc1measure      # green
-                    tind = [ (auxincontents.index(aux) + 1) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
+                    tind = [ (auxincontents.index(aux) + 0.5) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
                     ax.plot(tind,tval,'ro',color=tcolors[i], label = 'Target')
                     i += 1
 
         elif targets.has_key(pname):
             if type(targets[pname]) == dict:
                 tval, tcond = targets[pname]
-                tind = [ (auxincontents.index(aux) + 1) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
+                tind = [ (auxincontents.index(aux) + 0.5) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
                 ax.plot(tind,tval,'ro',color=[0,1,0], label = 'Target')
             else:
                 if pname=='ck':
@@ -205,38 +223,42 @@ def generate_fig_compound(paramset = ['sl','ck', 'Sck', 'Ssl', 'brc1','burst'],
 
 
 
-import optimize
+import optimize2
 
-def generate_fig_ck(targetvalues = None):
+def generate_fig_ck(targetvalues = None, conditions = None, paramfamily = None, values = None):
     if targetvalues is None:
-        targetvalues = optimize.cktargets
-    generate_fig('ck', 'CK', targetvalues = targetvalues)
+        targetvalues =  optimize2.cktargets
+        conditions   =  optimize2.ckconditions
+    generate_fig('CK', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
 
-def generate_fig_sl(targetvalues = None):
+def generate_fig_sl(targetvalues = None, conditions = None, paramfamily = None, values = None):
     if targetvalues is None:
         targetvalues = optimize.sltargets
-    generate_fig('sl','SL', targetvalues = targetvalues)
+        conditions   =  optimize2.slconditions
+    generate_fig('SL', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
 
-def generate_fig_slsignal(targetvalues = None):
+def generate_fig_slsignal(targetvalues = None, conditions = None, paramfamily = None, values = None):
     if targetvalues is None:
         targetvalues = optimize.slsignaltargets
-    generate_fig('slsignal','SLsignal', targetvalues = targetvalues)
+        conditions   =  optimize2.slsignalconditions
+    generate_fig('SLsignal', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
 
-def generate_fig_brc1(targetvalues = None):
+def generate_fig_brc1(targetvalues = None, conditions = None, paramfamily = None, values = None):
     if targetvalues is None:
-        targetvalues = optimize.brc1targets
-    generate_fig('brc1','BRC1', targetvalues = targetvalues)
+        targetvalues = optimize2.brc1targets
+        conditions   =  optimize2.brc1conditions
+    generate_fig('BRC1', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
 
 
     # add some text for labels, title and axes ticks
-    ax.set_ylabel('Simulated relative BRC1 content')
-    ax.set_title(('BRC1'))
-    ax.set_xticks(ind+width*(0.5+len(auxincontents)/2))
+    #ax.set_ylabel('Simulated relative BRC1 content')
+    #ax.set_title(('BRC1'))
+    #ax.set_xticks(ind+width*(0.5+len(auxincontents)/2))
 
-    ax.set_xticklabels( ['Manitol' if sugar == 0 else str(sugar*100)+' mM' for sugar in sugarcontents] )
+    #ax.set_xticklabels( ['Manitol' if sugar == 0 else str(sugar*100)+' mM' for sugar in sugarcontents] )
 
-    ax.legend( rects, [str(aux)+' $\mu$M NAA' for aux in auxincontents] ,bbox_to_anchor=(1.07, 1) )
-    plt.show()
+    #ax.legend( rects, [str(aux)+' $\mu$M NAA' for aux in auxincontents] ,bbox_to_anchor=(1.07, 1) )
+    #plt.show()
 
 
 

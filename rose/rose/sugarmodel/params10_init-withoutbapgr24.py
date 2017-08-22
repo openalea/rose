@@ -23,11 +23,11 @@ init_brc1 = 0
 if 'BRC1' in globals():
   cksignal_ck_k1_synth_coef, slsignal_sugar_k1_synth_coef, slsignal_sugar_k2_synth_coef, brc1_base_synth_coef,brc1_slck_synthcoef,brc1_base_decay_coef  = BRC1
 else:
-  cksignal_ck_k1_synth_coef   = 0.452790547717
-  slsignal_sugar_k1_synth_coef  = 6.82565661504
-  slsignal_sugar_k2_synth_coef = 3.14429076967
-  brc1_base_synth_coef    = 0.765791921233
-  brc1_slck_synthcoef     = -3.95974498139
+  cksignal_ck_k1_synth_coef   = 0.553888258685
+  slsignal_sugar_k1_synth_coef  = 35.295883754
+  slsignal_sugar_k2_synth_coef = 9.95857429924
+  brc1_base_synth_coef    = 0.623182402342
+  brc1_slck_synthcoef     = -14.4105803451
   brc1_base_decay_coef    = 1.01140263087
 
 

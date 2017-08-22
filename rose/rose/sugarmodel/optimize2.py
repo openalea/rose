@@ -1,30 +1,39 @@
 import numpy as np
 from numpy.linalg import norm
 import itertools
+import diagram ; reload(diagram)
 
 modelfile = 'model2.py'
-paramfile = 'params10_init.py'
+from runmodel import get_param_file
+paramfile = get_param_file(modelfile)
 
-conditions = list(itertools.product([0,2.5],[0, 1 , 2.5]))
+def isiterable(obj):
+    try:
+        iter(obj)
+        return True
+    except:
+        return False
 
-def simu(params, attname, conditions=conditions, withgr24 = False):
-    from openalea.lpy import Lsystem
+def tolist(obj):
+    if isiterable(obj) : return obj
+    else : return [obj]
+
+def cross_conditions(auxinslevels = [0,2.5], sugarlevels = [0, 1 , 2.5], gr24levels = 0, baplevels = 0):
+    return list(itertools.product(tolist(auxinslevels),tolist(sugarlevels), tolist(gr24levels), tolist(baplevels)))
+
+
+
+def simu(params, attname, conditions=cross_conditions()):
+    from runmodel import runmodel
     targetcontents = []
-    for auxin, sugar in conditions:
-            if type(attname) == str: entry = attname.upper()
-            else : entry = 'ALL'
-            namespace = { entry : tuple(params)} 
-            execfile(modelfile, namespace)
-            eval_model = namespace['eval_model']
-            sl, ck, Sck, Ssl, brc1 = eval_model(auxin, sugar, gr24 = (0 if not withgr24 else 0.1))
-            resvalues = { 'sl' : sl , 'ck' : ck, 'Sck': Sck, 'Ssl': Ssl, 'brc1' : brc1 }
+    for auxin, sugar, gr24, bap in conditions:
+            resvalues = runmodel(auxin, sugar, gr24, bap, attname, params, modelfile)
             if type(attname) == str:
                 res = resvalues[attname]
                 targetcontents.append(res)
             else:
-                for att in attname:
-                    res = resvalues[att]
-                    targetcontents.append(res)
+                res = resvalues[attname[-1]]
+                targetcontents.append(res)
     return targetcontents
 
 
@@ -35,29 +44,15 @@ def get_param_init(paramnames):
 
 
 def optimize(func, initvalue):
-    from scipy.optimize import leastsq
-    return leastsq(func,initvalue, ftol=1e-5)
+    from scipy.optimize import least_squares
+    result = least_squares(func,initvalue, ftol=1e-5)
+    return result.x, result.status > 0
 
-def evalsimu(target, attname, conditions=conditions):
-    withgr24optim = False
-    if withgr24optim:
-        simugr24a = conditions.index((1,0.5))    
-        simugr24b = conditions.index((1,1))
+def evalsimu(target, attname, conditions):
     def evaluator(params):
         values = simu(params,attname,conditions)
         res =  (target - values)/target
-        if withgr24optim:
-            vgr24 = simu(params, attname, [conditions[simugr24a], conditions[simugr24b]], True)
-            nres1 = 1.7  - (vgr24[0]/res[simugr24a])
-            nres2 = 1.4  - (vgr24[1]/res[simugr24b])
-            res = list(res)
-            res += [nres1, nres2]
-            res = np.array(res)
-            print (vgr24[0], res[simugr24a], vgr24[0]/res[simugr24a])
-            print (vgr24[1], res[simugr24b], vgr24[1]/res[simugr24b])
-            print params,':',norm(res),res[-2:]
-        else : 
-            print params,':',norm(res)
+        print params,':',norm(res)
         return res
     return evaluator
 
@@ -66,10 +61,9 @@ from params_generate import *
 ######  CK #########
 
 cktargets = np.array([0.75, 0.97, 1., 1.1, 0.51, 0.59, 0.58, 0.59, 0.23, 0.36, 0.46, 0.51])
-ckconditions = list(itertools.product([0, 1, 2.5],[0.1, 0.5, 1 , 2.5]))
+ckconditions = cross_conditions([0, 1, 2.5], [0.1, 0.5, 1 , 2.5])
 
 def optimize_ck(generate = True):
-    import diagram
     paramnames = get_param_names('CK',paramfile)
     print paramnames
     ckevalsimu = evalsimu(cktargets,'ck',ckconditions)
@@ -78,52 +72,50 @@ def optimize_ck(generate = True):
     print 'Ck Init :',ckinit
     result, ok = optimize(ckevalsimu,ckinit)
     print dict(zip(paramnames, result))
-    if generate: 
+    diagram.generate_fig_ck(cktargets, ckconditions,'ck', result)
+    if ok and generate: 
         update_param_file(paramfile,dict(zip(paramnames, result)))
-        diagram.generate_fig_ck(cktargets)
 	
 
 ######  SL #########
 
 sltargets = (0.4, 1.)
 sltargets = np.array([sltargets[0],sltargets[0],sltargets[1],sltargets[1]])
-slconditions = list(itertools.product([0,2.5],[1 , 2.5]))
+slconditions = cross_conditions([0,2.5],[1 , 2.5])
 
 def optimize_sl(generate = True):
-    import diagram
     paramnames = get_param_names('SL',paramfile)
     slevalsimu = evalsimu(sltargets,'sl',slconditions)
     slinit = get_param_init(paramnames)
     result, ok = optimize(slevalsimu,slinit)
-    if generate: 
+    diagram.generate_fig_sl(sltargets, slconditions, 'sl', result)
+    if ok and generate: 
         update_param_file(paramfile,dict(zip(paramnames, result)))
-        diagram.generate_fig_sl(sltargets)
 
 ######  SL signal #########
 
 slsignaltargets = np.array([0.1,0.06,0.28,0.14])
-slsignalconditions = list(itertools.product([0,2.5],[1 , 2.5]))
+slsignalconditions = cross_conditions([0,2.5],[1 , 2.5])
 
 def optimize_slsignal(generate = True):
-    import diagram
     paramnames = get_param_names('SLsignal',paramfile)
     slpevalsimu = evalsimu(slsignaltargets,'slsignal',slsignalconditions)
     slpinit = get_param_init(paramnames)
     result, ok = optimize(slpevalsimu,slpinit)
-    if generate: 
+    diagram.generate_fig_slsignal(slsignaltargets, slsignalconditions,'slsignal', result)
+    if ok and generate: 
         update_param_file(paramfile,dict(zip(paramnames, result)))
-        diagram.generate_fig_slsignal(slsignaltargets)
 
 ######  BRC1 #########
 
 brc1targets = np.array([1.,  0.8, 3.11, 1.5])
-brc1conditions = list(itertools.product([0,2.5],[1 , 2.5]))
+brc1conditions = cross_conditions([0,2.5],[1 , 2.5])
 
 
 def optimize_brc1(generate = True, brc1targets = brc1targets, conditions = brc1conditions, randomseed = False):
-    import diagram; reload(diagram)
     from random import uniform
     paramnames =  get_param_names('BRC1',paramfile)
+    print paramnames
     brc1evalsimu = evalsimu(np.array(brc1targets),'brc1',conditions)
     if randomseed:
         brc1inits = [[uniform(0,100) if '_k_' in p else uniform(0,1)  for p in paramnames] for n in xrange(20)]
@@ -134,12 +126,14 @@ def optimize_brc1(generate = True, brc1targets = brc1targets, conditions = brc1c
     for brc1init in brc1inits:
         print brc1init
         result, ok = optimize(brc1evalsimu,brc1init)
+        print 'ok :',ok
         val = norm(brc1evalsimu(result))
         if bestresult is None or bestresult[1] > val: bestresult = (result, val)
     result = bestresult[0]
+
+    diagram.generate_fig_brc1(brc1targets, conditions, 'brc1', result)
     if generate: 
         update_param_file(paramfile,dict(zip(paramnames, result)))
-        diagram.generate_fig_brc1()
 
 sugarlevels = [0.1, 0.5, 1 ,  2.5]
 auxinlevels = [0,   1,   2.5]
@@ -202,7 +196,8 @@ from model2 import brc1_law
 
 def estimate_brc1_from_duration(includebrc1measure = True,  
                                 includemeasuredduration = True, 
-                                includeinterpolation = True):
+                                includeinterpolation = True,
+                                gr24 = 0, bap = 0):
     if includebrc1measure:
         valres  = list(brc1targets)
         condres = list(brc1conditions)
@@ -225,8 +220,32 @@ def estimate_brc1_from_duration(includebrc1measure = True,
             brc1 = brc1_law(duration)
             if not brc1 is None: 
                 valres.append(brc1)
-                condres.append((auxval,sugval))
+                condres.append((auxval,sugval,gr24,bap))
     return valres, condres
+
+
+################ Extra BAP and GR24 experiment
+baplevel = 0.2
+
+bapconditions = [[0.5, 2.5, 0, baplevel], [1,2.5,0,baplevel]]
+bapdurations = [5.6, 2.8]
+bapbrc1levels = map(brc1_law, bapdurations)
+
+gr24level = 0.1
+gr24conditions = [[0.5, 0, gr24level,0], [1,1,gr24level,0]]
+gr24durations = [10, 4]
+gr24brc1levels = map(brc1_law, gr24durations) 
+
+######### Full optimization of Brc1 ########
+
+def optimize_brc1_full(generate = True, randomseed = False):
+        brc1targets, conditions = estimate_brc1_from_duration()
+        brc1targets += bapbrc1levels + gr24brc1levels
+        conditions += bapconditions + gr24conditions
+        print len(brc1targets), brc1targets
+        print len(conditions), conditions
+        optimize_brc1(generate, brc1targets, conditions, randomseed)
+
 
 
 ######### TOTAL ########
@@ -241,24 +260,25 @@ def optimize_all(generate = True):
     allevalsimu = evalsimu(np.array(targets),['ck','sl','slsignal','brc1'],conditions)
     allinit = get_param_init(paramnames)
     result, ok = optimize(allevalsimu,allinit)
-    if generate: 
+    if ok and generate: 
         update_param_file(paramfile,dict(zip(paramnames, result)))
-        diagram.generate_fig_compound()
+    diagram.generate_fig_compound()
 
 
 #########  MAIN ########
 
 def main_optimize():
     import sys
+    generate = False
     if len(sys.argv) > 1:
         data = sys.argv[1]
         func = 'optimize_'+data
-        globals()[func]()
+        if len(sys.argv) > 2:
+            generate = eval(sys.argv[2])
+            assert generate in [False,True]
+        globals()[func](generate)
     else:
-        brc1targets, conditions = estimate_brc1_from_duration()
-        print len(brc1targets), brc1targets
-        print len(conditions), conditions
-        optimize_brc1(True, brc1targets, conditions, False)
+        optimize_brc1_full(generate)
 
 if __name__ == '__main__':
     import sys

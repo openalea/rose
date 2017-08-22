@@ -1,10 +1,4 @@
 
-if not 'GR24' in globals():
-  GR24 = 0
-
-if not 'BAP' in globals():
-  BAP = 0
-
 if 'ALL' in globals():
   CK = ALL[:5]
   SL = ALL[5:8]
