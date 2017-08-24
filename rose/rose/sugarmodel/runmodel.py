@@ -7,6 +7,8 @@ def get_param_file(modelfile):
 
 #modelfile = 'model2.py'
 modelfile = 'model2_sugarOnBRC1Only.py'
+paramfile = get_param_file(modelfile)
+
 
 def runmodel(auxin, sugar, gr24 = 0, bap = 0, values = None, modelfile = modelfile):
     

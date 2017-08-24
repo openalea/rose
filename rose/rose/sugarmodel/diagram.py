@@ -2,28 +2,17 @@ import matplotlib
 matplotlib.use('Qt4Agg')
 import numpy as np
 import matplotlib.pyplot as plt
-from openalea.lpy import Lsystem
-
 from runmodel import runmodel
-
+from targets import *
 
    
 def generate_fig(title, targetvalues = None, conditions = None, values = None):
-
-    print targetvalues
-    print conditions
 
     auxinvalues = [0, 1, 2.5]
     sugarvalues = [0.1, 0.5, 1 , 2.5]
 
     width = 0.2       # the width of the bars
     ind = np.arange(len(sugarvalues))  # the x locations for the groups
-
-    baplevel = 0.2
-    bapconditions = [(0.5, 2.5, 0, baplevel), (1,2.5,0,baplevel)]
-
-    gr24level = 0.1
-    gr24conditions = [(0.5, 0, gr24level,0), (1,1,gr24level,0)]
     
 
     def myplot( values = None):
@@ -119,17 +108,17 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
 
 #import model2; reload(model2) 
 from model2 import burst_delay_law
-import optimize 
+import targets as tg
 
 def generate_fig_compound(paramset = ['sl','ck', 'cksignal', 'slsignal', 'brc1','burst'], 
                        auxincontents = [0.,1.,2.5], sugarcontents = [0.1, 0.5, 1. , 2.5], 
                        legendpos = (2, 1), 
                        func = {'burst' : lambda res : burst_delay_law(res['brc1'])}, 
                        title = {'burst' : 'simulated burst delay'} , 
-                       targets = {'sl' : optimize.sltargets, 
-                                  'ck' : optimize.cktargets,
-                                  #'slsignal':optimize.slsignaltargets,
-                                  'brc1' : optimize.brc1targets }): # estimate_brc1_from_duration(True)
+                       targets = {'sl' : tg.sltargets, 
+                                  'ck' : tg.cktargets,
+                                  #'slsignal':tg.slsignaltargets,
+                                  'brc1' : tg.brc1targets }): # estimate_brc1_from_duration(True)
 
     N = len(sugarcontents)
     M = len(auxincontents)
@@ -200,21 +189,19 @@ def generate_fig_compound(paramset = ['sl','ck', 'cksignal', 'slsignal', 'brc1',
             i += 1
 
         if pname == 'brc1':
-                import optimize; reload(optimize)
-                from optimize import estimate_brc1_from_duration
                 tcolors = [[0,0,0],[0,0.4,0],[0,1,0]]
                 i = 0
-                for tval, tcond in  [estimate_brc1_from_duration(False, False, True),    # interpolationduration # white
-                                     estimate_brc1_from_duration(False, True,  False),   # measuredduration # dark green
-                                     estimate_brc1_from_duration(True,  False, False)]:  # brc1measure      # green
-                    tind = [ (auxincontents.index(aux) + 0.5) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
+                for tval, tcond in  [tg.estimate_brc1_from_duration(False, False, True),    # interpolationduration # white
+                                     tg.estimate_brc1_from_duration(False, True,  False),   # measuredduration # dark green
+                                     tg.estimate_brc1_from_duration(True,  False, False)]:  # brc1measure      # green
+                    tind = [ (auxincontents.index(aux) + 0.5) * width +  sugarcontents.index(sug) for aux,sug,gr24,bap in tcond ]
                     ax.plot(tind,tval,'ro',color=tcolors[i], label = 'Target')
                     i += 1
 
         elif targets.has_key(pname):
             if type(targets[pname]) == dict:
                 tval, tcond = targets[pname]
-                tind = [ (auxincontents.index(aux) + 0.5) * width +  sugarcontents.index(sug) for aux,sug in tcond ]
+                tind = [ (auxincontents.index(aux) + 0.5) * width +  sugarcontents.index(sug) for aux,sug,gr24,bap in tcond ]
                 ax.plot(tind,tval,'ro',color=[0,1,0], label = 'Target')
             else:
                 if pname=='ck':
@@ -253,30 +240,28 @@ def generate_fig_compound(paramset = ['sl','ck', 'cksignal', 'slsignal', 'brc1',
 
 
 
-import optimize2
-
 def generate_fig_ck(targetvalues = None, conditions = None, paramfamily = None, values = None):
     if targetvalues is None:
-        targetvalues =  optimize2.cktargets
-        conditions   =  optimize2.ckconditions
+        targetvalues =  targets.cktargets
+        conditions   =  targets.ckconditions
     generate_fig('CK', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
 
 def generate_fig_sl(targetvalues = None, conditions = None, paramfamily = None, values = None):
     if targetvalues is None:
-        targetvalues = optimize.sltargets
-        conditions   =  optimize2.slconditions
+        targetvalues = targets.sltargets
+        conditions   =  targets.slconditions
     generate_fig('SL', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
 
 def generate_fig_slsignal(targetvalues = None, conditions = None, paramfamily = None, values = None):
     if targetvalues is None:
-        targetvalues = optimize.slsignaltargets
-        conditions   =  optimize2.slsignalconditions
+        targetvalues = targets.slsignaltargets
+        conditions   =  targets.slsignalconditions
     generate_fig('SLsignal', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
 
 def generate_fig_brc1(targetvalues = None, conditions = None, paramfamily = None, values = None):
     if targetvalues is None:
-        targetvalues = optimize2.brc1targets
-        conditions   =  optimize2.brc1conditions
+        targetvalues = targets.brc1targets
+        conditions   =  targets.brc1conditions
     generate_fig('BRC1', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
 
 

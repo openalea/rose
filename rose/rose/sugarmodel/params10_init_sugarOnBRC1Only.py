@@ -20,12 +20,12 @@ def SL():
 
 @defaultparameters
 def BRC1():
-      cksignal_ck_k1_synth_coef   = -0.0634397382238
-      slsignal_sugar_k1_synth_coef  = 1.03757313843
-      brc1_base_synth_coef    = -0.465615917339
-      brc1_slck_synthcoef     = -0.600968281362
-      brc1_sugar_base_synthcoef    = 0.161956144006
-      brc1_sugar_k_synthcoef    = 2.89109992532
-      brc1_base_decay_coef    = -0.632793086483
+      cksignal_ck_k1_synth_coef   = -0.152559578669
+      slsignal_sugar_k1_synth_coef  = -0.318043055544
+      brc1_base_synth_coef    = -0.747334308697
+      brc1_slck_synthcoef     = -0.417139543635
+      brc1_sugar_base_synthcoef    = 0.226238234805
+      brc1_sugar_k_synthcoef    = 2.38929351301
+      brc1_base_decay_coef    = -2.12297058047
 
 
