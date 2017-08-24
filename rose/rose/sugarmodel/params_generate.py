@@ -28,43 +28,47 @@ def generate_template(param_file):
             var = lsplit[0]
             value = lsplit[1]
             if isfloat(value):
-                result += var+'= {}\n'
+                result += var+'= {'+var.strip()+'}\n'
             else:
                 result += l                
         else: result += l
     return result
 
-
-def generate_params(params, param_file):
-    paramnames = param_order(param_file)
-    pvalues = []
-    for p in paramnames:
-        pvalues.append(params[p])
-        del params[p]
-
-
-
+def generate_paramfile(params, param_file):
     content = generate_template(param_file)
-    #content = file(template,'r').read()
-    #print content
-    content = content.format(*pvalues)
-    #for k,v in params.items():
-    #    content += str(k)+' = '+str(v)+'\n'
+    content = content.format(**params)
     return content
 
 def update_param_file(paramfile, newvalues = {}):
     from datetime import datetime
+    from os.path import join, exists
+    from os import makedirs
+    import shutil
+
+    backupdir = 'backup'
+
     w,v = {},{}
     execfile(paramfile,w,v)
     v.update(newvalues)
-    content = generate_params(v, paramfile)
-    import shutil
-    shutil.copy(paramfile,paramfile+'-'+datetime.now().strftime('%d-%m-%y_%H-%M-%S'))
+    content = generate_paramfile(v, paramfile)
+
     print 'Write parameters in file',repr(paramfile)
+    if not exists(backupdir) : makedirs (backupdir)
+    shutil.copy(paramfile,join(backupdir, paramfile+'-'+datetime.now().strftime('%d-%m-%y_%H-%M-%S')))
     f = file(paramfile,'w')
     f.write(content)
 
-def get_param_names(paramtags, paramfile):
+
+def get_parameters(paramtags, paramfile):
+    # New way of defining parameters
+    from defaultparameters import is_defaultparameters_function
+
+    w,v = {},{}
+    execfile(paramfile,w,v)
+    if paramtags in v and is_defaultparameters_function(v[paramtags]):
+        return v[paramtags].values
+
+    # old ways
     def contains(l, pattern):
         try:
             idx = l.index(pattern)
@@ -73,9 +77,16 @@ def get_param_names(paramtags, paramfile):
             return False
 
     f = file(paramfile)
+    paramnames = None
     for l in f:
-        if contains(l,paramtags ):
-            return map(lambda x:x.strip(), l.split('=')[0].split(','))
+        if contains(l, paramtags ):
+            paramnames = map(lambda x:x.strip(), l.split('=')[0].split(','))
+            break
+ 
+    namespace = {}
+    execfile(paramfile, namespace)
+    
+    return dict([(p,namespace[p]) for p in paramnames])
 
 def get_all_param_names(paramtags,paramfile):
     def contains(l, pattern):

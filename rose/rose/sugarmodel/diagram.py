@@ -4,56 +4,90 @@ import numpy as np
 import matplotlib.pyplot as plt
 from openalea.lpy import Lsystem
 
-#lsysfile = 'rosebudJune15v2-model1.lpy'
-modelfile = 'model2.py'
+from runmodel import runmodel
 
 
    
-def generate_fig(title, targetvalues = None, conditions = None, gr24 = 0, bap = 0, paramfamily = None, values = None):
-
-    import model2
-    from model2 import eval_model 
-    from runmodel import runmodel
+def generate_fig(title, targetvalues = None, conditions = None, values = None):
 
     print targetvalues
     print conditions
 
-    auxinvalues = [0,1,2.5]
+    auxinvalues = [0, 1, 2.5]
     sugarvalues = [0.1, 0.5, 1 , 2.5]
 
     width = 0.2       # the width of the bars
     ind = np.arange(len(sugarvalues))  # the x locations for the groups
+
+    baplevel = 0.2
+    bapconditions = [(0.5, 2.5, 0, baplevel), (1,2.5,0,baplevel)]
+
+    gr24level = 0.1
+    gr24conditions = [(0.5, 0, gr24level,0), (1,1,gr24level,0)]
     
 
-    def myplot(paramfamily = None, values = None):
+    def myplot( values = None):
         Simus = []
         ax = plt.gca()
 
         for auxin in auxinvalues:
             Simus.append(list())
             for sugar in sugarvalues:
-                resvalues = runmodel(auxin, sugar, gr24, bap, paramfamily, values)
+                resvalues = runmodel(auxin, sugar, gr24 = 0, bap = 0, values = values)
                 Simus[-1].append(resvalues[title.lower()])
 
+
         rects1 = ax.bar(ind, Simus[0], width, color=[0.2,0.2,0.2])
-        rects2 = ax.bar(ind+width, Simus[1], width, color=[0.5,0.5,0.5])
+        color = 0.2 + 0.6 / 2.5
+        rects2 = ax.bar(ind+width, Simus[1], width, color=[color,color,color])
         rects3 = ax.bar(ind+2*width, Simus[2], width, color=[0.8,0.8,0.8])
+
+        i = 0
+        for auxin, sugar, gr24,bap in  bapconditions:
+                resvalues = runmodel(auxin, sugar, gr24, bap, values)
+                resvalue  =  resvalues[title.lower()]
+                color = 0.2 + 0.6 * auxin / 2.5
+                rectsi = ax.bar([len(sugarvalues)+width*i], [resvalue], width, color=[color,color,color])
+                i += 1
+
+
+        i = 0
+        for auxin, sugar, gr24,bap in  gr24conditions:
+                resvalues = runmodel(auxin, sugar, gr24, bap, values)
+                resvalue  =  resvalues[title.lower()]
+                color = 0.2 + 0.6 * auxin / 2.5
+                rectsi = ax.bar([len(sugarvalues)+1+width*i], [resvalue], width, color=[color,color,color])
+                i += 1
+               
+               
 
         # add some text for labels, title and axes ticks
         ax.set_ylabel('Simulated relative '+title+' content')
         ax.set_title(title)
-        ax.set_xticks(ind+width)
-        ax.set_xticklabels( ('10', '50', '100', '250') )
+        ax.set_xticks(np.arange(len(sugarvalues)+2)+width)
+        ax.set_xticklabels( ('10', '50', '100', '250', '250','0/100') )
 
         if not targetvalues is None and not conditions is None:
             # il faudrait faire quelque chose de plus generique
             ptargetindices = []
             ptargetvalues  = []
             for target, (auxc, sugarc, gr24c, bapc) in zip(targetvalues, conditions):
-                if gr24c == gr24 and bapc == bap:
+                if gr24c == 0 and bapc == 0:
                     pos = ind[sugarvalues.index(sugarc)] + width * auxinvalues.index(auxc)
                     ptargetindices.append(pos)
                     ptargetvalues.append(target)
+                else:
+                    if gr24c > 0:
+                        if (auxc, sugarc, gr24c, bapc) in gr24conditions:
+                            pos = len(sugarvalues)+1 + width * gr24conditions.index((auxc, sugarc, gr24c, bapc))
+                            ptargetindices.append(pos)
+                            ptargetvalues.append(target)
+                    elif bapc > 0:
+                        if (auxc, sugarc, gr24c, bapc) in bapconditions:
+                            pos = len(sugarvalues) + width * bapconditions.index((auxc, sugarc, gr24c, bapc))
+                            ptargetindices.append(pos)
+                            ptargetvalues.append(target)
+
             ax.plot(ptargetindices,ptargetvalues,'ro',color=[0,1,0], label = 'Target')
 
             #if title=='CK':
@@ -66,7 +100,7 @@ def generate_fig(title, targetvalues = None, conditions = None, gr24 = 0, bap = 
         
         ax.legend( (rects1[0], rects2[0], rects3[0]), ('NAA 0', 'NAA 1', 'NAA 2.5') )
 
-    if paramfamily is None  :   
+    if values is None  :   
         fig, ax = plt.subplots()
         myplot()
     else:
@@ -74,7 +108,7 @@ def generate_fig(title, targetvalues = None, conditions = None, gr24 = 0, bap = 
         plt.subplot(211)
         myplot()
         plt.subplot(212)
-        myplot(paramfamily, values)
+        myplot( values)
 
 
     plt.show()
@@ -83,18 +117,18 @@ def generate_fig(title, targetvalues = None, conditions = None, gr24 = 0, bap = 
 
 
 
-import model2; reload(model2) 
+#import model2; reload(model2) 
 from model2 import burst_delay_law
 import optimize 
 
-def generate_fig_compound(paramset = ['sl','ck', 'Sck', 'Ssl', 'brc1','burst'], 
+def generate_fig_compound(paramset = ['sl','ck', 'cksignal', 'slsignal', 'brc1','burst'], 
                        auxincontents = [0.,1.,2.5], sugarcontents = [0.1, 0.5, 1. , 2.5], 
                        legendpos = (2, 1), 
                        func = {'burst' : lambda res : burst_delay_law(res['brc1'])}, 
                        title = {'burst' : 'simulated burst delay'} , 
                        targets = {'sl' : optimize.sltargets, 
                                   'ck' : optimize.cktargets,
-                                  'Ssl':optimize.slsignaltargets,
+                                  #'slsignal':optimize.slsignaltargets,
                                   'brc1' : optimize.brc1targets }): # estimate_brc1_from_duration(True)
 
     N = len(sugarcontents)
@@ -134,11 +168,7 @@ def generate_fig_compound(paramset = ['sl','ck', 'Sck', 'Ssl', 'brc1','burst'],
         for pname in paramset:
             targetcontents[pname].append(list())
         for sugar in sugarcontents:
-            namespace = { } 
-            execfile(modelfile, namespace)
-            eval_model = namespace['eval_model']
-            sl, ck, Sck, Ssl, brc1 = eval_model(auxin, sugar)
-            resvalues = { 'sl' : sl , 'ck' : ck, 'Sck': Sck, 'Ssl': Ssl, 'brc1' : brc1 }
+            resvalues = runmodel(auxin, sugar)
             for pname in paramset:
                 if func.has_key(pname) : getval = func[pname]
                 else : getval = lambda r :  r[pname]

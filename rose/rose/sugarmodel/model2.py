@@ -1,18 +1,13 @@
 
-if 'ALL' in globals():
-  CK = ALL[:5]
-  SL = ALL[5:8]
-  CKsignal = ALL[8:9]
-  SLsignal = ALL[9:11]
-  BRC1 = ALL[11:]
-
-if 'BRC1'in globals():
-  BRC1 = [abs(v) for v in BRC1]
-
 
 paramfile = 'params10_init.py'
 
-execfile(paramfile,globals(),locals())
+execfile(paramfile, globals(),locals())
+
+if 'BRC1'in globals():
+    for pname, pval in BRC1.values.items():
+      globals()[pname] = abs(pval) 
+
 
 sl_auxin_exp = 2
 ck_sugar_exp = 2
@@ -22,15 +17,15 @@ slsignal_sl_exp = 2
 slsignal_sugar_exp = 2
 
 
-import params_generate; reload(params_generate)
-from params_generate import param_order
+#import params_generate; reload(params_generate)
+#from params_generate import param_order
 
+from defaultparameters import get_parameters
 
-params = param_order(paramfile)
-for p in params:
-  if globals()[p] < 0 : globals()[p] = abs(globals()[p])
-  if globals()[p] > 1000 : globals()[p] = 1000
-  if 'decay' in p and globals()[p] > 0.99 : globals()[p] = 0.99
+for pname, pvalue in get_parameters(globals()).items():
+  if pvalue < 0 : globals()[pname] = abs(pvalue)
+  if pvalue > 1000 : globals()[pname] = 1000
+  if 'decay' in pname and pvalue > 0.99 : globals()[pname] = 0.99
 
 from math import *
 
