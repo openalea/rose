@@ -44,6 +44,7 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
         for auxin, sugar, gr24,bap in  gr24conditions:
                 resvalues = runmodel(auxin, sugar, gr24, bap, values)
                 resvalue  =  resvalues[title.lower()]
+                #print resvalue
                 color = 0.2 + 0.6 * auxin / 2.5
                 rectsi = ax.bar([len(sugarvalues)+1+width*i], [resvalue], width, color=[color,color,color])
                 i += 1
@@ -54,7 +55,7 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
         ax.set_ylabel('Simulated relative '+title+' content')
         ax.set_title(title)
         ax.set_xticks(np.arange(len(sugarvalues)+2)+width)
-        ax.set_xticklabels( ('10', '50', '100', '250', '250','0/100') )
+        ax.set_xticklabels( ('10', '50', '100', '250', '50-100','50-100') )
 
         if not targetvalues is None and not conditions is None:
             # il faudrait faire quelque chose de plus generique
@@ -78,14 +79,6 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
                             ptargetvalues.append(target)
 
             ax.plot(ptargetindices,ptargetvalues,'ro',color=[0,1,0], label = 'Target')
-
-            #if title=='CK':
-            #    indices = np.concatenate((ind,ind+width,ind+2*width))
-            #    ax.plot(indices,targetvalues,'ro',color=[0,1,0], label = 'Target')
-            #else:
-            #    ind2=np.array([2,3])
-            #    indices=np.concatenate((ind2+width/2,ind2+5*width/2))
-            #    ax.plot(indices,targetvalues,'ro',color=[0,1,0], label = 'Target')
         
         ax.legend( (rects1[0], rects2[0], rects3[0]), ('NAA 0', 'NAA 1', 'NAA 2.5') )
 
@@ -106,19 +99,17 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
 
 
 
-#import model2; reload(model2) 
-from model2 import burst_delay_law
+from model import burst_delay_law
 import targets as tg
 
-def generate_fig_compound(paramset = ['sl','ck', 'cksignal', 'slsignal', 'brc1','burst'], 
+def generate_fig_compound(paramset = ['sl','ck', 'ckresponse', 'slresponse', 'brc1','burst'], 
                        auxincontents = [0.,1.,2.5], sugarcontents = [0.1, 0.5, 1. , 2.5], 
                        legendpos = (2, 1), 
                        func = {'burst' : lambda res : burst_delay_law(res['brc1'])}, 
                        title = {'burst' : 'simulated burst delay'} , 
                        targets = {'sl' : tg.sltargets, 
                                   'ck' : tg.cktargets,
-                                  #'slsignal':tg.slsignaltargets,
-                                  'brc1' : tg.brc1targets }): # estimate_brc1_from_duration(True)
+                                  'brc1' : tg.brc1targets }): 
 
     N = len(sugarcontents)
     M = len(auxincontents)
@@ -228,61 +219,9 @@ def generate_fig_compound(paramset = ['sl','ck', 'cksignal', 'slsignal', 'brc1',
     plt.show()
 
 
-#data=np.random.exponential(scale=180, size=10000)
-#print ('el valor medio de la distribucion exponencial es: ')
-#print np.average(data)
-#plt.hist(data,bins=len(data)**0.5,normed=True, cumulative=True, facecolor='red', label='datos tamano paqutes acumulativa', alpha=0.5)
-#plt.legend()
-#plt.xlabel('algo')
-#plt.ylabel('algo')
-#plt.grid()
-#plt.show()
-
-
-
-def generate_fig_ck(targetvalues = None, conditions = None, paramfamily = None, values = None):
-    if targetvalues is None:
-        targetvalues =  targets.cktargets
-        conditions   =  targets.ckconditions
-    generate_fig('CK', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
-
-def generate_fig_sl(targetvalues = None, conditions = None, paramfamily = None, values = None):
-    if targetvalues is None:
-        targetvalues = targets.sltargets
-        conditions   =  targets.slconditions
-    generate_fig('SL', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
-
-def generate_fig_slsignal(targetvalues = None, conditions = None, paramfamily = None, values = None):
-    if targetvalues is None:
-        targetvalues = targets.slsignaltargets
-        conditions   =  targets.slsignalconditions
-    generate_fig('SLsignal', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
-
-def generate_fig_brc1(targetvalues = None, conditions = None, paramfamily = None, values = None):
-    if targetvalues is None:
-        targetvalues = targets.brc1targets
-        conditions   =  targets.brc1conditions
-    generate_fig('BRC1', targetvalues = targetvalues, conditions = conditions, paramfamily = paramfamily, values = values)
-
-
-    # add some text for labels, title and axes ticks
-    #ax.set_ylabel('Simulated relative BRC1 content')
-    #ax.set_title(('BRC1'))
-    #ax.set_xticks(ind+width*(0.5+len(auxincontents)/2))
-
-    #ax.set_xticklabels( ['Manitol' if sugar == 0 else str(sugar*100)+' mM' for sugar in sugarcontents] )
-
-    #ax.legend( rects, [str(aux)+' $\mu$M NAA' for aux in auxincontents] ,bbox_to_anchor=(1.07, 1) )
-    #plt.show()
 
 
 
 if __name__ == '__main__':
-    import sys
-    if len(sys.argv) > 1:
-        data = sys.argv[1]
-        func = 'generate_fig_'+data
-        globals()[func]()
-    else:
-        generate_fig_compound()
+    generate_fig_compound()
 

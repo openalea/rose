@@ -1,39 +1,15 @@
-
-if 'ALL' in globals():
-  CK = ALL[:5]
-  SL = ALL[5:8]
-  CKsignal = ALL[8:9]
-  SLsignal = ALL[9:11]
-  BRC1 = ALL[11:]
-
-if 'BRC1'in globals():
-  BRC1 = [abs(v) for v in BRC1]
-
-
-paramfile = 'params10_init_sugarOnBRC1Only.py'
+paramfile = 'parameters_sugarOnBRC1Only.py'
 
 execfile(paramfile,globals(),locals())
 
 sl_auxin_exp = 2
 ck_sugar_exp = 2
 ck_auxin_exp = 1
-cksignal_ck_exp = 3
-slsignal_sl_exp = 2
-slsignal_sugar_exp = 2
-
-
-import params_generate; reload(params_generate)
-from params_generate import param_order
-
-
-params = param_order(paramfile)
-for p in params:
-  if globals()[p] < 0 : globals()[p] = abs(globals()[p])
-  if globals()[p] > 1000 : globals()[p] = 1000
-  if 'decay' in p and globals()[p] > 0.99 : globals()[p] = 0.99
+ckresponse_ck_exp = 3
+slresponse_sl_exp = 2
+slresponse_sugar_exp = 2
 
 from math import *
-
 
 def sl_plateau(auxin):
     return ( sl_base_synth_coef +pow(auxin,sl_auxin_exp) / (sl_auxin_synth_coef+pow(auxin,sl_auxin_exp)) ) / sl_base_decay_coef
@@ -43,12 +19,12 @@ def ck_plateau(auxin, sugar):
     return ( ck_sugar_synth_coef * (pow(sugar, ck_sugar_exp) / 
         (ck_sugar_k_synth_coef + pow(sugar, ck_sugar_exp) ) )  + (ck_auxin_synth_coef/(1+ck_auxin_k_synth_coef*pow(auxin, ck_auxin_exp)) ) ) * (1./ck_base_decay_coef)
 
-def cksignal(ck,bap):
-    return (pow(ck,cksignal_ck_exp)/(cksignal_ck_k1_synth_coef+pow(ck,cksignal_ck_exp)) )
+def ckresponse(ck,bap):
+    return (pow(ck,ckresponse_ck_exp)/(ckresponse_ck_k1_synth_coef+pow(ck,ckresponse_ck_exp)) )
 
-def slsignal(sl,gr24):
-    powsl = pow(sl+gr24, slsignal_sl_exp)  
-    return ( ( powsl / (slsignal_sugar_k1_synth_coef+powsl ) ) )
+def slresponse(sl,gr24):
+    powsl = pow(sl+gr24, slresponse_sl_exp)  
+    return ( ( powsl / (slresponse_sugar_k1_synth_coef+powsl ) ) )
 
 def brc1_plateau(eck,esl,sugar):
     return ( brc1_base_synth_coef + brc1_slck_synthcoef * 1/(brc1_sugar_base_synthcoef+sugar*sugar/(brc1_sugar_k_synthcoef+sugar*sugar)) * esl/eck )/brc1_base_decay_coef
@@ -56,8 +32,8 @@ def brc1_plateau(eck,esl,sugar):
 def eval_model(auxin, sugar, gr24 = 0, bap = 0):
     sl = sl_plateau(auxin)+gr24
     ck = ck_plateau(auxin, sugar)+bap
-    Sck = cksignal(ck,bap)
-    Ssl = slsignal(sl,gr24)
+    Sck = ckresponse(ck,bap)
+    Ssl = slresponse(sl,gr24)
     brc1 = brc1_plateau(Sck,Ssl,sugar)
     #print auxin, sugar, '-->' , sl, ck, brc1
     return sl, ck, Sck, Ssl, brc1

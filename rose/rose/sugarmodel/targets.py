@@ -29,10 +29,10 @@ sltargets = (0.4, 1.)
 sltargets = np.array([sltargets[0],sltargets[0],sltargets[1],sltargets[1]])
 slconditions = cross_conditions([0,2.5],[1 , 2.5])
 
-######  SL signal #########
+######  SL response #########
 
-slsignaltargets = np.array([0.1,0.06,0.28,0.14])
-slsignalconditions = cross_conditions([0,2.5],[1 , 2.5])
+#slresponsetargets = np.array([0.1,0.06,0.28,0.14])
+#slresponseconditions = cross_conditions([0,2.5],[1 , 2.5])
 
 ######  BRC1 #########
 
@@ -55,7 +55,7 @@ interpolateddurations = [[None ,  None, None, None],
 completedurations =  [[measureddurations[i][j] if not measureddurations[i][j] is None else interpolateddurations[i][j] for j in xrange(len(measureddurations[i])) ] for i in xrange(len(measureddurations)) ]
 
 
-from model2 import brc1_law
+from model import brc1_law
 
 
 def estimate_brc1_from_duration(includebrc1measure = True,  
@@ -130,14 +130,15 @@ def estimate_brc1_duration_law():
 
 ################ Extra BAP and GR24 experiment
 
-baplevel = 10
+baplevel = 0.25 # CK
 
-bapconditions = [(0.5, 2.5, 0, baplevel), (1,2.5,0,baplevel)]
+            # auxin, sugar, gr24, bap
+bapconditions = [(2.5, 0.5,  0, baplevel), (2.5, 1, 0, baplevel)]
 bapdurations = [5.6, 2.8]
 bapbrc1levels = map(brc1_law, bapdurations)
 
-gr24level = 10
-gr24conditions = [(0.5, 0, gr24level,0), (1,1,gr24level,0)]
+gr24level = 1 # SL
+gr24conditions = [(1, 0.5, gr24level, 0), (1, 1, gr24level, 0)]
 gr24durations = [15, 4]
 gr24brc1levels = map(brc1_law, gr24durations) 
 

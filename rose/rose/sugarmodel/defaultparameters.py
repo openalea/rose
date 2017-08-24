@@ -36,20 +36,14 @@ class LocalsRetriever:
         return self.mylocals, res
 
 
-def default_parameters_wrapper(function):
-    def wrapper(*args, **kwargs):
-        l = LocalsRetriever(function)
-        params, res = l(*args,**kwargs)
-        map(get_caller_frame().f_locals.setdefault, params.keys(), params.values())
-        return res
-    return wrapper
+_dfattrname = 'paramsvalues'
 
 def defaultparameters(function):
     """ 
     A decorator to define in a simple way default values of parameters.
 
     This decorator retrieve all the local variables of a function and insert them
-    in the global namespace if they do not already exist after the function definition. 
+    in the global namespace if they do not already exist after the function definition.
 
     Example:
 
@@ -60,40 +54,35 @@ def defaultparameters(function):
 
     c  = a * b
 
-    If the function has parameters, it should be called explicitly to have initialization.
-    @defaultparameters
-    def myparams(i):
-        a = 1
-        b = 2*i
-    
-    myparams(4)
-    c  = a * b
-
-
     """
-    import inspect
-    if len(inspect.getargspec(function).args) == 0:
-        params, res = LocalsRetriever(function)()
-        map(get_caller_frame().f_locals.setdefault, params.keys(), params.values())
-        function.values = params
-        get_caller_frame().f_locals['_'+function.func_name] = params
-        return function
-    else:
-        return default_parameters_wrapper(function)
+    params, res = LocalsRetriever(function)()
+    for pname, pvalue in params.items():
+        if type(pvalue) == tuple:
+            get_caller_frame().f_locals.setdefault(pname, pvalue[0])
+        else:
+            get_caller_frame().f_locals.setdefault(pname, pvalue)
+    map(get_caller_frame().f_locals.setdefault, params.keys(), params.values())
+    setattr(function,_dfattrname,params)
+    return function
 
 
 def is_defaultparameters_function(function):
     import inspect
-    return inspect.isfunction(function) and hasattr(function,'values')
+    return inspect.isfunction(function) and hasattr(function,_dfattrname)
 
 def get_defaultparameters_functions(namespace):
     return dict([(fname, fvalue) for fname,fvalue in namespace.items() if is_defaultparameters_function(fvalue)])
 
 def get_defaultparameters(namespace):
+    # if a function is passed here
+    if is_defaultparameters_function(namespace) : 
+        return getattr(namespace,_dfattrname)
+    
+    # if a namespace is given here
     dpfunctions = get_defaultparameters_functions(namespace)
     results = {}
     for func in dpfunctions.values():
-        results.update(func.values)
+        results.update(getattr(func,_dfattrname))
     return results
 
 def get_redefinedparameters(namespace):

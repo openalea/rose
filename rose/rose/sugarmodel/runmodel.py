@@ -5,8 +5,8 @@ def get_param_file(modelfile):
     paramfile = lnamespace['paramfile']
     return paramfile
 
-#modelfile = 'model2.py'
-modelfile = 'model2_sugarOnBRC1Only.py'
+modelfile = 'model.py'
+#modelfile = 'model_sugarOnBRC1Only.py'
 paramfile = get_param_file(modelfile)
 
 
@@ -18,8 +18,8 @@ def runmodel(auxin, sugar, gr24 = 0, bap = 0, values = None, modelfile = modelfi
     # Execution of the model
     execfile(modelfile, namespace)
     eval_model = namespace['eval_model']
-    sl, ck, cksignal, slsignal, brc1 = eval_model(auxin, sugar, gr24, bap)
+    sl, ck, ckresponse, slresponse, brc1 = eval_model(auxin, sugar, gr24, bap)
 
     # retrieval of the values as a dict
-    resvalues = { 'sl' : sl , 'ck' : ck, 'cksignal': cksignal, 'slsignal': slsignal, 'brc1' : brc1 }
+    resvalues = { 'sl' : sl , 'ck' : ck, 'ckresponse': ckresponse, 'slresponse': slresponse, 'brc1' : brc1 }
     return resvalues
