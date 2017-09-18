@@ -19,11 +19,13 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
         Simus = []
         ax = plt.gca()
 
+        print "Auxin\tSugar\tGR24\tBAP\t:"+title.lower()
         for auxin in auxinvalues:
             Simus.append(list())
             for sugar in sugarvalues:
                 resvalues = runmodel(auxin, sugar, gr24 = 0, bap = 0, values = values)
                 Simus[-1].append(resvalues[title.lower()])
+                print auxin, '\t', sugar, '\t', 0, '\t', 0, '\t', ':', resvalues[title.lower()]
 
 
         rects1 = ax.bar(ind, Simus[0], width, color=[0.2,0.2,0.2])
@@ -32,22 +34,24 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
         rects3 = ax.bar(ind+2*width, Simus[2], width, color=[0.8,0.8,0.8])
 
         i = 0
-        for auxin, sugar, gr24,bap in  bapconditions:
+        for auxin, sugar, gr24, bap in  bapconditions:
                 resvalues = runmodel(auxin, sugar, gr24, bap, values)
                 resvalue  =  resvalues[title.lower()]
                 color = 0.2 + 0.6 * auxin / 2.5
                 rectsi = ax.bar([len(sugarvalues)+width*i], [resvalue], width, color=[color,color,color])
                 i += 1
+                print auxin,'\t',  sugar, '\t',  gr24, '\t', bap, '\t', ':', resvalues[title.lower()]
 
 
         i = 0
-        for auxin, sugar, gr24,bap in  gr24conditions:
+        for auxin, sugar, gr24, bap in  gr24conditions:
                 resvalues = runmodel(auxin, sugar, gr24, bap, values)
                 resvalue  =  resvalues[title.lower()]
                 #print resvalue
                 color = 0.2 + 0.6 * auxin / 2.5
                 rectsi = ax.bar([len(sugarvalues)+1+width*i], [resvalue], width, color=[color,color,color])
                 i += 1
+                print auxin, '\t', sugar, '\t', gr24, '\t', bap, '\t', ':', resvalues[title.lower()]
                
                
 
@@ -97,15 +101,15 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
 
 
 
-
-
-from model import burst_delay_law
+from model import burst_delay_law, brc1_threshold
 import targets as tg
+
+Zero4None = lambda x : x if not x is None else 0
 
 def generate_fig_compound(paramset = ['sl','ck', 'ckresponse', 'slresponse', 'brc1','burst'], 
                        auxincontents = [0.,1.,2.5], sugarcontents = [0.1, 0.5, 1. , 2.5], 
                        legendpos = (2, 1), 
-                       func = {'burst' : lambda res : burst_delay_law(res['brc1'])}, 
+                       func = {'burst' : lambda res : Zero4None(burst_delay_law(res['brc1']))}, 
                        title = {'burst' : 'simulated burst delay'} , 
                        targets = {'sl' : tg.sltargets, 
                                   'ck' : tg.cktargets,
@@ -154,7 +158,7 @@ def generate_fig_compound(paramset = ['sl','ck', 'ckresponse', 'slresponse', 'br
                 else : getval = lambda r :  r[pname]
                 targetcontents[pname][-1].append(getval(resvalues))
 
-    print 'Simulation:',targetcontents
+    #print 'Simulation:',targetcontents
 
     dc = 0.8/(M-1)
     colors = [0.9]+[0.9-i*dc for i in xrange(1,M-1)]+[0.1]
@@ -202,7 +206,6 @@ def generate_fig_compound(paramset = ['sl','ck', 'ckresponse', 'slresponse', 'br
                 
         
         if pname == 'brc1':
-            from model2 import brc1_threshold
             ax.plot([0,N],[brc1_threshold,brc1_threshold])
             ax.axis([0,N,0,17])
 
@@ -219,9 +222,36 @@ def generate_fig_compound(paramset = ['sl','ck', 'ckresponse', 'slresponse', 'br
     plt.show()
 
 
+def fig_ck():   generate_fig('CK', cktargets,  ckconditions)
+def fig_sl():   generate_fig('SL', sltargets,  slconditions)
+def fig_brc1():  
+    brc1targets, brc1conditions = estimate_brc1_from_duration()
+    brc1targets += bapbrc1levels + gr24brc1levels
+    brc1conditions += bapconditions + gr24conditions
+    generate_fig('BRC1', brc1targets,  brc1conditions)
 
+
+def print_values(auxinvalues, sugarvalues, gr24values, bapvalues):
+    print "Auxin\tSugar\tGR24\tBAP\t:",
+    init = True
+
+
+    for auxin, sugar, gr24, bap in  cross_conditions(auxinvalues, sugarvalues, gr24values, bapvalues):
+        resvalues = runmodel(auxin, sugar, gr24 = 0, bap = 0)
+        if init:
+            print '\t'.join(resvalues.keys()),'\tBurst Delay'
+            init = False
+        print auxin, '\t', sugar, '\t', gr24, '\t', bap, '\t', ':', '\t'.join(map(str,resvalues.values())),'\t',burst_delay_law(resvalues['brc1'])
 
 
 if __name__ == '__main__':
-    generate_fig_compound()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == '-t':
+        print_values([0,   1,   2.5], [0.1, 0.5, 1 ,  2.5], [0, gr24level], [0, baplevel])
+    elif len(sys.argv) > 1:
+        data = sys.argv[1]
+        func = 'fig_'+data
+        globals()[func]()
+    else:   
+        generate_fig_compound()
 

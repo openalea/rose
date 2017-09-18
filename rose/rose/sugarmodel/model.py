@@ -50,7 +50,7 @@ intercept = 0.630237580994
 
 def burst_delay_law(brc1):
     if brc1 < brc1_threshold : return  (brc1 - intercept)/ slope 
-    return 0
+    return None
 
 def brc1_law(duration):
     if not duration is None : return  duration * slope + intercept # (duration - intercept)/ slope 
