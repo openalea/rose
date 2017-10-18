@@ -10,8 +10,8 @@
 
 import math
 
-from openalea.mtg import DressingData, PlantFrame, MTG
-from openalea.plantgl.math import * # Vector4, Vector3, Vector2, norm, cross
+from openalea.mtg import DressingData, PlantFrame #, MTG
+from openalea.plantgl.math import  Vector4, Vector3, Vector2, norm, cross, dot
 
 from openalea.core.external import * 
 from openalea.core.logger  import *
@@ -23,12 +23,12 @@ import openalea.plantgl.all as pgl
 #from openalea.mtg.plantframe.turtle import pre_order2_with_filter
 from openalea.mtg.traversal import pre_order2_with_filter
 
-from rose_colors import *
+import rose_colors as myColors
 import rose_time
 
 deg2rad = math.pi / 180.  # convert degrees to radians
 
-## G E N E R A L functions
+## G E N E R A L  functions
 def computeHeading(points):
     """ computes the unity vector Hf that points from the 1st to
     the last point of the list, and computes their distance lf.
@@ -601,8 +601,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
     def meshedLeaflet(points, turtle=None):
         """    compute leaflet geometry from 4 points
         """
-        geometry = None; 
-
+        #geometry = None; 
         #print "1:",printPoints(points)
 
         # if the list of points is not a complete leaf
@@ -825,7 +824,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
     #print "lControlpointmatrix = %s" % lControlpointmatrix
     myColorFunc=colorFunc
     if colorFunc is None:
-        myColorFunc=setTurtlePink # custom 
+        myColorFunc=myColors.setTurtlePink # custom 
         
     def bpFlower(pointsnDiameters, turtle=None, dummy0=None, dummy1=None):
         """ computes a flower from two points and the diameters associated to 
@@ -843,7 +842,7 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
         # pointsNdiamters is : [[base_pos, base_diam], [None,None], [top_pos, top_diam], [...]]
         basePos=pointsnDiameters[0][0] # TypeError: '_ProxyNode' object does not support indexing
         topPos=pointsnDiameters[2][0]
-        pedDiam=pointsnDiameters[0][1]
+        #pedDiam=pointsnDiameters[0][1]
         flowerRay=pointsnDiameters[2][1] * 0.5
         flowerHeight=norm(topPos-basePos)
         baseRay=max(flowerRay *0.2, flowerHeight*0.2) # arbitrarily
@@ -939,7 +938,7 @@ def getValuesFromSepals(lSepales, mainAxis):
     lengthes=[]
     Front=Vector3([1,0,0])
     if lSepales:
-        testSepales=[]
+        #testSepales=[]
         # avant-der (pointe) - premier (insertion rachis)
         vein=lSepales[0][-2]-lSepales[0][0]
         side=cross(mainAxis,vein)
@@ -1311,7 +1310,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     # we prolongate the ped along the heading direction : 
     turtle.push()
     turtle.oLineRel(Heading *taille_fruit  ) 
-    #setTurtleOrange(turtle)
+    #myColors.setTurtleOrange(turtle)
     #turtle.setColor(4) 
 
     ############################ O V A R Y   |   F R U I T
@@ -1321,7 +1320,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         anglePetInt=lPetalAngles[-1]
     receptacle= pgl.Sphere(1.) 
     if anglePetExt > 90. and anglePetExt == anglePetInt: # Faded flower
-        setTurtleOrange(turtle)
+        myColors.setTurtleOrange(turtle)
         receptacle=pgl.Scaled(Vector3( 
                 taille_fruit*1.333, taille_fruit*1.333, taille_fruit), receptacle )
         #receptacle= pgl.Translated(0, 0, -taille*0.5, receptacle) 
@@ -1405,7 +1404,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     
     ############################ P E T A L S
     angleRepartition = angle72 * 2.1
-    setTurtleKoPink(turtle)
+    myColors.setTurtleKoPink(turtle)
 
     thisLength=lPetalDims[0]
     thisInc=(lPetalDims[0]-lPetalDims[-1])/ (numPetals -1)
@@ -1476,8 +1475,8 @@ def drawFloralOrgan(colorFunc=None):
     :param colorFunc: the index of the color to use for the flower
     """
     myColorFunc=colorFunc
-    if colorFunc is None:
-        myColorFunc=setTurtlePink # custom 
+    if myColorFunc is None:
+        myColorFunc=myColors.setTurtlePink # custom 
     return floralOrgan
 # endef drawFloralOrgan(colorFunc=None)
 
@@ -1503,7 +1502,7 @@ def coneFlower(colorFunc=None):
     # write the node code here.
     myColorFunc=colorFunc
     if colorFunc is None:
-        myColorFunc=setTurtlePink # custom 
+        myColorFunc=myColors.setTurtlePink # custom 
         
     def rawFlower(pointsnDiameters, turtle=None):
         """    computes a flower from 2 pairs [position, diameter]
@@ -1548,7 +1547,7 @@ def simpleFruit(colorFunc=None):
     # write the node code here.
     myColorFunc=colorFunc
     if colorFunc is None:
-        myColorFunc=setTurtleOrange # custom 
+        myColorFunc=myColors.setTurtleOrange # custom 
         
     def rawFruit(points, turtle=None, truc=None, Bidule=None): # arity is 4
         """    
@@ -1764,6 +1763,16 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
 
+        elif n.label ==  'K1' : 
+            turtle.push()
+            myColors.setTurtleRed(turtle)
+            #turtle.setColor(1) # red(?) temporary 
+            turtle.oLineTo(pt)
+            radius = 1.
+            geometry=  pgl.Sphere(radius)
+            turtle.customGeometry(geometry, 1)
+            turtle.pop()
+            
         elif n.label ==  'F1' :            
             turtle.setColor(2) # internode
             points = [position(n.parent()), pt]
@@ -2006,6 +2015,9 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             maTortue.oLineTo(pt)
             maTortue.setWidth(n.Diameter / 2.)
             
+        elif n.label ==  'K1' : 
+            pass
+            
         elif n.label ==  'F1' :            
             orgType=1 # leaf
             turtle.setColor(2) # internode
@@ -2108,7 +2120,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         if canFacts :
             #canFacts['canStream'].write("#Appel %d\n" % numApp)
             numApp += 1
-            out = []
+            #out = []
             debutLigne=can02line(canFacts['numJour'], orgType, plantNum, orgNum )
             
             maTortue.stopGC();
@@ -2452,10 +2464,10 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
     fOut=None # to write CAN files
     theScenes=[]
     makeCan=False
-    canPath=''
+    #canPath=''
     fOut=None
     canFacts={}
-    numJour= None
+    #numJour= None
     
     if not canFilesOutPath == "" :
         makeCan=True

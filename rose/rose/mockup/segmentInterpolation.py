@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 
-import math
 
 def bySegments(x, Xmin, Xmax, Ymin, Ymax):
     """ computes a value for a function defined by segments :

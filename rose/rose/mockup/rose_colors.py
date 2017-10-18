@@ -70,6 +70,8 @@ def LightPurple():
     return pgl.Color3(255,144,255)
 def Pink():
     return pgl.Color3(255,192,203)
+def Red():
+    return pgl.Color3(255,32,32)
 def Strand():
     return pgl.Color3(80,80,20) # set a realistic one
 def White():
@@ -123,6 +125,9 @@ def setTurtlePerlGrey(t):
 def setTurtlePink(t):
     t.setColorAt(pink, Pink())
     t.setColor(pink) 
+def setTurtleRed(t):
+    t.setColorAt(red, Red())
+    t.setColor(red) 
 def setTurtleStrand(t):
     t.setColorAt(strand, Strand())
     t.setColor(strand) 
