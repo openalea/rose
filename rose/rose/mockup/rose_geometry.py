@@ -5,7 +5,7 @@
 #
 """
 .. module rose_geometry 
-.. moduleauthor:: H. Autret <hautret@angers.inra.fr>
+.. moduleauthor:: H. Autret <herve.autret@inra.fr>
 """
 
 import math
@@ -1749,6 +1749,8 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
         """ 
         a function that analyses the code of a vertex then takes decisions about the ways to display it
         """
+        from openalea.mtg import algo
+        
         n = g.node(v)
         pt = position(n)
         symbol = n.label[0]
@@ -1763,14 +1765,21 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
 
-        elif n.label ==  'K1' : 
+        elif symbol ==  'K' : 
             turtle.push()
-            myColors.setTurtleRed(turtle)
-            #turtle.setColor(1) # red(?) temporary 
-            turtle.oLineTo(pt)
-            radius = 1.
+            lOrdre=algo.order(g,v)
+            # debugger colors
+            if lOrdre == 1 :
+                myColors.setTurtleRed(turtle)
+            elif lOrdre == 2:
+                myColors.setTurtleOrange(turtle)
+            else : myColors.setTurtleYellow(turtle)
+
+            turtle.move(pt)
+            radius = 0.5 # that small should remain visible
+            # TODO : draw an useable branch bud
             geometry=  pgl.Sphere(radius)
-            turtle.customGeometry(geometry, 1)
+            turtle.customGeometry(geometry, 1.)
             turtle.pop()
             
         elif n.label ==  'F1' :            
@@ -1788,8 +1797,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
                 points.append(position(n))
             
             lSepalStore.append(points)
-            #print "lSepalStore.APPEND"
-            #sepal_computer(points,turtle) # unused ?
 	    
         elif n.label == "B1" :
             #print "list(n.children())[0].Diameter=%s" % list(n.children())[0].Diameter
@@ -2200,13 +2207,15 @@ class VertexVisitor4CAN02(Node):
 #### Copied from mtg.turtle ###
 def traverse_with_turtle(g, vid, visitor, turtle=None ):
     """ 
-    This function is called from within TurtleFrame. It explores the part of a MTG tree being under the node number "vid". It walks through that sub-MTG using the pre_order2_with_filter algorithm.
+    This function is called from within TurtleFrame. It explores the part
+    of an MTG tree being under the node number "vid". 
+    It walks through that sub-MTG using the pre_order2_with_filter algorithm.
     
     :param g: the MTG object we are working on
     :param vid: the vertex ID inside the MTG
     :param visitor: the function that visits the nodes of the sub-MTG
     :see: openalea/mtg/traversal.py
-    :note: this function was copied from OpenAlea.Mtg-0.9.5-py2.6.egg/openalea/mtg/turtle.py 
+    :note: this function was inspired by OpenAlea.Mtg-0.9.5-py2.6.egg/openalea/mtg/turtle.py 
 """
     if turtle is None:
         turtle = PglTurtle()
@@ -2214,7 +2223,38 @@ def traverse_with_turtle(g, vid, visitor, turtle=None ):
     def push_turtle(v):
         if g.edge_type(v) == '+':
             turtle.push()
-            #turtle.startGC()
+            if g.class_name(v) == 'R':
+                """
+                The generalized cylinders may seem flattened horizontally
+                or vertically when they draw a new rachis.
+                So we turn the turtle towards the leaf before to draw it.
+                """
+                import numpy.linalg as npl
+                pp=position(g.node(v).parent())
+                tmp=int(g.node(v).parent().index())
+
+                ps=None
+                while tmp is not None :
+                    if g.class_name(tmp) == "E" :
+                        ps=position(g.node(tmp))
+                        break
+                    children=g.node(tmp).children()
+                    if len(children) == 0 :
+                        break
+                    tmp=int(g.node(tmp).children()[0].index())
+                    
+                if ps is not None :               
+                    rachis=position(g.node(v))-pp
+                    rachis = rachis/npl.norm(rachis)
+                    tige=ps-pp
+                    
+                    travers=tige^rachis
+                    travers=travers/npl.norm(travers)
+                    # that's the point :
+                    turtle.stopGC()
+                    turtle.setHead(travers, rachis)
+                    turtle.startGC()
+            
             turtle.setId(v)
         return True
 
@@ -2224,15 +2264,13 @@ def traverse_with_turtle(g, vid, visitor, turtle=None ):
             turtle.pop()
 
     turtle.push()
+    
     turtle.startGC()
-
     visitor(g,vid,turtle)
-    turtle.stopGC()
     for v in pre_order2_with_filter(g, vid, None, push_turtle, pop_turtle):
         if v == vid: continue
-        turtle.startGC()
         visitor(g,v,turtle)
-        turtle.stopGC()
+    turtle.stopGC()
     turtle.pop()
     return turtle.getScene()
  #endef traverse_with_turtle(g, vid, visitor, turtle=None)
@@ -2240,7 +2278,9 @@ def traverse_with_turtle(g, vid, visitor, turtle=None ):
 #### Copied from traverse_with_turtle() ###
 def traverse_with_turtle4CAN02(g, vid, visitor, turtle=None, canFacts={}):
     """ 
-    This function is called from within TurtleFrame. It explores the part of a MTG tree being under the node number "vid". It walks through that sub-MTG using the pre_order2_with_filter algorithm.
+    This function is called from within TurtleFrame. It explores the part
+    of an MTG tree being under the node number "vid". 
+    It walks through that sub-MTG using the pre_order2_with_filter algorithm.
     
     :param g: the MTG object we are working on
     :param vid: the vertex ID inside the MTG
