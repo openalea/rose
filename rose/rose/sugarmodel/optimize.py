@@ -1,14 +1,13 @@
 import numpy as np
 from numpy.linalg import norm
-
-from runmodel import modelfile, paramfile
+import os
 from targets import *
 
 def simu(params, attname, conditions=cross_conditions()):
     from runmodel import runmodel
     targetcontents = []
     for auxin, sugar, gr24, bap in conditions:
-            resvalues = runmodel(auxin, sugar, gr24, bap, params, modelfile)
+            resvalues = runmodel(auxin, sugar, gr24, bap, params)
             if type(attname) == str:
                 res = resvalues[attname]
                 targetcontents.append(res)
@@ -57,26 +56,87 @@ def param_values(parameters):
             result.append(pvalue)
     return result
 
-def optimize_group(generate, tag, functag, conditions, targets, randomseed = False):
-    print 'Model :',repr(modelfile)
-    parameters = get_parameters(functag, paramfile)
+
+def read_attempt(tag, i, paramfile):
+        from os.path import exists, join
+        from os import makedirs
+        from cPickle import load
+        mdir = join('randomseed',os.path.splitext(os.path.basename(paramfile))[0],tag)
+        if not exists(mdir) : makedirs(mdir)
+        f = join(mdir,str(i)+'.pkl')
+        if exists(f):    
+            stream = file(f,'rb')
+            return load( stream)[1:]
+
+
+def save_attempt(tag, i, val, param, paramfile):
+        from os.path import exists, join
+        from os import makedirs
+        from cPickle import dump
+        mdir = join('randomseed',os.path.splitext(os.path.basename(paramfile))[0],tag)
+        if not exists(mdir) : makedirs(mdir)
+        f = join(mdir,str(i)+'.pkl')
+        stream = file(f,'wb')
+        dump( (i,val, param), stream)
+
+
+def process(params, parallel = True):
+    tag, conditions, targets, paramfile, i, paraminit = params
+
+    parameters = get_parameters(tag, paramfile)
     myevalsimu = evalsimu(tag, parameters.keys(), targets, conditions)
 
-    paraminits = [param_values(parameters)]
-    if randomseed:
-        from random import uniform
-        paraminits += [[uniform(0,100) if '_k_' in p else uniform(0,1)  for p in parameters.keys()] for n in xrange(20)]
+    val = None
+    res = None
+    if parallel : 
+        res = read_attempt(tag, i, paramfile)
 
-    initialval = norm(myevalsimu(param_values(parameters)))
-    bestresult = None
-    bestval = initialval
-
-    for paraminit in paraminits:
+    if res :
+        val, result = res
+        print 'Seed ',i, 'Val', val, 'Params', result
+        ok = True
+    if val is None:
+        print 'Start from', paraminit
         result, ok = optimize(myevalsimu, paraminit, param_bounds(parameters))
         val = norm(myevalsimu(result))
+        if ok: 
+            save_attempt(tag, i, val, result, paramfile)
+    return result, val
 
-        if ok and bestresult is None or bestval > val: 
-            bestresult, bestval = result, val
+def generate_paraminits(tag, parameters, randomseedenabled, seeds):
+    paraminits = [ param_values(parameters) ]
+    if randomseedenabled:
+        from random import uniform, seed
+        print seeds
+        if type(seeds) == int: seeds = xrange(1,seeds)
+        elif 0 in seeds: seeds.remove(0)
+        for n in seeds:
+            seed(n)
+            paraminits.append([uniform(pmin,pmax)  for pname, (pvalue, pmin, pmax) in parameters.items()])
+    return paraminits        
+
+def optimize_group(generate, tag, conditions, targets, randomseedenabled = False, seeds = 1000, view = True, parallel = False):
+    from runmodel import modelfile, paramfile
+    print seeds
+    print 'Model :',repr(modelfile),'with parameters',repr(paramfile),'on', tag
+    parameters = get_parameters(tag, paramfile)
+
+    paraminits = generate_paraminits(tag, parameters, randomseedenabled, seeds)
+
+    initialval = norm(evalsimu(tag, parameters.keys(), targets, conditions)(param_values(parameters)))
+
+    if not parallel:
+        results = []
+        for i, paraminit in enumerate(paraminits):
+            result, val  = process((tag, conditions, targets, paramfile, i, paraminit), parallel = False)
+            results.append((result, val))
+    else:
+        from multiprocessing import Pool, cpu_count
+        n = cpu_count()-1
+        p = Pool(n)
+        results = p.map(process, [(tag, conditions, targets, paramfile, i, paraminit) for i, paraminit in enumerate(paraminits)])
+    
+    bestresult, bestval = min(results, key=lambda x : x[1])
 
     namedresult = dict(zip(parameters.keys(), bestresult))
 
@@ -85,68 +145,193 @@ def optimize_group(generate, tag, functag, conditions, targets, randomseed = Fal
     improvement = abs(initialval - bestval) > 1e-5
     if improvement :
         print 'Improve solution : ', initialval, ' --> ', bestval
-        diagram.generate_fig(functag, targetvalues = targets, conditions = conditions, values = namedresult)
+        if view : diagram.generate_fig(tag, targetvalues = targets, conditions = conditions, values = namedresult)
         if generate: 
             update_param_file(paramfile, namedresult)
     else:
         print 'No improvement found'
-        diagram.generate_fig(functag, targetvalues = targets, conditions = conditions)
+        if view : diagram.generate_fig(tag, targetvalues = targets, conditions = conditions)
 
 
 ######  CK #########
 
-def optimize_ck(generate = True, randomseed = False):
-    optimize_group(generate, 'ck', 'CK', ckconditions, cktargets, randomseed)
+def optimize_CK(generate = True, randomseedenabled = False, seeds = 100, view = True):
+    optimize_group(generate, 'CK', ckconditions, cktargets, randomseedenabled, seeds, view = view)
 	
 
 ######  SL #########
 
-def optimize_sl(generate = True, randomseed = False):
-    optimize_group(generate, 'sl', 'SL', slconditions, sltargets, randomseed)
+def optimize_SL(generate = True, randomseedenabled = False, seeds = 100, view = True):
+    optimize_group(generate,  'SL', slconditions, sltargets, randomseedenabled, seeds, view = view)
+
+######  I #########
+
+def optimize_I_simple(generate = True, targets = Itargets, conditions = Iconditions, randomseedenabled = False, seeds = 1000, view = True):
+    optimize_group(generate, 'I', conditions, targets, randomseedenabled, seeds=seeds, view = view)
 
 
-######  SL response #########
-#
-#def optimize_slresponse(generate = True, randomseed = False):
-#    optimize_group(generate, 'slresponse', 'SLResponse', slresponseconditions, slresponsetargets, randomseed)
+######### Full optimization of I ########
 
-
-######  BRC1 #########
-
-def optimize_brc1(generate = True, brc1targets = brc1targets, conditions = brc1conditions, randomseed = False):
-    optimize_group(generate, 'brc1', 'BRC1', conditions, brc1targets, randomseed)
-
-
-######### Full optimization of Brc1 ########
-
-def optimize_brc1_full(generate = True, randomseed = False):
-        brc1targets, conditions = estimate_brc1_from_duration()
-        brc1targets += bapbrc1levels + gr24brc1levels
+def optimize_I(generate = True, randomseedenabled = False, seeds = 1000, view = False):
+        Itargets, conditions = estimate_I_from_duration()
+        Itargets += bapIlevels + gr24Ilevels
         conditions += bapconditions + gr24conditions
         #print len(brc1targets), brc1targets
         #print len(conditions), conditions
-        optimize_brc1(generate, brc1targets, conditions, randomseed)
+        optimize_I_simple(generate, Itargets, conditions, randomseedenabled, seeds=seeds, view = view)
 
+
+
+############## Volume ##########
+
+def volumes(initparams, params, values = None, difftol = 1e-1):
+    from scipy.spatial import Voronoi, voronoi_plot_2d, ConvexHull
+    import numpy as np
+    nbminpoints = len(initparams[0])+1
+    
+    vor = Voronoi(initparams)
+    
+    if nbminpoints == 3:
+        import matplotlib.pyplot as plt
+        voronoi_plot_2d(vor)
+        plt.show()
+    #print len(vor.vertices), map(len,vor.regions)
+    def removeminusone(r):
+        try:
+            r.remove(-1)
+        except ValueError, ve:
+            pass
+        return r
+    print len(initparams)
+    lregions = [removeminusone(r) for r in vor.regions if len(removeminusone(r)) >= nbminpoints]
+    regions = [vor.vertices[r] for r in lregions]
+
+    #print set(sum(lregions,[])).difference(set(range(len(vor.vertices))))
+
+    results = []
+    for param, reg in zip(params, regions):
+        vol = ConvexHull(reg).area
+        find = None
+        for i, (p, ovol) in enumerate(results):
+            if norm(p-param, np.inf) < difftol:
+                find = i
+                break
+        if not find is None:
+            results[find] = (p,ovol+vol)
+        else:
+            results.append((param,vol))
+    return results, ConvexHull(vor.vertices).area
+
+
+####### Estimate volumes ############
+
+def estimate_volumes(tag):
+    from runmodel import modelfile, paramfile
+    from os.path import exists, join, splitext
+    import glob
+    print 'Model :',repr(modelfile),'with parameters',repr(paramfile),'on', tag
+    parameters = get_parameters(tag, paramfile)
+    mdir = join('randomseed',tag)
+    files = glob.glob(join(mdir,'*.pkl'))
+    files = [splitext(f[len(mdir)+1:])[0] for f in files]
+    seeds = map(int, files)
+    seeds.sort()
+
+    paraminits = generate_paraminits(tag, parameters, True, seeds)
+    results = [ read_attempt(tag, i) for i in seeds]
+    values = [r[0] if len(r) == 2 else r[1] for r in results]
+    params = [r[1] if len(r) == 2 else r[2] for r in results]
+
+    mvolumes,totvolumes = volumes(paraminits, params, values)
+    mvolumes.sort(key = lambda v : -v[1])
+
+    print '\t'.join(parameters.keys())
+    for p,v in mvolumes:
+        print '\t'.join(map(str,p)),':', v*100/totvolumes
+    print sum([v for p,v in mvolumes]), totvolumes
+
+def estimate_volumes_CK(): estimate_volumes('CK')
+def estimate_volumes_SL(): estimate_volumes('SL')
+def estimate_volumes_I():  estimate_volumes('I')
+
+########@
+
+def test_volume():
+    from random import uniform, seed
+    from numpy import array
+    seed(0)
+    pts = array([(uniform(0,1),uniform(0,1)) for i in xrange(100)])
+    mvolumes, totvolumes = volumes(pts,pts)
+    mvolumes.sort(key = lambda v : -v[1])
+
+    for p,v in mvolumes:
+        print '\t'.join(map(str,p)),':', v #*100/totvolumes
+    print sum([v for p,v in mvolumes]), totvolumes
 
 
 #########  MAIN ########
 
+def print_help():
+    print 'help of script optimize.py'
+    print '-h : this help'
+    print '-m : set the model to optimize'
+    print '-r : with random seed'
+    print '-v : characterize random seed'
+    print 'CK,SL,I,ALL : optimize the parameters of the specified compound'
+    print 'default : optimize I with all conditions (including burst delay inference)'
+
 def main_optimize():
+    #estimate_volumes_CK()
+    #exit()
     import sys
     generate = False
+    randomseedenabled = False
+    target = 'optimize_'
+    def targetfunc(tag):
+        func = target+tag
+        if target == 'optimize_':
+            def mfunc(view = True): 
+                return globals()[func](generate, randomseedenabled, view=view)
+        elif target == 'estimate_volumes_':
+            def mfunc(view = True): 
+                return globals()[func]()
+        return mfunc
+
     if len(sys.argv) > 1:
-        data = sys.argv[1]
-        func = 'optimize_'+data
-        if len(sys.argv) > 2:
-            generate = eval(sys.argv[2])
-            assert generate in [False,True]
-        globals()[func](generate)
-    else:
-        optimize_brc1_full(generate)
+        i = 1
+        done = False
+        while  i < len(sys.argv) and not done:
+            current = sys.argv[i].upper()
+            if current == '-H':
+                print_help()
+            elif current == '-M':
+                from runmodel import set_model
+                set_model(sys.argv[i+1])
+                i += 1
+            elif current == '-R':
+                randomseedenabled = True
+            elif current == '-V':
+                target = 'estimate_volumes_'
+            elif current == 'ALL':
+                targetfunc('CK')(view = False)
+                targetfunc('SL')(view = False)
+                targetfunc('I')(view = False)
+                done = True
+            elif target+current in globals():
+                targetfunc(current)()
+                done = True
+            else:
+                print 'Unknow option : ', sys.argv[i]
+                print_help()
+                done = True
+            i += 1
+        if not done:
+            targetfunc('I')()
+    else: 
+        optimize_I(generate, randomseedenabled)
+
 
 if __name__ == '__main__':
-    import sys
-    #test_gr24()
+    #test_volume()
     main_optimize()
-    #estimate_brc1_from_duration()
-    #estimate_brc1_duration_law()
+

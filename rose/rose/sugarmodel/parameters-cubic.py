@@ -18,12 +18,12 @@ def SL():
 
 
 @defaultparameters
-def BRC1():
+def I():
       ckresponse_ck_k1_synth_coef     = 0.335227513165, 0, 1000
       slresponse_sugar_k1_synth_coef  = 5.27978524571,  0, 1000
       slresponse_sugar_k2_synth_coef  = 2.69224386227,  0, 1000
-      brc1_base_synth_coef          = 0.649986436378, 0, 1000
-      brc1_slck_synthcoef           = 4.34411430799,  0, 1000
-      brc1_base_decay_coef          = 0.989670071812,  0, 0.99
+      I_base_synth_coef               = 0.649986436378, 0, 1000
+      I_slck_synthcoef                = 4.34411430799,  0, 1000
+      I_base_decay_coef               = 0.989670071812, 0, 0.99
 
 

@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from runmodel import runmodel
 from targets import *
+from model import burst_delay_law, I_threshold
+import targets as tg
 
    
 def generate_fig(title, targetvalues = None, conditions = None, values = None):
@@ -19,13 +21,13 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
         Simus = []
         ax = plt.gca()
 
-        print "Auxin\tSugar\tGR24\tBAP\t:"+title.lower()
+        print "Auxin\tSugar\tGR24\tBAP\t:\t"+title
         for auxin in auxinvalues:
             Simus.append(list())
             for sugar in sugarvalues:
                 resvalues = runmodel(auxin, sugar, gr24 = 0, bap = 0, values = values)
-                Simus[-1].append(resvalues[title.lower()])
-                print auxin, '\t', sugar, '\t', 0, '\t', 0, '\t', ':', resvalues[title.lower()]
+                Simus[-1].append(resvalues[title])
+                print auxin, '\t', sugar, '\t', 0, '\t', 0, '\t', ':', '\t', resvalues[title]
 
 
         rects1 = ax.bar(ind, Simus[0], width, color=[0.2,0.2,0.2])
@@ -36,22 +38,22 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
         i = 0
         for auxin, sugar, gr24, bap in  bapconditions:
                 resvalues = runmodel(auxin, sugar, gr24, bap, values)
-                resvalue  =  resvalues[title.lower()]
+                resvalue  =  resvalues[title]
                 color = 0.2 + 0.6 * auxin / 2.5
                 rectsi = ax.bar([len(sugarvalues)+width*i], [resvalue], width, color=[color,color,color])
                 i += 1
-                print auxin,'\t',  sugar, '\t',  gr24, '\t', bap, '\t', ':', resvalues[title.lower()]
+                print auxin,'\t',  sugar, '\t',  gr24, '\t', bap, '\t', ':', '\t', resvalues[title]
 
 
         i = 0
         for auxin, sugar, gr24, bap in  gr24conditions:
                 resvalues = runmodel(auxin, sugar, gr24, bap, values)
-                resvalue  =  resvalues[title.lower()]
+                resvalue  =  resvalues[title]
                 #print resvalue
                 color = 0.2 + 0.6 * auxin / 2.5
                 rectsi = ax.bar([len(sugarvalues)+1+width*i], [resvalue], width, color=[color,color,color])
                 i += 1
-                print auxin, '\t', sugar, '\t', gr24, '\t', bap, '\t', ':', resvalues[title.lower()]
+                print auxin, '\t', sugar, '\t', gr24, '\t', bap, '\t', ':', '\t', resvalues[title]
                
                
 
@@ -86,6 +88,11 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
         
         ax.legend( (rects1[0], rects2[0], rects3[0]), ('NAA 0', 'NAA 1', 'NAA 2.5') )
 
+        if title == 'I':
+            N = len(sugarvalues)+2
+            ax.plot([0,N],[I_threshold,I_threshold])
+            ax.axis([0,N,0,17])
+
     if values is None  :   
         fig, ax = plt.subplots()
         myplot()
@@ -101,19 +108,17 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
 
 
 
-from model import burst_delay_law, brc1_threshold
-import targets as tg
 
 Zero4None = lambda x : x if not x is None else 0
 
-def generate_fig_compound(paramset = ['sl','ck', 'ckresponse', 'slresponse', 'brc1','burst'], 
+def generate_fig_compound(paramset = ['SL','CK', 'CKRESPONSE', 'SLRESPONSE', 'I','burst'], 
                        auxincontents = [0.,1.,2.5], sugarcontents = [0.1, 0.5, 1. , 2.5], 
                        legendpos = (2, 1), 
-                       func = {'burst' : lambda res : Zero4None(burst_delay_law(res['brc1']))}, 
+                       func = {'burst' : lambda res : Zero4None(burst_delay_law(res['I']))}, 
                        title = {'burst' : 'simulated burst delay'} , 
-                       targets = {'sl' : tg.sltargets, 
-                                  'ck' : tg.cktargets,
-                                  'brc1' : tg.brc1targets }): 
+                       targets = {'SL' : tg.sltargets, 
+                                  'CK' : tg.cktargets,
+                                  'I' : tg.Itargets }): 
 
     N = len(sugarcontents)
     M = len(auxincontents)
@@ -183,12 +188,12 @@ def generate_fig_compound(paramset = ['sl','ck', 'ckresponse', 'slresponse', 'br
             rects.append(ax.bar(ind+i*width, target, width, color=[color,color,color]))
             i += 1
 
-        if pname == 'brc1':
+        if pname == 'I':
                 tcolors = [[0,0,0],[0,0.4,0],[0,1,0]]
                 i = 0
-                for tval, tcond in  [tg.estimate_brc1_from_duration(False, False, True),    # interpolationduration # white
-                                     tg.estimate_brc1_from_duration(False, True,  False),   # measuredduration # dark green
-                                     tg.estimate_brc1_from_duration(True,  False, False)]:  # brc1measure      # green
+                for tval, tcond in  [tg.estimate_I_from_duration(False, False, True),    # interpolationduration # white
+                                     tg.estimate_I_from_duration(False, True,  False),   # measuredduration # dark green
+                                     tg.estimate_I_from_duration(True,  False, False)]:  # Imeasure      # green
                     tind = [ (auxincontents.index(aux) + 0.5) * width +  sugarcontents.index(sug) for aux,sug,gr24,bap in tcond ]
                     ax.plot(tind,tval,'ro',color=tcolors[i], label = 'Target')
                     i += 1
@@ -199,14 +204,14 @@ def generate_fig_compound(paramset = ['sl','ck', 'ckresponse', 'slresponse', 'br
                 tind = [ (auxincontents.index(aux) + 0.5) * width +  sugarcontents.index(sug) for aux,sug,gr24,bap in tcond ]
                 ax.plot(tind,tval,'ro',color=[0,1,0], label = 'Target')
             else:
-                if pname=='ck':
+                if pname=='CK':
                     ax.plot(targetindices_ck,targets[pname],'ro',color=[0,1,0], label = 'Target')
                 else:
                     ax.plot(targetindices,targets[pname],'ro',color=[0,1,0], label = 'Target')
                 
         
-        if pname == 'brc1':
-            ax.plot([0,N],[brc1_threshold,brc1_threshold])
+        if pname == 'I':
+            ax.plot([0,N],[I_threshold,I_threshold])
             ax.axis([0,N,0,17])
 
 
@@ -224,11 +229,11 @@ def generate_fig_compound(paramset = ['sl','ck', 'ckresponse', 'slresponse', 'br
 
 def fig_ck():   generate_fig('CK', cktargets,  ckconditions)
 def fig_sl():   generate_fig('SL', sltargets,  slconditions)
-def fig_brc1():  
-    brc1targets, brc1conditions = estimate_brc1_from_duration()
-    brc1targets += bapbrc1levels + gr24brc1levels
-    brc1conditions += bapconditions + gr24conditions
-    generate_fig('BRC1', brc1targets,  brc1conditions)
+def fig_I():  
+    Itargets, Iconditions = estimate_I_from_duration()
+    Itargets += bapIlevels + gr24Ilevels
+    Iconditions += bapconditions + gr24conditions
+    generate_fig('I', Itargets,  Iconditions)
 
 
 def print_values(auxinvalues, sugarvalues, gr24values, bapvalues):
@@ -241,17 +246,114 @@ def print_values(auxinvalues, sugarvalues, gr24values, bapvalues):
         if init:
             print '\t'.join(resvalues.keys()),'\tBurst Delay'
             init = False
-        print auxin, '\t', sugar, '\t', gr24, '\t', bap, '\t', ':', '\t'.join(map(str,resvalues.values())),'\t',burst_delay_law(resvalues['brc1'])
+        print auxin, '\t', sugar, '\t', gr24, '\t', bap, '\t', ':', '\t'.join(map(str,resvalues.values())),'\t',burst_delay_law(resvalues['I'])
 
+
+
+def plot_ratios():
+    from math import log
+    from numpy import arange, polyfit, array, concatenate
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.colors import Normalize
+    c = ScalarMappable(norm=Normalize(0,2.5), cmap='jet')
+    exponent = 1
+    allvalues, allratios = [], []
+    testedratios = arange(1, 8.01, 0.5)
+    #testedratios = concatenate((testedratios, 1. / testedratios))
+    print testedratios
+
+    plottedratio = lambda aux,sug : ((sug/aux)-1) 
+    for sugar in arange(0.1,2.51,0.2):
+        values = []
+        ratios = []
+        for ratio in testedratios:
+            auxin = sugar / ratio
+            resvalues = runmodel(auxin, sugar, gr24 = 0, bap = 0)
+            duration = burst_delay_law(resvalues['I'])
+            if duration:
+                values.append(duration)
+                ratios.append(plottedratio(auxin, sugar))
+        plt.plot(ratios, values, '.', c = c.to_rgba(sugar))
+
+    plottedratio = lambda aux,sug : (1-(aux/sug)) 
+    for auxin in arange(0.1,2.51,0.2):
+        values = []
+        ratios = []
+        for ratio in testedratios:
+            sugar = auxin / ratio
+            resvalues = runmodel(auxin, sugar, gr24 = 0, bap = 0)
+            duration = burst_delay_law(resvalues['I'])
+            if duration:
+                values.append(duration)
+                ratios.append(plottedratio(auxin, sugar))
+        plt.plot(ratios, values, '.', c = c.to_rgba(auxin))
+
+
+    plottedratio = lambda aux,sug : ((sug/aux)-1) if (sug >= aux) else (1-aux/sug)
+
+    plt.plot([0,0], [0,9])
+
+    #allvalues = array(allvalues)
+    #allvalues = 1/allvalues
+    #polycoef =  polyfit(allratios, allvalues, 2)
+    #print polycoef
+    def fitted(x):
+        res = 0
+        for i, c in enumerate(reversed(polycoef)):
+            res += pow(x,i) * c
+        return 1/res
+    #plt.plot(testedratios, map(fitted, testedratios))
+
+
+    values = []
+    ratios = []
+    for aux,sug in itertools.product(enumerate(auxinlevels), enumerate(sugarlevels)):
+        auxi, auxin = aux
+        sugi, sugar = sug
+        duration = measureddurations[auxi][sugi]
+        if not duration is None:
+            values.append(duration)
+            if auxin == 0: ratio = 10
+            else : ratio = plottedratio(auxin, sugar)
+            #else : ratio = pow(sugval,exponent)/auxval
+        plt.plot([ratio], [duration], 'D', c = c.to_rgba(sugar), markeredgecolor='black',
+         markeredgewidth=1.0)
+
+
+    plt.show()
+
+def print_help():
+    print 'help of script diagram.py'
+    print '-h : this help'
+    print '-t : print a table of value of simulation for different conditions'
+    print '-r : plot the ratio'
+    print '-m : set the model to plot'
+    print 'ck,sl,I : plot the values of the specified compound'
+    print 'default : plot a composed diagram of the different compounds'
 
 if __name__ == '__main__':
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == '-t':
-        print_values([0,   1,   2.5], [0.1, 0.5, 1 ,  2.5], [0, gr24level], [0, baplevel])
-    elif len(sys.argv) > 1:
-        data = sys.argv[1]
-        func = 'fig_'+data
-        globals()[func]()
+    if len(sys.argv) > 1:
+        i = 1
+        while  i < len(sys.argv):
+            if sys.argv[i] == '-t':
+                print_values([0,   1,   2.5], [0.1, 0.5, 1 ,  2.5], [0, gr24level], [0, baplevel])
+            elif sys.argv[i] == '-r':
+                plot_ratios()
+            elif sys.argv[i] == '-h':
+                print_help()
+            elif sys.argv[i] == '-m':
+                from runmodel import set_model
+                set_model(sys.argv[i+1])
+                i += 1
+            elif 'fig_'+sys.argv[i] in globals():
+                data = sys.argv[i]
+                func = 'fig_'+data
+                globals()[func]()
+            else:
+                print 'Unknow option : ', sys.argv[i]
+                print_help()
+            i += 1
     else:   
         generate_fig_compound()
 

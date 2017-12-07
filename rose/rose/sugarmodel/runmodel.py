@@ -5,12 +5,17 @@ def get_param_file(modelfile):
     paramfile = lnamespace['paramfile']
     return paramfile
 
-modelfile = 'model.py'
+modelfile = 'model-additive.py'
 #modelfile = 'model_sugarOnBRC1Only.py'
 paramfile = get_param_file(modelfile)
 
 
-def runmodel(auxin, sugar, gr24 = 0, bap = 0, values = None, modelfile = modelfile):
+def set_model(fname):
+    global modelfile, paramfile
+    modelfile = fname
+    paramfile = get_param_file(modelfile)
+
+def runmodel(auxin, sugar, gr24 = 0, bap = 0, values = None):
     
     namespace = {}
     if not values is None : namespace.update(values)
@@ -18,8 +23,8 @@ def runmodel(auxin, sugar, gr24 = 0, bap = 0, values = None, modelfile = modelfi
     # Execution of the model
     execfile(modelfile, namespace)
     eval_model = namespace['eval_model']
-    sl, ck, ckresponse, slresponse, brc1 = eval_model(auxin, sugar, gr24, bap)
+    sl, ck, ckresponse, slresponse, I = eval_model(auxin, sugar, gr24, bap)
 
     # retrieval of the values as a dict
-    resvalues = { 'sl' : sl , 'ck' : ck, 'ckresponse': ckresponse, 'slresponse': slresponse, 'brc1' : brc1 }
+    resvalues = { 'SL' : sl , 'CK' : ck, 'CKRESPONSE': ckresponse, 'SLRESPONSE': slresponse, 'I' : I }
     return resvalues
