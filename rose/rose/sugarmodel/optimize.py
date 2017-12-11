@@ -56,31 +56,31 @@ def param_values(parameters):
             result.append(pvalue)
     return result
 
+def get_attempt_dir(tag, paramfile):
+    from os.path import exists, join
+    from os import makedirs
+    mdir = join('randomseed',os.path.splitext(os.path.basename(paramfile))[0],tag)
+    if not exists(mdir) : makedirs(mdir)
+    return mdir
 
 def read_attempt(tag, i, paramfile):
-        from os.path import exists, join
-        from os import makedirs
-        from cPickle import load
-        mdir = join('randomseed',os.path.splitext(os.path.basename(paramfile))[0],tag)
-        if not exists(mdir) : makedirs(mdir)
-        f = join(mdir,str(i)+'.pkl')
-        if exists(f):    
-            stream = file(f,'rb')
-            return load( stream)[1:]
+    from cPickle import load        
+    from os.path import exists, join
+    f = join(get_attempt_dir(tag, paramfile),str(i)+'.pkl')
+    if exists(f):    
+        stream = file(f,'rb')
+        return load( stream)[1:]
 
 
 def save_attempt(tag, i, val, param, paramfile):
-        from os.path import exists, join
-        from os import makedirs
-        from cPickle import dump
-        mdir = join('randomseed',os.path.splitext(os.path.basename(paramfile))[0],tag)
-        if not exists(mdir) : makedirs(mdir)
-        f = join(mdir,str(i)+'.pkl')
-        stream = file(f,'wb')
-        dump( (i,val, param), stream)
+    from cPickle import dump
+    from os.path import join
+    f = join(get_attempt_dir(tag, paramfile),str(i)+'.pkl')
+    stream = file(f,'wb')
+    dump( (i,val, param), stream)
 
 
-def process(params, parallel = True):
+def process(params, saving = True):
     tag, conditions, targets, paramfile, i, paraminit = params
 
     parameters = get_parameters(tag, paramfile)
@@ -88,7 +88,7 @@ def process(params, parallel = True):
 
     val = None
     res = None
-    if parallel : 
+    if saving : 
         res = read_attempt(tag, i, paramfile)
 
     if res :
@@ -99,7 +99,7 @@ def process(params, parallel = True):
         print 'Start from', paraminit
         result, ok = optimize(myevalsimu, paraminit, param_bounds(parameters))
         val = norm(myevalsimu(result))
-        if ok: 
+        if ok and saving: 
             save_attempt(tag, i, val, result, paramfile)
     return result, val
 
@@ -115,7 +115,7 @@ def generate_paraminits(tag, parameters, randomseedenabled, seeds):
             paraminits.append([uniform(pmin,pmax)  for pname, (pvalue, pmin, pmax) in parameters.items()])
     return paraminits        
 
-def optimize_group(generate, tag, conditions, targets, randomseedenabled = False, seeds = 1000, view = True, parallel = False):
+def optimize_group(generate, tag, conditions, targets, randomseedenabled = False, seeds = 1000, view = True, parallel = True):
     from runmodel import modelfile, paramfile
     print seeds
     print 'Model :',repr(modelfile),'with parameters',repr(paramfile),'on', tag
@@ -128,7 +128,7 @@ def optimize_group(generate, tag, conditions, targets, randomseedenabled = False
     if not parallel:
         results = []
         for i, paraminit in enumerate(paraminits):
-            result, val  = process((tag, conditions, targets, paramfile, i, paraminit), parallel = False)
+            result, val  = process((tag, conditions, targets, paramfile, i, paraminit), saving = False)
             results.append((result, val))
     else:
         from multiprocessing import Pool, cpu_count
@@ -155,7 +155,7 @@ def optimize_group(generate, tag, conditions, targets, randomseedenabled = False
 
 ######  CK #########
 
-def optimize_CK(generate = True, randomseedenabled = False, seeds = 100, view = True):
+def optimize_CK(generate = True, randomseedenabled = False, seeds = 1000, view = True):
     optimize_group(generate, 'CK', ckconditions, cktargets, randomseedenabled, seeds, view = view)
 	
 
@@ -231,14 +231,14 @@ def estimate_volumes(tag):
     import glob
     print 'Model :',repr(modelfile),'with parameters',repr(paramfile),'on', tag
     parameters = get_parameters(tag, paramfile)
-    mdir = join('randomseed',tag)
+    mdir = get_attempt_dir(tag, paramfile)
     files = glob.glob(join(mdir,'*.pkl'))
     files = [splitext(f[len(mdir)+1:])[0] for f in files]
     seeds = map(int, files)
     seeds.sort()
 
     paraminits = generate_paraminits(tag, parameters, True, seeds)
-    results = [ read_attempt(tag, i) for i in seeds]
+    results = [ read_attempt(tag, i, paramfile) for i in seeds]
     values = [r[0] if len(r) == 2 else r[1] for r in results]
     params = [r[1] if len(r) == 2 else r[2] for r in results]
 

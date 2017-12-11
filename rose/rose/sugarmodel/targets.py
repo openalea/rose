@@ -130,14 +130,14 @@ def estimate_I_duration_law():
 
 ################ Extra BAP and GR24 experiment
 
-baplevel = 0.25 # CK
+baplevel = 0.8 # CK
 
             # auxin, sugar, gr24, bap
 bapconditions = [(2.5, 0.5,  0, baplevel), (2.5, 1, 0, baplevel)]
 bapdurations = [5.6, 2.8]
 bapIlevels = map(I_law, bapdurations)
 
-gr24level = 2 # SL
+gr24level = 10 # SL
 gr24conditions = [(1, 0.5, gr24level, 0), (1, 1, gr24level, 0)]
 gr24durations = [15, 4]
 gr24Ilevels = map(I_law, gr24durations) 
