@@ -41,7 +41,11 @@ perlGrey=28
 brokenWhite=29
 # KO
 koPink=30
+# Knop
+anthocyan=31
 
+def Anthocyan():
+    return pgl.Color3(100, 11, 33)
 def Blue():
     return pgl.Color3(80,80,255)
 def LightBlue():
@@ -83,6 +87,9 @@ def Yellow():
 def LightYellow():
     return pgl.Color3(250,250,192)
 
+def setTurtleAnthocyan(t):
+    t.setColorAt(anthocyan, Anthocyan())
+    t.setColor(anthocyan) 
 def setTurtleBlue(t):
     t.setColorAt(blue, Blue())
     t.setColor(blue) 

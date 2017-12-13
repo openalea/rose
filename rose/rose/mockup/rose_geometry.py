@@ -573,7 +573,49 @@ class drawBuds(Node):
         return (noThing, rawBud(), builtBud(), revolutionBud(), bud )
 #end drawBuds   
 
-################################################ LEAFLET
+################################################  K N O P
+def computeKnop4pts(xFac=4, yFac=1, zFac=1):
+    """
+    We build a knop as two triangles overlapping the stem.
+    """    
+    dihedralKnop=None    
+    # node code here.
+    def dihedralKnop(points, turtle=None):
+        if len(points) < 4:
+            return
+        turtle.push()
+        myColors.setTurtleAnthocyan(turtle)
+        turtle.move(points[0])
+        # triangle 1
+        turtle.startPolygon()
+        turtle.lineTo(points[2])
+        turtle.lineTo(points[1])
+        turtle.lineTo(points[0])
+        turtle.stopPolygon()
+        # triangle 2
+        turtle.startPolygon()
+        turtle.lineTo(points[3])
+        turtle.lineTo(points[2])
+        turtle.lineTo(points[0])
+        turtle.stopPolygon()
+
+        turtle.pop()
+    return dihedralKnop
+    # fin computeKnop4pts
+    
+class drawKnops(Node):
+    """ :return: a list of drawing bud functions """
+    def __init__(self):
+        Node.__init__(self)
+        self.add_output( name = 'knopComputers', 
+                         interface = ISequence )
+
+    def __call__( self, inputs ):
+        return (noThing, computeKnop4pts() )
+#end drawKnops   
+
+
+################################################  L E A F L E T
 def  displayNormalVector(turtle,points,color):
     """ displays a nail (or something sharp) to show up the normal direction of a surface
 
@@ -587,7 +629,7 @@ def  displayNormalVector(turtle,points,color):
     turtle.customGeometry(Cone(2,13), 1)
     turtle.pop()
 #endef  displayNormalVector(turtle,points,color)
-
+    
 def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1], 
                        yMesh=[0.81, 0.92 , 0.94, 0]):
     """  We define here a nested function (meshedLeaflet) that computes a meshed leaflet geometry from 4 points.
@@ -1714,7 +1756,7 @@ def position(n):
 #endef position(n)
     
 ########################################
-def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None ):
+def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None, knop_factory=None ):
     """ We define here a function (visitor) that is used visit MTG nodes.
 
     :param leaf_factory: the function that draws the leaves
@@ -1722,6 +1764,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
     :param sepal_factory: the function that draws the sepals
     :param flower_factory: the function that draws the flowers
     :param fruit_factory: the function that draws the fruits
+    :param knop_factory: the function that draws the knops
     :return: the visitor function
     :todo: check the arity of all the versions of bud_factory
     """  
@@ -1739,13 +1782,16 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
         flower_factory=coneFlower() # bug when flower_factory is None
     if fruit_factory is None:
         fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None 
+    if knop_factory is None :
+        knop_factory=None
 
     def visitor(g, v, turtle, 
                 leaf_computer=leaf_factory, 
                 bud_computer=bud_factory,
                 sepal_computer=sepal_factory,
                 flower_computer=flower_factory,
-                fruit_computer=fruit_factory):
+                fruit_computer=fruit_factory,
+                knop_factory=knop_factory):
         """ 
         a function that analyses the code of a vertex then takes decisions about the ways to display it
         """
@@ -1757,7 +1803,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
         turtle.setId(v)
         currentColor=turtle.getColor()        
 
-        if symbol in ['E', 'R']:
+        if symbol in ['E', 'R']: # internode, rachis
             if n.Diameter is None:
                 logging.error('ERROR: vertex %d (name: %s, line around %d)'%(v,n.label,n._line))
                 n.Diameter = 0.75
@@ -1765,32 +1811,44 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
 
-        elif symbol ==  'K' : 
-            turtle.push()
-            lOrdre=algo.order(g,v)
-            # debugger colors
-            if lOrdre == 1 :
-                myColors.setTurtleRed(turtle)
-            elif lOrdre == 2:
-                myColors.setTurtleOrange(turtle)
-            else : myColors.setTurtleYellow(turtle)
-
-            turtle.move(pt)
-            radius = 0.5 # that small should remain visible
-            # TODO : draw an useable branch bud
-            geometry=  pgl.Sphere(radius)
-            turtle.customGeometry(geometry, 1.)
-            turtle.pop()
-            
-        elif n.label ==  'F1' :            
-            turtle.setColor(2) # internode
+        elif n.label ==  'K1' : # knop
+            if knop_factory is not None :
+                
+                ## tests
+                #turtle.push()
+                #lOrdre=algo.order(g,v)
+                ## debugger colors
+                #if lOrdre == 1 :
+                #    myColors.setTurtleRed(turtle)
+                #elif lOrdre == 2:
+                #    myColors.setTurtleOrange(turtle)
+                #else : myColors.setTurtleYellow(turtle)
+    
+                #turtle.move(pt)
+                #radius = 0.5 # that small should remain visible
+                #geometry=  pgl.Sphere(radius)
+                #turtle.customGeometry(geometry, 1.)
+                #turtle.pop()
+                
+                # draw an useable leaf axil bud
+                # Todo : couleur anthocyane
+                
+                points=[position(n)]
+                while n.nb_children() == 1:
+                    n = list(n.children())[0]
+                    points.append(position(n))
+                knop_factory(points,turtle)
+                
+                
+        elif n.label ==  'F1' :  # leaF          
+            turtle.setColor(2) # 
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
             leaf_computer(points,turtle)
 
-        elif n.label == 'S1' :
+        elif n.label == 'S1' : # sepal
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -1798,7 +1856,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             
             lSepalStore.append(points)
 	    
-        elif n.label == "B1" :
+        elif n.label == "B1" : # flower Button
             #print "list(n.children())[0].Diameter=%s" % list(n.children())[0].Diameter
             points = [n.parent(), n]
             while n.nb_children() == 1:
@@ -1811,7 +1869,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
             while lSepalStore:
                sepal_computer(lSepalStore.pop(),turtle)
 
-        elif n.label == "O1" :
+        elif n.label == "O1" : # flOwer
             turtle.setColor(4) # apple green
 
             points=[n.parent(),n]
@@ -1829,7 +1887,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
                 #sepal_computer(sepale,turtle) # 2 draw sepal
                 sepal_computer(lSepalStore.pop(),turtle)
 
-        elif n.label == "C1" :
+        elif n.label == "C1" : # fruit (Cynorrodon)
             turtle.setColor(4) # apple green
             # process sepals
             #points=[[position(n.parent()),n.parent().Diameter], [None,None], [pt, None]] # old way
@@ -1839,8 +1897,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
                 sepal_computer(lSepalStore.pop(),turtle)
                 #print "lSepalStore:USED in FRUIT"
 
-            # process terminator
-        elif n.label == "T1":
+        elif n.label == "T1": # Terminator
             # The turtle is supposed to be at the top of the previous vertex
             #turtle.stopGC() # not useful anymore
             turtle.setColor(2) # green
@@ -2163,6 +2220,8 @@ class VertexVisitor(Node):
                         interface = IFunction)
         self.add_input( name = 'fruit_factory',
                         interface = IFunction)
+        self.add_input( name = 'knop_factory',
+                        interface = IFunction)
         self.add_output( name = 'VertexVisitor', 
                          interface = IFunction )
 
@@ -2172,7 +2231,8 @@ class VertexVisitor(Node):
         sepal_factory=self.get_input('sepal_factory')
         flower_factory=self.get_input('flower_factory')
         fruit_factory=self.get_input('fruit_factory')
-        return vertexVisitor(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory )
+        knop_factory=self.get_input('knop_factory')
+        return vertexVisitor(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory,knop_factory )
 #end class VertexVisitor   (wrapper for vertexVisitor)
 
 class VertexVisitor4CAN02(Node):
