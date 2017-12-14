@@ -598,6 +598,13 @@ def computeKnop4pts(xFac=4, yFac=1, zFac=1):
         turtle.lineTo(points[2])
         turtle.lineTo(points[0])
         turtle.stopPolygon()
+        # triangle 3 le long de la tige
+        turtle.startPolygon()
+        turtle.lineTo(points[1])
+        turtle.lineTo(points[3])
+        turtle.lineTo(points[0])
+        turtle.stopPolygon()
+        
 
         turtle.pop()
     return dihedralKnop
@@ -1899,9 +1906,9 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
 
         elif n.label == "T1": # Terminator
             # The turtle is supposed to be at the top of the previous vertex
-            #turtle.stopGC() # not useful anymore
-            turtle.setColor(2) # green
-            #turtle.startGC()
+            turtle.stopGC() # à cause des <T1, à débuguer ds donnéesMSD
+            myColors.setTurtleAnthocyan(turtle)
+            turtle.startGC()
             turtle.oLineTo(pt)
             turtle.setWidth(0.01) 
 

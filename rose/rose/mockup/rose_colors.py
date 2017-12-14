@@ -45,7 +45,8 @@ koPink=30
 anthocyan=31
 
 def Anthocyan():
-    return pgl.Color3(100, 11, 33)
+    #return pgl.Color3(100, 11, 33)
+    return pgl.Color3(100, 50, 50)
 def Blue():
     return pgl.Color3(80,80,255)
 def LightBlue():
