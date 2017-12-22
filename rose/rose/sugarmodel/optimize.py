@@ -98,6 +98,7 @@ def process(params, saving = True):
     if val is None:
         print 'Start from', paraminit
         result, ok = optimize(myevalsimu, paraminit, param_bounds(parameters))
+        result, ok = optimize(myevalsimu, result, param_bounds(parameters))
         val = norm(myevalsimu(result))
         if ok and saving: 
             save_attempt(tag, i, val, result, paramfile)
@@ -107,7 +108,6 @@ def generate_paraminits(tag, parameters, randomseedenabled, seeds):
     paraminits = [ param_values(parameters) ]
     if randomseedenabled:
         from random import uniform, seed
-        print seeds
         if type(seeds) == int: seeds = xrange(1,seeds)
         elif 0 in seeds: seeds.remove(0)
         for n in seeds:
@@ -125,7 +125,7 @@ def optimize_group(generate, tag, conditions, targets, randomseedenabled = False
 
     initialval = norm(evalsimu(tag, parameters.keys(), targets, conditions)(param_values(parameters)))
 
-    if not parallel:
+    if not randomseedenabled:
         results = []
         for i, paraminit in enumerate(paraminits):
             result, val  = process((tag, conditions, targets, paramfile, i, paraminit), saving = False)
@@ -184,12 +184,13 @@ def optimize_I(generate = True, randomseedenabled = False, seeds = 1000, view = 
 
 ############## Volume ##########
 
-def volumes(initparams, params, values = None, difftol = 1e-1):
+def volumes(initparams, params, values = None, difftol = 1e-1, verbose = True):
     from scipy.spatial import Voronoi, voronoi_plot_2d, ConvexHull
     import numpy as np
     nbminpoints = len(initparams[0])+1
-    
+    if verbose : print 'Compute Voronoi ...',
     vor = Voronoi(initparams)
+    if verbose : print 'done'
     
     if nbminpoints == 3:
         import matplotlib.pyplot as plt
@@ -211,6 +212,7 @@ def volumes(initparams, params, values = None, difftol = 1e-1):
     results = []
     for param, reg in zip(params, regions):
         vol = ConvexHull(reg).area
+        if verbose: print params,'-->',vol
         find = None
         for i, (p, ovol) in enumerate(results):
             if norm(p-param, np.inf) < difftol:
@@ -225,7 +227,7 @@ def volumes(initparams, params, values = None, difftol = 1e-1):
 
 ####### Estimate volumes ############
 
-def estimate_volumes(tag):
+def read_attempts(tag):
     from runmodel import modelfile, paramfile
     from os.path import exists, join, splitext
     import glob
@@ -241,7 +243,11 @@ def estimate_volumes(tag):
     results = [ read_attempt(tag, i, paramfile) for i in seeds]
     values = [r[0] if len(r) == 2 else r[1] for r in results]
     params = [r[1] if len(r) == 2 else r[2] for r in results]
+    return parameters, params, values, seeds
 
+def estimate_volumes(tag):
+    parameters, params, values, seeds = read_attempts(tag)
+    paraminits = generate_paraminits(tag, parameters, True, seeds)
     mvolumes,totvolumes = volumes(paraminits, params, values)
     mvolumes.sort(key = lambda v : -v[1])
 
@@ -253,6 +259,31 @@ def estimate_volumes(tag):
 def estimate_volumes_CK(): estimate_volumes('CK')
 def estimate_volumes_SL(): estimate_volumes('SL')
 def estimate_volumes_I():  estimate_volumes('I')
+
+
+def filter(params, values, valuefilter):
+    nparams = []
+    nvalues = []
+    for i, value in enumerate(values):
+        if valuefilter(value):
+            nparams.append(params[i])
+            nvalues.append(value)
+    return nparams, nvalues
+
+def estimate_variability(tag):
+    parameters, params, values, seeds = read_attempts(tag)
+    params, values = filter(params, values, lambda v : v < 10.)
+    print '\t'.join(parameters.keys())
+    for p,v in zip(params, values):
+        print '\t'.join(map(str,p)),':', v
+
+    params = np.array(params)
+    for i in xrange(len(parameters.keys())):
+        print parameters.keys()[i] + '\t'+str(np.mean(params[:,i]))+' +- '+str(np.std(params[:,i]))+'\t'
+    print 
+    print 'Error:', str(np.mean(values))+' +- '+str(np.std(values))+'  '+str(min(values))+'  '+str(max(values))
+
+
 
 ########@
 
@@ -277,6 +308,7 @@ def print_help():
     print '-m : set the model to optimize'
     print '-r : with random seed'
     print '-v : characterize random seed'
+    print '-w : characterize variability of random seed'
     print 'CK,SL,I,ALL : optimize the parameters of the specified compound'
     print 'default : optimize I with all conditions (including burst delay inference)'
 
@@ -288,13 +320,13 @@ def main_optimize():
     randomseedenabled = False
     target = 'optimize_'
     def targetfunc(tag):
-        func = target+tag
         if target == 'optimize_':
+            func = target+tag
             def mfunc(view = True): 
                 return globals()[func](generate, randomseedenabled, view=view)
-        elif target == 'estimate_volumes_':
+        else:
             def mfunc(view = True): 
-                return globals()[func]()
+                return globals()[target](tag)
         return mfunc
 
     if len(sys.argv) > 1:
@@ -302,6 +334,7 @@ def main_optimize():
         done = False
         while  i < len(sys.argv) and not done:
             current = sys.argv[i].upper()
+            print current
             if current == '-H':
                 print_help()
             elif current == '-M':
@@ -311,13 +344,15 @@ def main_optimize():
             elif current == '-R':
                 randomseedenabled = True
             elif current == '-V':
-                target = 'estimate_volumes_'
+                target = 'estimate_volumes'
+            elif current == '-W':
+                target = 'estimate_variability'
             elif current == 'ALL':
                 targetfunc('CK')(view = False)
                 targetfunc('SL')(view = False)
                 targetfunc('I')(view = False)
                 done = True
-            elif target+current in globals():
+            elif target+current in globals() or target in globals():
                 targetfunc(current)()
                 done = True
             else:
