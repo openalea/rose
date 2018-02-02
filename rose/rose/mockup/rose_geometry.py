@@ -576,38 +576,27 @@ class drawBuds(Node):
 ################################################  K N O P
 def computeKnop4pts(xFac=4, yFac=1, zFac=1):
     """
-    We build a knop as two triangles overlapping the stem.
+    We build a knop as a triangle facing the air.
     """    
-    dihedralKnop=None    
+    triangleKnop=None    
     # node code here.
-    def dihedralKnop(points, turtle=None):
-        if len(points) < 4:
+    def triangleKnop(points, turtle=None):
+        if len(points) < 3:
             return
         turtle.push()
         myColors.setTurtleAnthocyan(turtle)
-        turtle.move(points[0])
-        # triangle 1
-        turtle.startPolygon()
-        turtle.lineTo(points[2])
-        turtle.lineTo(points[1])
-        turtle.lineTo(points[0])
-        turtle.stopPolygon()
-        # triangle 2
-        turtle.startPolygon()
-        turtle.lineTo(points[3])
-        turtle.lineTo(points[2])
-        turtle.lineTo(points[0])
-        turtle.stopPolygon()
-        # triangle 3 le long de la tige
+        
+        ## The  triangle 
+        turtle.move(points[2])
         turtle.startPolygon()
         turtle.lineTo(points[1])
-        turtle.lineTo(points[3])
         turtle.lineTo(points[0])
+        turtle.lineTo(points[2]) # closing is really needed 
         turtle.stopPolygon()
         
 
         turtle.pop()
-    return dihedralKnop
+    return triangleKnop
     # fin computeKnop4pts
     
 class drawKnops(Node):
@@ -1763,7 +1752,8 @@ def position(n):
 #endef position(n)
     
 ########################################
-def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None, knop_factory=None ):
+def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
+                  flower_factory=None, fruit_factory=None, knop_factory=None ):
     """ We define here a function (visitor) that is used visit MTG nodes.
 
     :param leaf_factory: the function that draws the leaves
@@ -1802,7 +1792,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
         """ 
         a function that analyses the code of a vertex then takes decisions about the ways to display it
         """
-        from openalea.mtg import algo
+#        from openalea.mtg import algo
         
         n = g.node(v)
         pt = position(n)
@@ -1820,30 +1810,12 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None, flowe
 
         elif n.label ==  'K1' : # knop
             if knop_factory is not None :
-                
-                ## tests
-                #turtle.push()
-                #lOrdre=algo.order(g,v)
-                ## debugger colors
-                #if lOrdre == 1 :
-                #    myColors.setTurtleRed(turtle)
-                #elif lOrdre == 2:
-                #    myColors.setTurtleOrange(turtle)
-                #else : myColors.setTurtleYellow(turtle)
-    
-                #turtle.move(pt)
-                #radius = 0.5 # that small should remain visible
-                #geometry=  pgl.Sphere(radius)
-                #turtle.customGeometry(geometry, 1.)
-                #turtle.pop()
-                
-                # draw an useable leaf axil bud
-                # Todo : couleur anthocyane
-                
+                                
+                # we draw a leaf axil bud            
                 points=[position(n)]
                 while n.nb_children() == 1:
                     n = list(n.children())[0]
-                    points.append(position(n))
+                    points.append(position(n)) 
                 knop_factory(points,turtle)
                 
                 
@@ -1948,8 +1920,8 @@ def can02line( numJour, typeOrg, numPlante, numOrg):
     """
     :param numJour: the day number 
     :param typeOrg: the type of organ
-    :param numPlante: thye plant number
-    :param numOrg:  the id of the organ
+    :param numPlante: the plant number
+    :param numOrg:  the Id of the organ
     :return: a can02 line heading fields 
     :note: all these fields will be read as integers by Sec2
     """
@@ -1963,7 +1935,9 @@ numApp= 0      # the number of callings within a plant (debug purposes)
 sOn = [] # ?? todo : unerstand y # None         # the stack of nodes that carry a branch
 oldOrdre=0                                      # did we branch or debranch ?
 ########################################
-def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None, flower_factory=None, fruit_factory=None, canFacts=None ):
+def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
+                        flower_factory=None, fruit_factory=None, knop_factory=None,
+                        canFacts=None ):
     """ We define here a function (visitor) that is used visit MTG nodes.
 
     :param leaf_factory: the function that draws the leaves
@@ -1971,6 +1945,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
     :param sepal_factory: the function that draws the sepals
     :param flower_factory: the function that draws the flowers
     :param fruit_factory: the function that draws the fruits
+    :param knop_factory: the function that draws the knops
+    :param canFacts: data to build the CAN02 files
     :return: the visitor function
     :todo: check the arity of all the versions of bud_factory
     """  
@@ -1989,6 +1965,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         flower_factory=coneFlower() # bug when flower_factory is None
     if fruit_factory is None:
         fruit_factory=simpleFruit() # bug "'tuple' object is not callable" if fruit_factory is None
+    if knop_factory is None:
+        knop_factory=noThing
     if canFacts is None:
         canFacts={'toto':0}
     elif canFacts=={} :
@@ -2008,7 +1986,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 retVal += localStack.pop()*factor
                 factor *= 1000
         else :
-            return 1 # wtf ?
+            return 1 
         return retVal
     # fin orgNumFromStack
 
@@ -2018,6 +1996,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 sepal_computer=sepal_factory,
                 flower_computer=flower_factory,
                 fruit_computer=fruit_factory,
+                knop_factory=knop_factory,
                 canFacts=canFacts):
         """ 
         a function that analyses the code of a vertex then 
@@ -2087,7 +2066,16 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             maTortue.setWidth(n.Diameter / 2.)
             
         elif n.label ==  'K1' : 
-            pass
+            if knop_factory is not None :
+                
+                orgType=11 # emerging knot
+                points=[position(n)]
+                while n.nb_children() == 1:
+                    n = list(n.children())[0]
+                    points.append(position(n))
+                knop_factory(points,maTortue)
+                knop_factory(points,turtle)
+                
             
         elif n.label ==  'F1' :            
             orgType=1 # leaf
@@ -2255,6 +2243,8 @@ class VertexVisitor4CAN02(Node):
                         interface = IFunction)
         self.add_input( name = 'fruit_factory',
                         interface = IFunction)
+        self.add_input( name = 'knop_factory',
+                        interface = IFunction)
         self.add_input( name = 'canFacts',
                         interface = IDict)
         self.add_output( name = 'VertexVisitor', 
@@ -2266,8 +2256,10 @@ class VertexVisitor4CAN02(Node):
         sepal_factory=self.get_input('sepal_factory')
         flower_factory=self.get_input('flower_factory')
         fruit_factory=self.get_input('fruit_factory')
+        knop_factory=self.get_input('knop_factory')
         canFacts=self.get_input('canFacts')
-        return vertexVisitor4CAN02(leaf_factory,bud_factory,sepal_factory,flower_factory,fruit_factory, canFacts )
+        return vertexVisitor4CAN02(leaf_factory,bud_factory,sepal_factory,
+                                   flower_factory,fruit_factory,knop_factory, canFacts )
 #end class VertexVisitor4CAN02  (wrapper for vertexVisitor4CAN02)
 
 
@@ -2583,7 +2575,7 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
     for mtg in mtgs :
         # if we have to write a can file, we'll do it organ by organ in each MTG
         if makeCan :
-            #check we can get two interesting properties
+            #check if we can get two interesting properties
             if 'dirName' in mtg.properties() and 'plantNum' in mtg.properties():
                 fOut=openCanFile(canFilesOutPath,
                                  mtg.properties()['dirName'],
