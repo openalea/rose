@@ -56,10 +56,12 @@ def param_values(parameters):
             result.append(pvalue)
     return result
 
+reallyrandom = True
+
 def get_attempt_dir(tag, paramfile):
     from os.path import exists, join
     from os import makedirs
-    mdir = join('randomseed',os.path.splitext(os.path.basename(paramfile))[0],tag)
+    mdir = join('randomseed' if reallyrandom else 'randomseedreg',os.path.splitext(os.path.basename(paramfile))[0],tag)
     if not exists(mdir) : makedirs(mdir)
     return mdir
 
@@ -104,15 +106,23 @@ def process(params, saving = True):
             save_attempt(tag, i, val, result, paramfile)
     return result, val
 
+
 def generate_paraminits(tag, parameters, randomseedenabled, seeds):
+    from math import ceil
+    from itertools import product
     paraminits = [ param_values(parameters) ]
     if randomseedenabled:
         from random import uniform, seed
-        if type(seeds) == int: seeds = xrange(1,seeds)
-        elif 0 in seeds: seeds.remove(0)
-        for n in seeds:
-            seed(n)
-            paraminits.append([uniform(pmin,pmax)  for pname, (pvalue, pmin, pmax) in parameters.items()])
+        if reallyrandom:
+            if type(seeds) == int: seeds = xrange(1,seeds)
+            elif 0 in seeds: seeds.remove(0)
+            for n in seeds:
+                seed(n)
+                paraminits.append([uniform(pmin,pmax)  for pname, (pvalue, pmin, pmax) in parameters.items()])
+        else:
+            dim = len(parameters)
+            nbvalperparam = ceil(pow(seeds,1./dim))
+            paraminits = list(product(*[np.linspace(pmin,pmax,nbvalperparam) for pname, (pvalue, pmin, pmax) in parameters.items()]))
     return paraminits        
 
 def optimize_group(generate, tag, conditions, targets, randomseedenabled = False, seeds = 1000, view = True, parallel = True):
@@ -172,7 +182,7 @@ def optimize_I_simple(generate = True, targets = Itargets, conditions = Iconditi
 
 ######### Full optimization of I ########
 
-def optimize_I(generate = True, randomseedenabled = False, seeds = 1000, view = False):
+def optimize_I(generate = True, randomseedenabled = False, seeds = 10, view = False):
         Itargets, conditions = estimate_I_from_duration()
         Itargets += bapIlevels + gr24Ilevels
         conditions += bapconditions + gr24conditions
@@ -224,6 +234,21 @@ def volumes(initparams, params, values = None, difftol = 1e-1, verbose = True):
             results.append((param,vol))
     return results, ConvexHull(vor.vertices).area
 
+def regvolumes(initparams, params, values = None, difftol = 1e-1, verbose = False):
+    vol = 1.
+    results = []
+    for param in params:
+        if verbose: print params,'-->',vol
+        find = None
+        for i, (p, ovol) in enumerate(results):
+            if norm(p-param) < difftol:
+                find = i
+                break
+        if not find is None:
+            results[find] = (p,ovol+vol)
+        else:
+            results.append((param,vol))
+    return results, len(params)
 
 ####### Estimate volumes ############
 
@@ -245,10 +270,24 @@ def read_attempts(tag):
     params = [r[1] if len(r) == 2 else r[2] for r in results]
     return parameters, params, values, seeds
 
+def filter_attempts(tag, parameters, params, values, seeds):
+    maxerror = {'I':0.7,'CK':0.4}.get(tag,None)
+    if not maxerror is None : 
+        nbvalues = len(values)
+        filtering = [i for i,v in enumerate(values) if v <= maxerror]
+        params = [params[i] for i in filtering]
+        values = [values[i] for i in filtering]
+        seeds = [seeds[i] for i in filtering]
+        print 'Remove',nbvalues - len(values),'values'
+    return parameters, params, values, seeds
+
+
 def estimate_volumes(tag):
+    print 'estimate_volumes'
     parameters, params, values, seeds = read_attempts(tag)
+    parameters, params, values, seeds = filter_attempts(tag, parameters, params, values, seeds)
     paraminits = generate_paraminits(tag, parameters, True, seeds)
-    mvolumes,totvolumes = volumes(paraminits, params, values)
+    mvolumes,totvolumes = regvolumes(paraminits, params, values)
     mvolumes.sort(key = lambda v : -v[1])
 
     print '\t'.join(parameters.keys())
@@ -261,28 +300,39 @@ def estimate_volumes_SL(): estimate_volumes('SL')
 def estimate_volumes_I():  estimate_volumes('I')
 
 
-def filter(params, values, valuefilter):
-    nparams = []
-    nvalues = []
-    for i, value in enumerate(values):
-        if valuefilter(value):
-            nparams.append(params[i])
-            nvalues.append(value)
-    return nparams, nvalues
 
 def estimate_variability(tag):
     parameters, params, values, seeds = read_attempts(tag)
-    params, values = filter(params, values, lambda v : v < 10.)
-    print '\t'.join(parameters.keys())
+    parameters, params, values, seeds = filter_attempts(tag, parameters, params, values, seeds)
+    output = file('optimalsolution.csv','w')
+    output.write('\t'.join(parameters.keys())+'\t\t\Error\n')
     for p,v in zip(params, values):
-        print '\t'.join(map(str,p)),':', v
+        output.write('\t'.join(map(str,p))+'\t:\t'+str(v)+'\n')
 
     params = np.array(params)
     for i in xrange(len(parameters.keys())):
         print parameters.keys()[i] + '\t'+str(np.mean(params[:,i]))+' +- '+str(np.std(params[:,i]))+'\t'
     print 
     print 'Error:', str(np.mean(values))+' +- '+str(np.std(values))+'  '+str(min(values))+'  '+str(max(values))
+    plot_variability(tag)
 
+
+def plot_variability(tag):
+    import matplotlib.pyplot as plot
+    from math import ceil
+    parameters, params, values, seeds = read_attempts(tag)
+    parameters, params, values, seeds = filter_attempts(tag, parameters, params, values, seeds)
+    nbcol = 3
+    nbrow = ceil((len(parameters)+1)/float(nbcol))
+    for i,parname in enumerate(parameters.keys()):
+        axes = plot.subplot(nbrow,nbcol,i+1)
+        data = [param[i] for param in params]
+        plot.hist(data)
+        axes.set_xlabel(parname)
+    axes = plot.subplot(nbrow,nbcol,len(parameters)+1)
+    plot.hist(values)
+    axes.set_xlabel('Error')
+    plot.show()
 
 
 ########@
@@ -316,7 +366,7 @@ def main_optimize():
     #estimate_volumes_CK()
     #exit()
     import sys
-    generate = False
+    generate = True
     randomseedenabled = False
     target = 'optimize_'
     def targetfunc(tag):

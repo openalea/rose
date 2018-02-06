@@ -37,10 +37,10 @@ slconditions = cross_conditions([0,2.5],[1 , 2.5])
 ######  I #########
 
 Itargets = np.array([1.,  0.8, 3.11, 1.5])
-Iconditions = cross_conditions([0,2.5],[1 , 2.5])
+Iconditions = cross_conditions([0,2.5],[1. , 2.5])
 
-sugarlevels = [0.1, 0.5, 1 ,  2.5]
-auxinlevels = [0,   1,   2.5]
+sugarlevels = [0.1, 0.5, 1. ,  2.5]
+auxinlevels = [0,   1.,   2.5]
 
 measureddurations =  [[3.2 , 2.7, 1, 0.9],
                       [None, 5.8, 3.5, 2.1],
@@ -100,14 +100,17 @@ def estimate_I_duration_law():
         duration = measureddurations[auxi][sugi]
         if not duration is None:
             delays[(auxval,sugval)] = duration
+    print(delays)
     measureddelay = []
     measuredI  = []
     consideredcond = []
     for i, cond in enumerate(Iconditions):
-        if cond in delays:
-            consideredcond.append(cond)
-            measureddelay.append(delays[cond])
-            measuredI.append(Itargets[i])
+        if cond[2] == cond[3] == 0:
+            cond = (cond[0],cond[1])
+            if cond in delays:
+                consideredcond.append(cond)
+                measureddelay.append(delays[cond])
+                measuredI.append(Itargets[i])
 
     print measureddelay
     print measuredI
@@ -115,18 +118,33 @@ def estimate_I_duration_law():
 
 
     from scipy.stats import linregress
-    slope, intercept, r_value, p_value, std_err = linregress(measureddelay, measuredI)
+    # slope, intercept, r_value, p_value, std_err = linregress(measureddelay, measuredI)
+    # print 'slope', slope
+    # print 'intercept', intercept
+
+    # x = np.array(measureddelay)
+    # plt.plot(measureddelay, measuredI,'ro',color=(1,0,0))
+    # plt.plot( x, slope*x+intercept, '-k', label = ('$y=%.4f x '+('+ ' if intercept > 0 else '') +'%.4f, r^2=%.4f$') % (slope, intercept, r_value)) 
+    # plt.margins(0.2)
+    # plt.legend(loc=2)
+    # plt.ylabel('I level')
+    # plt.xlabel('Burst delay')
+    # plt.show() 
+
+    slope, intercept, r_value, p_value, std_err = linregress(measuredI, measureddelay)
     print 'slope', slope
     print 'intercept', intercept
 
-    x = np.array(measureddelay)
-    plt.plot(measureddelay, measuredI,'ro',color=(1,0,0))
+    x = np.array(measuredI)
+    plt.plot(measuredI, measureddelay, 'ro',color=(1,0,0))
     plt.plot( x, slope*x+intercept, '-k', label = ('$y=%.4f x '+('+ ' if intercept > 0 else '') +'%.4f, r^2=%.4f$') % (slope, intercept, r_value)) 
     plt.margins(0.2)
     plt.legend(loc=2)
-    plt.ylabel('Burst d elay')
+    plt.ylabel('Burst delay')
     plt.xlabel('I level')
     plt.show() 
+
+
 
 ################ Extra BAP and GR24 experiment
 

@@ -61,7 +61,8 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
         ax.set_ylabel('Simulated relative '+title+' content')
         ax.set_title(title)
         ax.set_xticks(np.arange(len(sugarvalues)+2)+width)
-        ax.set_xticklabels( ('10', '50', '100', '250', '50-100','50-100') )
+        ax.set_xticklabels( ('10', '50', '100', '250', 'BAP/50-100','GR24/50-100') )
+        ax.set_ylabel('Sugar')
 
         if not targetvalues is None and not conditions is None:
             # il faudrait faire quelque chose de plus generique
@@ -235,6 +236,7 @@ def fig_I():
     Iconditions += bapconditions + gr24conditions
     generate_fig('I', Itargets,  Iconditions)
 
+def fig_ALL():  generate_fig_compound()
 
 def print_values(auxinvalues, sugarvalues, gr24values, bapvalues):
     print "Auxin\tSugar\tGR24\tBAP\t:",
@@ -328,8 +330,10 @@ def print_help():
     print '-t : print a table of value of simulation for different conditions'
     print '-r : plot the ratio'
     print '-m : set the model to plot'
-    print 'ck,sl,I : plot the values of the specified compound'
+    print 'ck,sl,I,ALL : plot the values of the specified compound'
     print 'default : plot a composed diagram of the different compounds'
+
+from numpy import arange
 
 if __name__ == '__main__':
     import sys
@@ -337,7 +341,7 @@ if __name__ == '__main__':
         i = 1
         while  i < len(sys.argv):
             if sys.argv[i] == '-t':
-                print_values([0,   1,   2.5], [0.1, 0.5, 1 ,  2.5], [0, gr24level], [0, baplevel])
+                print_values(arange(0,2.6,0.1), arange(0,2.6,0.1), [0, gr24level], [0, baplevel])
             elif sys.argv[i] == '-r':
                 plot_ratios()
             elif sys.argv[i] == '-h':
