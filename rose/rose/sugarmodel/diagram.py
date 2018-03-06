@@ -341,7 +341,7 @@ if __name__ == '__main__':
         i = 1
         while  i < len(sys.argv):
             if sys.argv[i] == '-t':
-                print_values(arange(0,2.6,0.1), arange(0,2.6,0.1), [0, gr24level], [0, baplevel])
+                print_values(arange(0,2.6,0.1), arange(0.1,2.6,0.1), [0, gr24level], [0, baplevel])
             elif sys.argv[i] == '-r':
                 plot_ratios()
             elif sys.argv[i] == '-h':
