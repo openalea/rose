@@ -244,7 +244,7 @@ def print_values(auxinvalues, sugarvalues, gr24values, bapvalues):
 
 
     for auxin, sugar, gr24, bap in  cross_conditions(auxinvalues, sugarvalues, gr24values, bapvalues):
-        resvalues = runmodel(auxin, sugar, gr24 = 0, bap = 0)
+        resvalues = runmodel(auxin, sugar, gr24 = gr24, bap = bap)
         if init:
             print '\t'.join(resvalues.keys()),'\tBurst Delay'
             init = False
