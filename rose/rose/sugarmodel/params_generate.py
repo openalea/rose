@@ -1,6 +1,8 @@
 
 
 def isfloatortuple(txt):
+    if '#' in txt:
+        txt = txt[:txt.index('#')]
     if ',' in txt:
         return min(map(isfloatortuple, txt.split(','))) == True
     else:
@@ -31,6 +33,7 @@ def generate_template(param_file):
 
 def generate_paramfile(params, param_file):
     content = generate_template(param_file)
+    print content
     content = content.format(**params)
     return content
 
@@ -46,6 +49,7 @@ def update_param_file(paramfile, newvalues = {}):
     execfile(paramfile,w,v)
     v.update(newvalues)
     content = generate_paramfile(v, paramfile)
+    print content
 
     print 'Write parameters in file',repr(paramfile)
     if not exists(backupdir) : makedirs (backupdir)
