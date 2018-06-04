@@ -1,7 +1,7 @@
 
 
 # The optimizable parameters are defined in this file
-paramfile = 'parameters-additive-directsugar-paper2.py'
+paramfile = 'parameters-directsugar-paper.py'
 execfile(paramfile, globals(),locals())
 
 from math import *

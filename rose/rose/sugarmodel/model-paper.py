@@ -1,7 +1,7 @@
 
 
 # The optimizable parameters are defined in this file
-paramfile = 'parameters-additive-paper2.py'
+paramfile = 'parameters-paper.py'
 execfile(paramfile, globals(),locals())
 
 from math import *

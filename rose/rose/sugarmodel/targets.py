@@ -1,3 +1,4 @@
+
 import itertools
 import numpy as np
 
@@ -29,11 +30,6 @@ sltargets = (0.4, 1.)
 sltargets = np.array([sltargets[0],sltargets[0],sltargets[1],sltargets[1]])
 slconditions = cross_conditions([0,2.5],[1 , 2.5])
 
-######  SL response #########
-
-#slresponsetargets = np.array([0.1,0.06,0.28,0.14])
-#slresponseconditions = cross_conditions([0,2.5],[1 , 2.5])
-
 ######  I #########
 
 Itargets = np.array([1.,  0.8, 3.11, 1.5])
@@ -55,13 +51,13 @@ interpolateddurations = [[None ,  None, None, None],
 completedurations =  [[measureddurations[i][j] if not measureddurations[i][j] is None else interpolateddurations[i][j] for j in xrange(len(measureddurations[i])) ] for i in xrange(len(measureddurations)) ]
 
 
-from model import I_law
+from model_general import I_law
 
 
 def estimate_I_from_duration(includeImeasure = True,  
                              includemeasuredduration = True, 
                              includeinterpolation = True,
-                                gr24 = 0, bap = 0):
+                             gr24 = 0, bap = 0):
     if includeImeasure:
         valres  = list(Itargets)
         condres = list(Iconditions)
@@ -116,20 +112,7 @@ def estimate_I_duration_law():
     print measuredI
     print consideredcond
 
-
     from scipy.stats import linregress
-    # slope, intercept, r_value, p_value, std_err = linregress(measureddelay, measuredI)
-    # print 'slope', slope
-    # print 'intercept', intercept
-
-    # x = np.array(measureddelay)
-    # plt.plot(measureddelay, measuredI,'ro',color=(1,0,0))
-    # plt.plot( x, slope*x+intercept, '-k', label = ('$y=%.4f x '+('+ ' if intercept > 0 else '') +'%.4f, r^2=%.4f$') % (slope, intercept, r_value)) 
-    # plt.margins(0.2)
-    # plt.legend(loc=2)
-    # plt.ylabel('I level')
-    # plt.xlabel('Burst delay')
-    # plt.show() 
 
     slope, intercept, r_value, p_value, std_err = linregress(measuredI, measureddelay)
     print 'slope', slope
@@ -143,8 +126,6 @@ def estimate_I_duration_law():
     plt.ylabel('Burst delay')
     plt.xlabel('I level')
     plt.show() 
-
-
 
 ################ Extra BAP and GR24 experiment
 

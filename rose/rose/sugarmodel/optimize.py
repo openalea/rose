@@ -182,7 +182,7 @@ def optimize_I_simple(generate = True, targets = Itargets, conditions = Iconditi
 
 ######### Full optimization of I ########
 
-def optimize_I(generate = True, randomseedenabled = False, seeds = 10, view = False):
+def optimize_I(generate = True, randomseedenabled = False, seeds = 1000, view = False):
         Itargets, conditions = estimate_I_from_duration()
         Itargets += bapIlevels + gr24Ilevels
         conditions += bapconditions + gr24conditions
@@ -190,65 +190,6 @@ def optimize_I(generate = True, randomseedenabled = False, seeds = 10, view = Fa
         #print len(conditions), conditions
         optimize_I_simple(generate, Itargets, conditions, randomseedenabled, seeds=seeds, view = view)
 
-
-
-############## Volume ##########
-
-def volumes(initparams, params, values = None, difftol = 1e-1, verbose = True):
-    from scipy.spatial import Voronoi, voronoi_plot_2d, ConvexHull
-    import numpy as np
-    nbminpoints = len(initparams[0])+1
-    if verbose : print 'Compute Voronoi ...',
-    vor = Voronoi(initparams)
-    if verbose : print 'done'
-    
-    if nbminpoints == 3:
-        import matplotlib.pyplot as plt
-        voronoi_plot_2d(vor)
-        plt.show()
-    #print len(vor.vertices), map(len,vor.regions)
-    def removeminusone(r):
-        try:
-            r.remove(-1)
-        except ValueError, ve:
-            pass
-        return r
-    print len(initparams)
-    lregions = [removeminusone(r) for r in vor.regions if len(removeminusone(r)) >= nbminpoints]
-    regions = [vor.vertices[r] for r in lregions]
-
-    #print set(sum(lregions,[])).difference(set(range(len(vor.vertices))))
-
-    results = []
-    for param, reg in zip(params, regions):
-        vol = ConvexHull(reg).area
-        if verbose: print params,'-->',vol
-        find = None
-        for i, (p, ovol) in enumerate(results):
-            if norm(p-param, np.inf) < difftol:
-                find = i
-                break
-        if not find is None:
-            results[find] = (p,ovol+vol)
-        else:
-            results.append((param,vol))
-    return results, ConvexHull(vor.vertices).area
-
-def regvolumes(initparams, params, values = None, difftol = 1e-1, verbose = False):
-    vol = 1.
-    results = []
-    for param in params:
-        if verbose: print params,'-->',vol
-        find = None
-        for i, (p, ovol) in enumerate(results):
-            if norm(p-param) < difftol:
-                find = i
-                break
-        if not find is None:
-            results[find] = (p,ovol+vol)
-        else:
-            results.append((param,vol))
-    return results, len(params)
 
 ####### Estimate volumes ############
 
@@ -281,25 +222,9 @@ def filter_attempts(tag, parameters, params, values, seeds):
         print 'Remove',nbvalues - len(values),'values'
     return parameters, params, values, seeds
 
-
-def estimate_volumes(tag):
-    print 'estimate_volumes'
-    parameters, params, values, seeds = read_attempts(tag)
-    parameters, params, values, seeds = filter_attempts(tag, parameters, params, values, seeds)
-    paraminits = generate_paraminits(tag, parameters, True, seeds)
-    mvolumes,totvolumes = regvolumes(paraminits, params, values)
-    mvolumes.sort(key = lambda v : -v[1])
-
-    print '\t'.join(parameters.keys())
-    for p,v in mvolumes:
-        print '\t'.join(map(str,p)),':', v*100/totvolumes
-    print sum([v for p,v in mvolumes]), totvolumes
-
 def estimate_volumes_CK(): estimate_volumes('CK')
 def estimate_volumes_SL(): estimate_volumes('SL')
 def estimate_volumes_I():  estimate_volumes('I')
-
-
 
 def estimate_variability(tag):
     parameters, params, values, seeds = read_attempts(tag)
@@ -334,20 +259,6 @@ def plot_variability(tag):
     axes.set_xlabel('Error')
     plot.show()
 
-
-########@
-
-def test_volume():
-    from random import uniform, seed
-    from numpy import array
-    seed(0)
-    pts = array([(uniform(0,1),uniform(0,1)) for i in xrange(100)])
-    mvolumes, totvolumes = volumes(pts,pts)
-    mvolumes.sort(key = lambda v : -v[1])
-
-    for p,v in mvolumes:
-        print '\t'.join(map(str,p)),':', v #*100/totvolumes
-    print sum([v for p,v in mvolumes]), totvolumes
 
 
 #########  MAIN ########
@@ -393,8 +304,6 @@ def main_optimize():
                 i += 1
             elif current == '-R':
                 randomseedenabled = True
-            elif current == '-V':
-                target = 'estimate_volumes'
             elif current == '-W':
                 target = 'estimate_variability'
             elif current == 'ALL':

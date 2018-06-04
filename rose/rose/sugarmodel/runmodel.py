@@ -5,8 +5,7 @@ def get_param_file(modelfile):
     paramfile = lnamespace['paramfile']
     return paramfile
 
-modelfile = 'model-additive.py'
-#modelfile = 'model_sugarOnBRC1Only.py'
+modelfile = 'model-paper.py'
 paramfile = get_param_file(modelfile)
 
 

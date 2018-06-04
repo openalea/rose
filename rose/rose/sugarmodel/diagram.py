@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from runmodel import runmodel
 from targets import *
-from model import burst_delay_law, I_threshold
+from model_general import burst_delay_law, I_threshold
 import targets as tg
 
    
@@ -112,7 +112,7 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
 
 Zero4None = lambda x : x if not x is None else 0
 
-def generate_fig_compound(paramset = ['SL','CK', 'CKRESPONSE', 'SLRESPONSE', 'I','burst'], 
+def generate_fig_compounds(paramset = ['SL','CK', 'CKRESPONSE', 'SLRESPONSE', 'I','burst'], 
                        auxincontents = [0.,1.,2.5], sugarcontents = [0.1, 0.5, 1. , 2.5], 
                        legendpos = (2, 1), 
                        func = {'burst' : lambda res : Zero4None(burst_delay_law(res['I']))}, 
@@ -228,15 +228,15 @@ def generate_fig_compound(paramset = ['SL','CK', 'CKRESPONSE', 'SLRESPONSE', 'I'
     plt.show()
 
 
-def fig_ck():   generate_fig('CK', cktargets,  ckconditions)
-def fig_sl():   generate_fig('SL', sltargets,  slconditions)
+def fig_CK():   generate_fig('CK', cktargets,  ckconditions)
+def fig_SL():   generate_fig('SL', sltargets,  slconditions)
 def fig_I():  
     Itargets, Iconditions = estimate_I_from_duration()
     Itargets += bapIlevels + gr24Ilevels
     Iconditions += bapconditions + gr24conditions
     generate_fig('I', Itargets,  Iconditions)
 
-def fig_ALL():  generate_fig_compound()
+def fig_ALL():  generate_fig_compounds()
 
 def print_values(auxinvalues, sugarvalues, gr24values, bapvalues):
     print "Auxin\tSugar\tGR24\tBAP\t:",
@@ -252,83 +252,11 @@ def print_values(auxinvalues, sugarvalues, gr24values, bapvalues):
 
 
 
-def plot_ratios():
-    from math import log
-    from numpy import arange, polyfit, array, concatenate
-    from matplotlib.cm import ScalarMappable
-    from matplotlib.colors import Normalize
-    c = ScalarMappable(norm=Normalize(0,2.5), cmap='jet')
-    exponent = 1
-    allvalues, allratios = [], []
-    testedratios = arange(1, 8.01, 0.5)
-    #testedratios = concatenate((testedratios, 1. / testedratios))
-    print testedratios
-
-    plottedratio = lambda aux,sug : ((sug/aux)-1) 
-    for sugar in arange(0.1,2.51,0.2):
-        values = []
-        ratios = []
-        for ratio in testedratios:
-            auxin = sugar / ratio
-            resvalues = runmodel(auxin, sugar, gr24 = 0, bap = 0)
-            duration = burst_delay_law(resvalues['I'])
-            if duration:
-                values.append(duration)
-                ratios.append(plottedratio(auxin, sugar))
-        plt.plot(ratios, values, '.', c = c.to_rgba(sugar))
-
-    plottedratio = lambda aux,sug : (1-(aux/sug)) 
-    for auxin in arange(0.1,2.51,0.2):
-        values = []
-        ratios = []
-        for ratio in testedratios:
-            sugar = auxin / ratio
-            resvalues = runmodel(auxin, sugar, gr24 = 0, bap = 0)
-            duration = burst_delay_law(resvalues['I'])
-            if duration:
-                values.append(duration)
-                ratios.append(plottedratio(auxin, sugar))
-        plt.plot(ratios, values, '.', c = c.to_rgba(auxin))
-
-
-    plottedratio = lambda aux,sug : ((sug/aux)-1) if (sug >= aux) else (1-aux/sug)
-
-    plt.plot([0,0], [0,9])
-
-    #allvalues = array(allvalues)
-    #allvalues = 1/allvalues
-    #polycoef =  polyfit(allratios, allvalues, 2)
-    #print polycoef
-    def fitted(x):
-        res = 0
-        for i, c in enumerate(reversed(polycoef)):
-            res += pow(x,i) * c
-        return 1/res
-    #plt.plot(testedratios, map(fitted, testedratios))
-
-
-    values = []
-    ratios = []
-    for aux,sug in itertools.product(enumerate(auxinlevels), enumerate(sugarlevels)):
-        auxi, auxin = aux
-        sugi, sugar = sug
-        duration = measureddurations[auxi][sugi]
-        if not duration is None:
-            values.append(duration)
-            if auxin == 0: ratio = 10
-            else : ratio = plottedratio(auxin, sugar)
-            #else : ratio = pow(sugval,exponent)/auxval
-        plt.plot([ratio], [duration], 'D', c = c.to_rgba(sugar), markeredgecolor='black',
-         markeredgewidth=1.0)
-
-
-    plt.show()
 
 def print_help():
     print 'help of script diagram.py'
     print '-h : this help'
-    print '-t : print a table of value of simulation for different conditions'
-    print '-r : plot the ratio'
+    print '-t : print a table of resulting values of simulations for different conditions'
     print '-m : set the model to plot'
     print 'ck,sl,I,ALL : plot the values of the specified compound'
     print 'default : plot a composed diagram of the different compounds'
@@ -339,25 +267,28 @@ if __name__ == '__main__':
     import sys
     if len(sys.argv) > 1:
         i = 1
+        shouldplot = False
         while  i < len(sys.argv):
             if sys.argv[i] == '-t':
                 print_values(arange(0,2.6,0.1), arange(0.1,2.6,0.1), [0, gr24level], [0, baplevel])
-            elif sys.argv[i] == '-r':
-                plot_ratios()
             elif sys.argv[i] == '-h':
                 print_help()
             elif sys.argv[i] == '-m':
                 from runmodel import set_model
                 set_model(sys.argv[i+1])
                 i += 1
+                shouldplot = True
             elif 'fig_'+sys.argv[i] in globals():
-                data = sys.argv[i]
+                data = sys.argv[i].upper()
                 func = 'fig_'+data
                 globals()[func]()
+                shouldplot = False
             else:
                 print 'Unknow option : ', sys.argv[i]
                 print_help()
             i += 1
+            if shouldplot:
+                generate_fig_compounds()
     else:   
-        generate_fig_compound()
+        generate_fig_compounds()
 

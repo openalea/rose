@@ -1,5 +1,8 @@
+"""
+    A module that implement a mechanism to declare names and default values of parameters using initialization functions
+"""
 
-def get_caller_frame():
+def get_caller_frame():    
     import inspect
     return inspect.getouterframes(inspect.currentframe())[2][0]
    
@@ -67,13 +70,16 @@ def defaultparameters(function):
 
 
 def is_defaultparameters_function(function):
+    """ Return whether a function is compatible with the mechanism 'defaultparameters' """
     import inspect
     return inspect.isfunction(function) and hasattr(function,_dfattrname)
 
 def get_defaultparameters_functions(namespace):
+    """ Retrieve all functions compatible with  the mechanism 'defaultparameters' """
     return dict([(fname, fvalue) for fname,fvalue in namespace.items() if is_defaultparameters_function(fvalue)])
 
 def get_defaultparameters(namespace):
+    """ Retrieve all the parameters and their default values defned in a namespace """
     # if a function is passed here
     if is_defaultparameters_function(namespace) : 
         return getattr(namespace,_dfattrname)
@@ -86,10 +92,12 @@ def get_defaultparameters(namespace):
     return results
 
 def get_redefinedparameters(namespace):
+    """ Retrieve all the parameters that have values different from their default one """
     defparameters = get_defaultparameters(namespace)
     return dict([(pname, pvalue) for pname, pvalue in defparameters.items() if pvalue != namespace[pname]])
 
 def get_parameters(namespace):
+    """ Retrieve all the parameters and their value in the namespace """
     defparameters = get_defaultparameters(namespace)
     return dict([(pname, namespace[pname]) for pname in defparameters.keys()])
 

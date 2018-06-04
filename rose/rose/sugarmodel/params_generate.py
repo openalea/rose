@@ -1,4 +1,6 @@
-
+"""
+    Method to regenerate a parameter file with updated values.
+"""
 
 def isfloatortuple(txt):
     if '#' in txt:
