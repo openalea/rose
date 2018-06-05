@@ -58,11 +58,11 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
                
 
         # add some text for labels, title and axes ticks
-        ax.set_ylabel('Relative '+title+' content')
+        ax.set_ylabel(title)
         ax.set_title(title)
         ax.set_xticks(np.arange(len(sugarvalues)+2)+width)
         ax.set_xticklabels( ('10', '50', '100', '250', 'BAP/50-100','GR24/50-100') )
-        #ax.set_ylabel('Sugar')
+        ax.set_xlabel('Sugar')
 
         if not targetvalues is None and not conditions is None:
             # il faudrait faire quelque chose de plus generique
@@ -116,7 +116,7 @@ def generate_fig_compounds(paramset = ['SL','CK', 'CKRESPONSE', 'SLRESPONSE', 'I
                        auxincontents = [0.,1.,2.5], sugarcontents = [0.1, 0.5, 1. , 2.5], 
                        legendpos = (2, 1), 
                        func = {'burst' : lambda res : Zero4None(burst_delay_law(res['I']))}, 
-                       title = {'burst' : 'Burst Delay'} , 
+                       title = {'burst' : 'T', 'CKRESPONSE' : 'CK response', 'SLRESPONSE' : 'SL response'} , 
                        targets = {'SL' : tg.sltargets, 
                                   'CK' : tg.cktargets,
                                   'I' : tg.Itargets }): 
@@ -217,7 +217,7 @@ def generate_fig_compounds(paramset = ['SL','CK', 'CKRESPONSE', 'SLRESPONSE', 'I
 
 
         # add some text for labels, title and axes tic
-        ax.set_ylabel(title.get(pname,'Relative '+pname+' contents'))
+        ax.set_ylabel(title.get(pname,pname))
         ax.set_xticks(ind+width*(0.5+len(auxincontents)/2))
 
         ax.set_xticklabels( ['Manitol' if sugar == 0 else str(sugar*100)+' mM' for sugar in sugarcontents] )
