@@ -58,11 +58,11 @@ def generate_fig(title, targetvalues = None, conditions = None, values = None):
                
 
         # add some text for labels, title and axes ticks
-        ax.set_ylabel('Simulated relative '+title+' content')
+        ax.set_ylabel('Relative '+title+' content')
         ax.set_title(title)
         ax.set_xticks(np.arange(len(sugarvalues)+2)+width)
         ax.set_xticklabels( ('10', '50', '100', '250', 'BAP/50-100','GR24/50-100') )
-        ax.set_ylabel('Sugar')
+        #ax.set_ylabel('Sugar')
 
         if not targetvalues is None and not conditions is None:
             # il faudrait faire quelque chose de plus generique
@@ -116,7 +116,7 @@ def generate_fig_compounds(paramset = ['SL','CK', 'CKRESPONSE', 'SLRESPONSE', 'I
                        auxincontents = [0.,1.,2.5], sugarcontents = [0.1, 0.5, 1. , 2.5], 
                        legendpos = (2, 1), 
                        func = {'burst' : lambda res : Zero4None(burst_delay_law(res['I']))}, 
-                       title = {'burst' : 'simulated burst delay'} , 
+                       title = {'burst' : 'Burst Delay'} , 
                        targets = {'SL' : tg.sltargets, 
                                   'CK' : tg.cktargets,
                                   'I' : tg.Itargets }): 
@@ -217,7 +217,7 @@ def generate_fig_compounds(paramset = ['SL','CK', 'CKRESPONSE', 'SLRESPONSE', 'I
 
 
         # add some text for labels, title and axes tic
-        ax.set_ylabel(title.get(pname,'Simulated relative '+pname+' contents'))
+        ax.set_ylabel(title.get(pname,'Relative '+pname+' contents'))
         ax.set_xticks(ind+width*(0.5+len(auxincontents)/2))
 
         ax.set_xticklabels( ['Manitol' if sugar == 0 else str(sugar*100)+' mM' for sugar in sugarcontents] )
@@ -263,7 +263,7 @@ def print_help():
 
 from numpy import arange
 
-if __name__ == '__main__':
+def main():
     import sys
     if len(sys.argv) > 1:
         i = 1
@@ -271,8 +271,10 @@ if __name__ == '__main__':
         while  i < len(sys.argv):
             if sys.argv[i] == '-t':
                 print_values(arange(0,2.6,0.1), arange(0.1,2.6,0.1), [0, gr24level], [0, baplevel])
+                shouldplot = False
             elif sys.argv[i] == '-h':
                 print_help()
+                return
             elif sys.argv[i] == '-m':
                 from runmodel import set_model
                 set_model(sys.argv[i+1])
@@ -292,3 +294,5 @@ if __name__ == '__main__':
     else:   
         generate_fig_compounds()
 
+if __name__ == '__main__':
+    main()
