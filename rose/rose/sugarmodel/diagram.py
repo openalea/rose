@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Qt4Agg')
+#matplotlib.use('Qt4Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 from runmodel import runmodel
@@ -224,7 +224,10 @@ def generate_fig_compounds(paramset = ['SL','CK', 'CKRESPONSE', 'SLRESPONSE', 'I
 
     plt.legend( rects, [str(aux)+' $\mu$M NAA' for aux in auxincontents] ,bbox_to_anchor=legendpos)
     mngr = plt.get_current_fig_manager()
-    mngr.window.setGeometry(1000,100,800,800)
+    try:
+        mngr.window.setGeometry(1000,100,800,800)
+    except:
+        pass
     plt.show()
 
 
