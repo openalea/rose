@@ -2,6 +2,7 @@ REQUIREMENTS:
 This model is written in python 2.7 and uses recents versions of scipy, numpy et matplotlib.
 To install all of these modules, you can install the miniconda distribution :
 https://conda.io/miniconda.html
+(Installation instructions can be found here: https://conda.io/docs/user-guide/install/index.html)
 and create an environment
 >>> conda create -n rose python=2 scipy matplotlib
 that can be activated and used to play the model
