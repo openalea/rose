@@ -292,8 +292,8 @@ def main():
                 print 'Unknow option : ', sys.argv[i]
                 print_help()
             i += 1
-            if shouldplot:
-                generate_fig_compounds()
+        if shouldplot:
+            generate_fig_compounds()
     else:   
         generate_fig_compounds()
 
