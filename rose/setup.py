@@ -24,7 +24,7 @@ for key,value in metadata.iteritems():
 
 pkg_name = name.lower()
 src_rep = 'rose'
-packages =find_packages(src_rep)
+packages =[ namespace+'.'+m for m in find_packages(src_rep)]
 package_dir = {pkg_name : src_rep}
 # List of top level wralea packages (directories with __wralea__.py)
 #wralea_entry_points = ['%s = %s'%(pkg,namespace + '.' + pkg) for pkg in top_pkgs]
@@ -57,7 +57,6 @@ setup(
 
     # Dependencies
     setup_requires = setup_requires,
-    install_requires = install_requires,
     dependency_links = dependency_links,
 
 
