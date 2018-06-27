@@ -4,26 +4,28 @@
 # imports globaux
 import os,re,sys
 
-# imports du projet
-import process
-day=process.dayTime()
+# Christophe Pradal: I have commented this code because I do not understand the code.
+# # imports du projet
+# import process
 
-helpString=""" On fait ci et ça
-Syntaxe :
-  %%s [-h] [-t]
-  alias : 
- -t in %s : effectue des tests internes
- -h in %s : affiche ce message
- """ % (process.testTag, process.helpTag)
+# day=process.dayTime()
 
-# remove
-readDummy=False
-dummyTag=""
+# helpString=""" On fait ci et ça
+# Syntaxe :
+#   %%s [-h] [-t]
+#   alias :
+#  -t in %s : effectue des tests internes
+#  -h in %s : affiche ce message
+#  """ % (process.testTag, process.helpTag)
 
-def faitCeci():
-    return False
+# # remove
+# readDummy=False
+# dummyTag=""
 
-from openalea.core.external import * 
+# def faitCeci():
+#     return False
+
+from openalea.core.external import *
 from openalea.core.logger  import *
 import os
 myViewer="xv"
@@ -48,7 +50,7 @@ def decode_liste(codes=[], colonnes=[]):
     listOfPlants=[]
 
     #print "Entrée: \"%s\"" % codes
-    
+
     map(lambda k, v: dictOfDirs.update({k: v}), clefs, manips)
     col_manip=0
     col_plante=2
@@ -56,9 +58,9 @@ def decode_liste(codes=[], colonnes=[]):
         if len(colonnes == 2):
             col_manip = colonnes[0]
             col_plante = colonnes[1]
-        else: 
+        else:
             print "decode_liste() : Attention : préciser deux colonnes ou rien"
-        
+
     for ligne in codes:
         #print "ligne : \"%s\"" % ligne
         if ligne:
@@ -81,8 +83,8 @@ def decode_liste(codes=[], colonnes=[]):
                 #result += "%s" % plante
                 if not result in listOfPlants:
                     listOfPlants.append(result)
-                    retVal.append(result)        
-    
+                    retVal.append(result)
+
     return retVal
 # decode_list
 
@@ -90,7 +92,7 @@ class Decode_liste(Node):
     def __init__(self):
         Node.__init__(self)
         self.add_input( name = 'list_of_codes', interface=ISequence)
-        self.add_input(name= 'colonnes', interface = ISequence, value=[]) 
+        self.add_input(name= 'colonnes', interface = ISequence, value=[])
         self.add_output(name = 'list_of_plants', interface = ISequence)
     def __call__( self, inputs ):
         codes= self.get_input('list_of_codes')
@@ -112,7 +114,7 @@ if __name__ == "__main__":
             dummy=arg
             readDummy=False
         elif arg in process.testTag:
-            sys.argv.remove(arg)        
+            sys.argv.remove(arg)
             unittest.main()
         elif arg in process.helpTag:
             process.Help(0, helpString)

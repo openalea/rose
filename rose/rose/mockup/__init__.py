@@ -2,6 +2,6 @@
 # -*- coding: iso-8859-15 -*-
 #
 #import  rose_geometry # crashes iPython
-import  rose 
-import  rose_process 
+import alinea.rose.mockup.rose
+import alinea.rose.mockup.rose_process
 

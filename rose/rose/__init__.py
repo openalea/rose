@@ -1,2 +1,2 @@
-from mockup import *
-from growth import *
+from alinea.rose.mockup import *
+from alinea.rose.growth import *
