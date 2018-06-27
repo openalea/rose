@@ -24,17 +24,13 @@ for key,value in metadata.iteritems():
 
 pkg_name = name.lower()
 src_rep = 'rose'
-packages =[pkg_name]
+packages =find_packages(src_rep)
 package_dir = {pkg_name : src_rep}
-# List of top level wralea packages (directories with __wralea__.py) 
+# List of top level wralea packages (directories with __wralea__.py)
 #wralea_entry_points = ['%s = %s'%(pkg,namespace + '.' + pkg) for pkg in top_pkgs]
 
 # dependencies to other eggs
 setup_requires = ['openalea.deploy']
-if("win32" in sys.platform):
-    install_requires = []
-else:
-    install_requires = []
 
 # web sites where to find eggs
 dependency_links = ['http://openalea.gforge.inria.fr/pi']
@@ -48,10 +44,10 @@ setup(
     author_email=authors_email,
     url=url,
     license=license,
-    keywords = '',	
+    keywords = '',
 
     # package installation
-    packages= packages,	
+    packages= packages,
     package_dir= package_dir,
 
     # Namespace packages creation by deploy
@@ -68,7 +64,7 @@ setup(
     include_package_data = True,
     package_data = {'' : ['*.mtg', '*.drf', '*.txt', '*.csv'],},
 
-    # Declare scripts and wralea as entry_points (extensions) of your package 
+    # Declare scripts and wralea as entry_points (extensions) of your package
     entry_points = {'wralea' : ['rose = alinea.rose','rose.mockup = alinea.rose.mockup','rose.growth = alinea.rose.growth'],},
     )
 
