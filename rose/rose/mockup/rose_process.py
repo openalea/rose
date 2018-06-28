@@ -2,32 +2,11 @@
 # -*- coding: iso-8859-1 -*-
 
 # imports globaux
-import os,re,sys
-
-# Christophe Pradal: I have commented this code because I do not understand the code.
-# # imports du projet
-# import process
-
-# day=process.dayTime()
-
-# helpString=""" On fait ci et ça
-# Syntaxe :
-#   %%s [-h] [-t]
-#   alias :
-#  -t in %s : effectue des tests internes
-#  -h in %s : affiche ce message
-#  """ % (process.testTag, process.helpTag)
-
-# # remove
-# readDummy=False
-# dummyTag=""
-
-# def faitCeci():
-#     return False
+import os,re
 
 from openalea.core.external import *
 from openalea.core.logger  import *
-import os
+
 myViewer="xv"
 
 class RunXV(Node):
@@ -100,24 +79,50 @@ class Decode_liste(Node):
         return plantes
 
 if __name__ == "__main__":
+
+    # This is a test :
+    # in the openalea environment, i.e with the (openalea) prompt,
+    # typing "python ./rose_process.py [-(t|h)]" runs.
+    # It means that openalea.core.* imports are successful,
+    # so that we can do many things within the conda environment.
+    
+    import sys
+    testTag=[ '-t', '--test']
+    helpTag=[ '-h', '--help']
+
+    helpString=""" Test du module %s
+     Syntaxe :
+       %%s [-h] [-t]
+       alias :
+      -t in %s : effectue des tests internes
+      -h in %s : affiche ce message
+      """ % (sys.argv[0], testTag, helpTag)
+
+    def testFunc():
+         return False
+
+    def Help(code, msg):
+         print "%s" % msg
+         sys.exit(code)
+         
     import unittest
     class TestSimple(unittest.TestCase):
         def setUp(self):
             pass
         def tearDown(self):
             pass
-        def test01_faitCeci(self):
-            self.assertFalse(faitCeci)
+        def test01_testFunc(self):
+            self.assertFalse(testFunc())
 
     for arg in sys.argv[1:]:
-        if readDummy:
-            dummy=arg
-            readDummy=False
-        elif arg in process.testTag:
+        if  arg in testTag:
             sys.argv.remove(arg)
             unittest.main()
-        elif arg in process.helpTag:
-            process.Help(0, helpString)
+        elif arg in helpTag:
+            Help(0, helpString)
         else:
             print """Argument "%s" non reconnu :  S T O P  !""" % arg
-            process.Help(-1, helpString)
+            Help(-1, helpString)
+
+    # anyway :
+    unittest.main()
