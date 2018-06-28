@@ -576,25 +576,52 @@ class drawBuds(Node):
 ################################################  K N O P
 def computeKnop4pts(xFac=4, yFac=1, zFac=1):
     """
-    We build a knop as a triangle facing the air.
+    We build a knop as a tetraedron  where the outermost edge
+    is joining the rachis and the internode ;
+    The 1st triangle is facing the right and the second one is facing the left,
+    The 3rd one lies aginst the stem and the last one goes aginst the rachis.
+    The mtg file builder says :
+      # face droite (vu depuis la tige) : (1, 0, 2) 
+      # face gauche (vu depuis la tige) : (0, 1, 3) 
     """    
     triangleKnop=None    
     # node code here.
     def triangleKnop(points, turtle=None):
-        if len(points) < 3:
+        if len(points) < 4:
             return
         turtle.push()
         myColors.setTurtleAnthocyan(turtle)
         
-        ## The  triangle 
+        ## The 4 triangles 
+        # the right one (facing right of the axilla)
         turtle.move(points[2])
         turtle.startPolygon()
         turtle.lineTo(points[1])
         turtle.lineTo(points[0])
         turtle.lineTo(points[2]) # closing is really needed 
         turtle.stopPolygon()
-        
-
+        # the left one (facing left of the axilla)
+        turtle.move(points[3])
+        turtle.startPolygon()
+        turtle.lineTo(points[0])
+        turtle.lineTo(points[1])
+        turtle.lineTo(points[3]) # closing...
+        turtle.stopPolygon()
+        # the rear one (facing the stem)
+        turtle.move(points[0])
+        turtle.startPolygon()
+        turtle.lineTo(points[3])
+        turtle.lineTo(points[2])
+        turtle.lineTo(points[0]) # closing 
+        turtle.stopPolygon()
+        # the bottom one (facing the rachis)
+        turtle.move(points[1])
+        turtle.startPolygon()
+        turtle.lineTo(points[2])
+        turtle.lineTo(points[3])
+        turtle.lineTo(points[1]) # closing  
+        turtle.stopPolygon()
+            
         turtle.pop()
     return triangleKnop
     # fin computeKnop4pts
