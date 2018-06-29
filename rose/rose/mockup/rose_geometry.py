@@ -1943,16 +1943,16 @@ def canline(ind, label,p):
     return "p 2 %s 9 3 %s"%(str(label), ' '.join(str(x) for i in ind for x in p[i]))
 #end canline
 
-def can02line( numJour, typeOrg, numPlante, numOrg):
+def can02line( dateDigit, typeOrg, numPlante, numOrg):
     """
-    :param numJour: the day number 
+    :param dateDigit: the day number 
     :param typeOrg: the type of organ
     :param numPlante: the plant number
     :param numOrg:  the Id of the organ
     :return: a can02 line heading fields 
     :note: all these fields will be read as integers by Sec2
     """
-    return "%s %s %s %s " % (numJour, typeOrg, numPlante, numOrg)
+    return "%s %s %s %s " % (dateDigit, typeOrg, numPlante, numOrg)
 # end can02line
 
 # global variables whose values remains unchanged between successive calls of vertexVisitor4CAN02
@@ -2095,7 +2095,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         elif n.label ==  'K1' : 
             if knop_factory is not None :
                 
-                orgType=11 # emerging knot
+                orgType=11 # emerging knop
                 points=[position(n)]
                 while n.nb_children() == 1:
                     n = list(n.children())[0]
@@ -2207,7 +2207,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             #canFacts['canStream'].write("#Appel %d\n" % numApp)
             numApp += 1
             #out = []
-            debutLigne=can02line(canFacts['numJour'], orgType, plantNum, orgNum )
+            debutLigne=can02line(canFacts['dateDigit'], orgType, plantNum, orgNum )
             
             maTortue.stopGC();
             maScene=maTortue.getScene()
@@ -2543,7 +2543,7 @@ def openCanFile(path, plantPath, plantName):
     realPath=buildCanPath(path)
     retVal=open("%s/%s.can" % (realPath, plantName),"w")
     retVal.write("CAN02\n")
-    retVal.write("#numJour\ttypeOrgane\tnumPlante\tnumOrgane\tnumTri\tx1 y1 z1\tx2 y2 z2\tx3 y3 z3\n")
+    retVal.write("#dateDigit\ttypeOrgane\tnumPlante\tnumOrgane\tnumTri\tx1 y1 z1\tx2 y2 z2\tx3 y3 z3\n")
     #retVal.write("#Debugging\n");
     return retVal
 # end openCanFile
@@ -2558,17 +2558,35 @@ def writeCanFile(fOut, numTri, organNum, organType, plantNum, jour=1, geometrie=
 # end writeCanFile
 
 
-def numeroJour(dirName) :
+def dateDigit(dirName, plantnum) :
     """ 
     we return the date when this computation was made
     :TODO: we want to compute the number of the day when the digitization was made,
      this data could become deductible from the dirname if the associated knowledge 
-    were be made available here. 
-    we shall use int(time.mktime((year, month, day, ...)))
+    By importing json & loadin the dict everytime, this code should be quite inefficient in C
+    Getting the dict (at least it's name) as an input of the node could be an option
+    
     """
-    import time
-    return time.strftime('%Y%m%d',time.localtime())
-# end numeroJour
+    #import time
+    #return time.strftime('%Y%m%d',time.localtime())
+    import json
+    from openalea.core.pkgmanager import PackageManager
+    pm = PackageManager()
+    pkg = pm.get('rose')
+    p = ''
+    if pkg:
+        p = pkg.path
+
+#    with open('%s/../../share/datesPrelevements.json', p, 'r') as f:
+    with open('/home/hautret/outils/OA/openaleapkg/rose/share/datesPrelevements.json', 'r') as f:
+        dicoPrel = json.load(f)
+        
+    chemin = dirName.split('/')
+    manip=chemin[-2]
+    prel=chemin[-1]
+    return int(dicoPrel[manip][prel][str(plantnum%2000)])
+
+# end dateDigit
 
 def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
     """ Builds a list of scenes from a liste of MTG object using a « vertex visitor »
@@ -2593,7 +2611,7 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
     #canPath=''
     fOut=None
     canFacts={}
-    #numJour= None
+    #dateDigit= None
     
     if not canFilesOutPath == "" :
         makeCan=True
@@ -2608,7 +2626,8 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
                                  mtg.properties()['dirName'],
                                  mtg.properties()['plantNum'])
                 canFacts['canStream']=fOut
-                canFacts['numJour']= numeroJour(mtg.properties()['dirName'])
+                canFacts['dateDigit']= dateDigit(mtg.properties()['dirName'],
+                        mtg.properties()['plantNum'])
                         
         diameter = mtg.property('Diameter')
         for v in mtg:
