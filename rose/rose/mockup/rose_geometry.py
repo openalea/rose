@@ -2569,17 +2569,18 @@ def dateDigit(dirName, plantnum) :
     """
     #import time
     #return time.strftime('%Y%m%d',time.localtime())
-    import json
+    import json, re
     from openalea.core.pkgmanager import PackageManager
     pm = PackageManager()
-    pkg = pm.get('rose')
-    p = ''
-    if pkg:
-        p = pkg.path
-
-#    with open('%s/../../share/datesPrelevements.json', p, 'r') as f:
-    with open('/home/hautret/outils/OA/openaleapkg/rose/share/datesPrelevements.json', 'r') as f:
-        dicoPrel = json.load(f)
+    pkg = pm.get_wralea_path()
+    p=''
+    for path in pkg :
+        if re.search("rose/rose$", path) :
+            p=path
+    if p :
+        with open('%s/../share/datesPrelevements.json' % p, 'r') as f:
+        #with open('/home/hautret/outils/OA/openaleapkg/rose/share/datesPrelevements.json', 'r') as f:
+            dicoPrel = json.load(f)
         
     chemin = dirName.split('/')
     manip=chemin[-2]
