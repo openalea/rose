@@ -169,7 +169,39 @@ class IntSort(Node):
     def __call__(self,inputs):
         listeFics= self.get_input( 'strList' )
         return intSort(listeFics)
- 
+
+def tempPickleFile(filename):
+    '''    returns a temp file name in a temp dir according to the os 
+    '''
+    picklefile = None; 
+    # write the node code here.
+    if filename is None:
+	    filename="tempfile.dat"
+    import os
+    tempDir=os.getenv("TEMP")
+    if not tempDir:
+	    tempDir="/tmp"
+    picklefile=tempDir + os.sep + filename
+    # return outputs
+    return picklefile,
+
+def jsonDump(data, file_path ):
+    import json
+    # unfortunately, json says that an MTG is not serialisable
+    # 
+    f = open( file_path, 'w' )
+    json.dump( data, f, indent=4 )
+    f.close()
+# fin jsonDump
+
+def jsonLoad(file_path ):
+    import json
+    data=[]
+    f = open( file_path, 'r' )
+    data = json.load( f, indent=4 )
+    f.close()
+    return data
+# fin jsonLoad
 
 def rootName(nom):
     """ renvoie la séquence numérique en début du nom de fichier """
