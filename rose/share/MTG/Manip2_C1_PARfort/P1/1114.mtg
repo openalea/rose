@@ -13,6 +13,7 @@ P	1	CONNECTED	FREE	EXPLICIT
 R	2	CONNECTED	FREE	EXPLICIT
 S	2	CONNECTED	FREE	EXPLICIT
 T	2	CONNECTED	FREE	EXPLICIT
+L	2	CONNECTED	FREE	EXPLICIT
 K	2	CONNECTED	FREE	EXPLICIT
 DESCRIPTION:
 LEFT	RIGHT	RELTYPE	MAX
@@ -22,8 +23,10 @@ E	E,J,K,R,H,T	+	?
 E	E,B,H,O,T,C	<	?
 J	S	+	?
 R	F	+	?
+R	L	+	?
 B	B	<	?
 R	R	<	?
+L	L	<	?
 F	F	<	?
 E	H	<	?
 E	T	<	?
@@ -74,6 +77,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		-1.478	-19.225	111.17									
 	^<K3		-0.878	-17.968	110.921									
 	^<K4		-0.898	-19.736	109.985									
+	+L1		0.013	-16.093	108.022									
+	^<L2		-14.996	-27.152	127.233									
+	^<L3		0.23	-16.983	109.76									
+	+L1		-0.013	-18.408	106.796									
+	^<L2		0.203	-19.349	108.508									
+	^<L3		-15.004	-27.815	126.883									
 ^<E7			2.0	-25.718	123.361						5	2.09		
 	+R1		8.0	-23.804	143.073						3.1			
 		+F1	0.0	-11.874	147.52									
@@ -99,6 +108,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		2.64	-26.198	126.987									
 	^<K3		3.189	-26.794	125.829									
 	^<K4		1.483	-25.842	126.256									
+	+L1		2.892	-26.215	123.138									
+	^<L2		8.32	-23.982	142.993									
+	^<L3		2.799	-27.029	124.475									
+	+L1		1.108	-25.221	123.584									
+	^<L2		0.977	-26.012	124.931									
+	^<L3		7.68	-23.626	143.153									
 ^<E8			1.0	-32.877	135.325						5	1.68		
 	+R1		-3.0	-44.03	148.919						3.1			
 		+F1	8.0	-50.319	153.06									
@@ -124,6 +139,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		-0.866	-38.259	142.767									
 	^<K3		-1.547	-37.216	142.096									
 	^<K4		0.275	-38.03	141.964									
+	+L1		0.235	-32.535	135.38									
+	^<L2		-3.342	-43.878	148.944									
+	^<L3		0.012	-33.162	136.451									
+	+L1		1.765	-33.219	135.27									
+	^<L2		1.576	-33.86	136.338									
+	^<L3		-2.658	-44.183	148.894									
 ^<E9			0.0	-35.955	140.516						5	1.50		
 	+R1		-3.0	-37.533	151.536						3.1			
 		+F1	-6.0	-40.281	158.573									

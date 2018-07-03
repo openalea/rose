@@ -13,6 +13,7 @@ P	1	CONNECTED	FREE	EXPLICIT
 R	2	CONNECTED	FREE	EXPLICIT
 S	2	CONNECTED	FREE	EXPLICIT
 T	2	CONNECTED	FREE	EXPLICIT
+L	2	CONNECTED	FREE	EXPLICIT
 K	2	CONNECTED	FREE	EXPLICIT
 DESCRIPTION:
 LEFT	RIGHT	RELTYPE	MAX
@@ -22,8 +23,10 @@ E	E,J,K,R,H,T	+	?
 E	E,B,H,O,T,C	<	?
 J	S	+	?
 R	F	+	?
+R	L	+	?
 B	B	<	?
 R	R	<	?
+L	L	<	?
 F	F	<	?
 E	H	<	?
 E	T	<	?
@@ -74,6 +77,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		-10.719	-1.265	94.092									
 	^<K3		-9.897	-0.259	93.533									
 	^<K4		-9.959	-2.255	93.425									
+	+L1		-6.946	0.64	89.101									
+	^<L2		-23.988	-1.006	103.924									
+	^<L3		-7.608	0.548	91.639									
+	+L1		-7.054	-2.853	88.912									
+	^<L2		-7.718	-2.994	91.448									
+	^<L3		-24.012	-1.755	103.884									
 ^<E7			-11.0	-1.807	104.308						5	3.21		
 	+R1		-1.0	-11.023	122.427						3.1			
 		+F1	5.0	-2.649	126.904									
@@ -99,6 +108,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		-9.851	-3.23	108.915									
 	^<K3		-10.878	-3.631	108.029									
 	^<K4		-9.783	-1.974	108.268									
+	+L1		-11.878	-3.137	104.117									
+	^<L2		-1.205	-11.333	122.382									
+	^<L3		-12.293	-3.232	106.486									
+	+L1		-10.122	-0.478	104.499									
+	^<L2		-10.51	-0.535	106.875									
+	^<L3		-0.795	-10.712	122.472									
 ^<E8			-13.0	-2.188	116.128						5	2.98		
 	+R1		-20.0	-1.933	131.338						3.1			
 		+F1	-23.0	-0.188	140.626									
@@ -124,6 +139,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		-14.725	-2.677	122.062									
 	^<K3		-13.764	-1.884	121.392									
 	^<K4		-14.75	-3.571	120.966									
+	+L1		-12.265	-0.931	116.445									
+	^<L2		-19.815	-1.617	131.418									
+	^<L3		-12.255	-1.461	118.617									
+	+L1		-13.735	-3.444	115.811									
+	^<L2		-13.745	-4.008	117.973									
+	^<L3		-20.185	-2.25	131.258									
 ^<E9			-13.0	-3.553	121.536						5	2.88		
 	+R1		-16.0	-7.364	131.922						3.1			
 		+F1	-11.0	-7.243	135.205									

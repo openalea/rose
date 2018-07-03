@@ -13,6 +13,7 @@ P	1	CONNECTED	FREE	EXPLICIT
 R	2	CONNECTED	FREE	EXPLICIT
 S	2	CONNECTED	FREE	EXPLICIT
 T	2	CONNECTED	FREE	EXPLICIT
+L	2	CONNECTED	FREE	EXPLICIT
 K	2	CONNECTED	FREE	EXPLICIT
 DESCRIPTION:
 LEFT	RIGHT	RELTYPE	MAX
@@ -22,8 +23,10 @@ E	E,J,K,R,H,T	+	?
 E	E,B,H,O,T,C	<	?
 J	S	+	?
 R	F	+	?
+R	L	+	?
 B	B	<	?
 R	R	<	?
+L	L	<	?
 F	F	<	?
 E	H	<	?
 E	T	<	?
@@ -78,6 +81,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		11.45	-7.607	110.638									
 	^<K3		10.068	-7.563	110.342									
 	^<K4		11.676	-6.537	109.742									
+	+L1		7.943	-6.602	107.341									
+	^<L2		19.698	-16.235	119.233									
+	^<L3		8.62	-6.645	109.193									
+	+L1		10.057	-5.252	106.551									
+	^<L2		10.789	-5.261	108.383									
+	^<L3		20.302	-15.85	119.007									
 ^<E7			12.0	-6.038	114.792						5	2.34		
 	+R1		18.0	2.199	135.611						3.1			
 		+F1	9.0	4.479	144.967									
@@ -103,6 +112,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		13.28	-5.677	118.388									
 	^<K3		13.946	-5.854	117.153									
 	^<K4		12.118	-6.273	117.846									
+	+L1		13.07	-5.792	114.387									
+	^<L2		18.343	2.278	135.481									
+	^<L3		13.805	-6.465	115.831									
+	+L1		10.93	-6.283	115.197									
+	^<L2		11.609	-6.969	116.664									
+	^<L3		17.657	2.121	135.741									
 ^<E8			16.0	-9.879	123.022						5	1.99		
 	+R1		20.0	-13.625	137.823						3.1			
 		+F1	30.0	-17.873	143.611									
@@ -128,6 +143,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		17.368	-10.465	128.486									
 	^<K3		16.147	-10.321	127.787									
 	^<K4		18.077	-10.058	127.332									
+	+L1		15.04	-10.009	123.248									
+	^<L2		19.638	-13.675	137.908									
+	^<L3		15.33	-9.821	124.7									
+	+L1		16.96	-9.748	122.796									
+	^<L2		17.299	-9.553	124.236									
+	^<L3		20.362	-13.576	137.738									
 ^<E9			17.0	-9.269	127.616						5	1.83		
 	+R1		26.0	-8.436	137.524						3.1			
 		+F1	27.0	-4.397	142.814									

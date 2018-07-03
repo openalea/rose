@@ -13,6 +13,7 @@ P	1	CONNECTED	FREE	EXPLICIT
 R	2	CONNECTED	FREE	EXPLICIT
 S	2	CONNECTED	FREE	EXPLICIT
 T	2	CONNECTED	FREE	EXPLICIT
+L	2	CONNECTED	FREE	EXPLICIT
 K	2	CONNECTED	FREE	EXPLICIT
 DESCRIPTION:
 LEFT	RIGHT	RELTYPE	MAX
@@ -22,8 +23,10 @@ E	E,J,K,R,H,T	+	?
 E	E,B,H,O,T,C	<	?
 J	S	+	?
 R	F	+	?
+R	L	+	?
 B	B	<	?
 R	R	<	?
+L	L	<	?
 F	F	<	?
 E	H	<	?
 E	T	<	?
@@ -78,6 +81,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		-3.477	-10.237	109.995									
 	^<K3		-3.989	-9.046	109.43									
 	^<K4		-2.255	-10.035	109.313									
+	+L1		-3.518	-6.185	105.072									
+	^<L2		-11.325	-24.756	122.702									
+	^<L3		-3.685	-6.738	107.632									
+	+L1		-0.482	-7.915	104.866									
+	^<L2		-0.612	-8.489	107.425									
+	^<L3		-10.675	-25.127	122.658									
 ^<E7			-3.0	-10.853	122.239						6	3.21		
 	+R1		-6.0	-5.992	149.894						4.2			
 		+F1	3.0	-12.099	150.25									
@@ -107,6 +116,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		-3.618	-11.097	128.558									
 	^<K3		-2.517	-11.262	127.686									
 	^<K4		-4.505	-11.361	127.488									
+	+L1		-1.405	-10.774	122.398									
+	^<L2		-5.627	-5.973	149.931									
+	^<L3		-1.564	-11.664	124.629									
+	+L1		-4.595	-10.932	122.08									
+	^<L2		-4.792	-11.824	124.307									
+	^<L3		-6.373	-6.011	149.857									
 ^<E8			-4.0	-15.857	134.757						5	3.00		
 	+R1		2.0	-27.706	153.642						3.1			
 		+F1	8.0	-26.529	161.258									
@@ -132,6 +147,12 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<K2		-0.873	-22.297	146.375									
 	^<K3		-1.986	-22.304	145.503									
 	^<K4		-0.326	-21.201	145.667									
+	+L1		-5.245	-16.684	134.634									
+	^<L2		1.689	-27.913	153.611									
+	^<L3		-4.885	-17.564	136.673									
+	+L1		-2.755	-15.03	134.88									
+	^<L2		-2.363	-15.89	136.922									
+	^<L3		2.311	-27.499	153.673									
 ^<E9			-3.0	-18.171	140.182						7	2.90		
 	+R1		-5.0	-23.766	149.892						4.1			
 		+F1	-5.0	-27.353	153.354									
