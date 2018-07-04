@@ -1930,7 +1930,7 @@ oldOrdre=0                                      # did we branch or debranch ?
 def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                         flower_factory=None, fruit_factory=None,
                         knop_factory=None, stipuLe_factory=None,
-                        canFacts=None ):
+                        pathToOrgIds=None ):
     """ We define here a function (visitor) that is used visit MTG nodes.
 
     :param leaf_factory: the function that draws the leaves
@@ -1962,10 +1962,13 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         knop_factory=noThing
     if stipuLe_factory is None:
         stipuLe_factory=noThing
-    if canFacts is None:
-        canFacts={'toto':0}
-    elif canFacts=={} :
-        canFacts={'titi':1}
+    if pathToOrgIds is None :
+        return None
+    import json, re
+    # the same .json dict is to be read by sec2 too
+    f=open("%s/%s.json" % (re.sub("/MTG","", pathToOrgIds), "symbOrganId"),"r")
+    symbolOrganIdict=json.load(f)
+    f.close()
 
     def orgNumFromStack(stack):
         """
@@ -1993,7 +1996,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 fruit_computer=fruit_factory,
                 knop_factory=knop_factory,
                 stipuLe_factory=stipuLe_factory,
-                canFacts=canFacts):
+                canFacts={}, #{'titi':1},# to rip off soon or later after cleaning that code
+                symbolOrganIdict=symbolOrganIdict):
         """ 
         a function that analyses the code of a vertex then 
         takes decisions about the ways to display it.
@@ -2024,8 +2028,10 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         plantNum=None
         global oldOrdre     # keep the order between 2 calls
         global sOn          # keep the stack of node number between 2 calls
-        
-        orgType=None
+
+        orgType=666
+        if symbolOrganIdict :
+            orgType=symbolOrganIdict[symbol]
         
         if canFacts: 
             plantNum=g.properties()['plantNum']
@@ -2036,7 +2042,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 n.Diameter = 0.75
                 
             if symbol=='E':
-                orgType=2 # Sec2/Sources/Canopy/CANReader.cpp
+                #orgType=2 # Sec2/Sources/Canopy/CANReader.cpp
                 # To deal with branching :
                 numNode=int(n.label[1:])
                 ordre=algo.order(g,v) # vplants doc 0.8 p.83
@@ -2049,12 +2055,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                     if sOn:
                         sOn[-1]=numNode
                     else:
-                        sOn.append(numNode)
-                        
-                oldOrdre=ordre
-                    
-            else :
-                orgType=4 # rachis or petiole
+                        sOn.append(numNode)                        
+                oldOrdre=ordre                    
 
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
@@ -2065,7 +2067,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             if knop_factory is not None :
 
                 # TODO : read the organ types from a .json or so
-                orgType=11 # emerging knop
+                #orgType=11 # emerging knop
                 points=[position(n)]
                 while n.nb_children() == 1:
                     n = list(n.children())[0]
@@ -2075,7 +2077,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 
         elif n.label ==  'L1' : 
             if stipuLe_factory is not None :
-                orgType=12 # stipule
+                #orgType=12 # stipule
                  # we draw a stipule as an occultor for the bud
                 points=[position(n)]
                 while n.nb_children() == 1:
@@ -2085,7 +2087,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 stipuLe_factory(points,turtle)
           
         elif n.label ==  'F1' :            
-            orgType=1 # leaf
+            #orgType=1 # leaf
             turtle.setColor(2) # leaf
             maTortue.setColor(2) # 
             
@@ -2097,7 +2099,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             leaf_computer(points,maTortue)
 
         elif n.label == 'S1' :
-            orgType=6 # sepal
+            #orgType=6 # sepal
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -2106,7 +2108,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             lSepalStore.append(points)
 	    
         elif n.label == "B1" :
-            orgType=7 # floawer button
+            #orgType=7 # floawer button
             points = [n.parent(), n]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -2122,7 +2124,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "O1" :
-            orgType=8 # fleur
+            #orgType=8 # fleur
             turtle.setColor(4) #fluo apple green
             maTortue.setColor(4) 
 
@@ -2139,7 +2141,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "C1" :
-            orgType=9 # fruit or cynorrhodon
+            #orgType=9 # fruit or cynorrhodon
             turtle.setColor(4) # fluo apple green
             maTortue.setColor(4) # 
             points=[n.parent(),n]
@@ -2151,7 +2153,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
             # process terminator
         elif n.label == "T1":
-            orgType=10 # terminator
+            #orgType=10 # terminator
             # The turtle is supposed to be at the top of the previous vertex
             turtle.setColor(2) # green
             #turtle.startGC()
@@ -2476,7 +2478,7 @@ def reconstructWithTurtle(mtg, visitor, powerParam):
 
     drf = DressingData(LeafClass=['F', 'S'], 
         FlowerClass='O', FruitClass='C',
-        MinTopDiameter=dict(E=0.5))
+                       MinTopDiameter=dict(E=0.5)) #{'E':0.5}) #dict(E=0.5))
     pf = PlantFrame(mtg, TopDiameter='Diameter', 
                     DressingData=drf, 
                     Exclude = 'F S T O B C'.split())
