@@ -157,6 +157,8 @@ def intSort(listeOfStrings):
             resS.append(elt)
             continue
     resN.sort()
+    # tri de fichiers sur le numero dans "/PATHTO/numero.ext" :
+    resS.sort(key=lambda v: int(v.rsplit('/',1)[1].split('.')[0]))
     resNOut=[ "%s" % (elt) for elt in resN ]
     return resNOut+resS
 
