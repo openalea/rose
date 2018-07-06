@@ -1966,7 +1966,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         return None
     import json, re
     # the same .json dict is to be read by sec2 too
-    f=open("%s/%s.json" % (re.sub("/MTG","", pathToOrgIds), "symbOrganId"),"r")
+    f=open("%s/%s.json" % (re.sub("/MTG","/CAN", pathToOrgIds), "symbOrganId"),"r")
     symbolOrganIdict=json.load(f)
     f.close()
 
@@ -2563,7 +2563,7 @@ def dateDigit(dirName, plantnum) :
         if re.search("rose/rose$", path) :
             p=path
     if p :
-        with open('%s/../share/datesPrelevements.json' % p, 'r') as f:
+        with open('%s/../share/CAN/datesPrelevements.json' % p, 'r') as f:
         #with open('/home/hautret/outils/OA/openaleapkg/rose/share/datesPrelevements.json', 'r') as f:
             dicoPrel = json.load(f)
         
