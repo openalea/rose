@@ -85,7 +85,7 @@ class ReadXls(Node):
         return readXls
 # end Class readXls
 
-# for scene2can10
+# for scene2can01
 import openalea.plantgl.all as pgl
 import os
 from openalea.core.pkgmanager import PackageManager
@@ -108,8 +108,8 @@ def scene2Can01 (maScene, fileName, makeDir=False):
     out = []
     for obj in range (len(maScene)):
         geometry = mesh(maScene[obj])
-        label = maScene[obj].geometry.getName()
-        label = "007" #maScene[obj].geometry.getName()
+        #label = maScene[obj].geometry.getName()# GEOMID_ 
+        label = "007" 
         p = geometry.pointList
         index = geometry.indexList
         for ind in index:
