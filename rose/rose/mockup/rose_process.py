@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-1 -*-
-
+#
+# $Id$
+#
 # imports globaux
 import os,re
 
-from openalea.core.external import *
-from openalea.core.logger  import *
+from openalea.core.external import Node, ISequence, IStr# *
 
 myViewer="xv"
 

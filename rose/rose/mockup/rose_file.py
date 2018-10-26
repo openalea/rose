@@ -1,11 +1,14 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+#
+# $Id$
+#
 """
 .. module rose_file 
 .. moduleauthor:: H. Autret <hautret@angers.inra.fr>
 """
 # for csv
-from openalea.core.external import * 
+from openalea.core.external import Node, IBool, IInt, ISequence, IStr# * 
 import openalea.core.logger  as ocl
 import re
 
@@ -16,7 +19,7 @@ def readCsv(fileName, delimiter=',', ligne_debut=0):
     retList=[]
     fIn=open(fileName,"U")
     if not fIn:
-        ocl.error("%s : no such file" %filename ) 
+        ocl.error("%s : no such file" %fileName ) 
         return retList
     else :
         csvIn=csv.reader(fIn,delimiter=delimiter)
@@ -46,11 +49,11 @@ class ReadCsv(Node):
 
 def readXls(fileName, numero_feuille=0, ligne_debut=0):
     """ we read the csv file, then we return a list of splited lines """
-    import csv, xlrd
+    import  xlrd
     retList=[]
     wb = xlrd.open_workbook(fileName)
     if not wb:
-        ocl.error("%s : no such file" %filename ) 
+        ocl.error("%s : no such file" %fileName ) 
         return retList
     else :
         
@@ -59,8 +62,8 @@ def readXls(fileName, numero_feuille=0, ligne_debut=0):
         except:
             print "Le classeur %s n'a pas de feuille numéro %d" %  (fileName, numero_feuille)
             return retList
-        rep=""
-        plantID=""
+#        rep=""
+#        plantID=""
         for rx in range(sh1.nrows):
             sortie=[]
             if rx >= ligne_debut :
@@ -88,8 +91,7 @@ class ReadXls(Node):
 # for scene2can01
 import openalea.plantgl.all as pgl
 import os
-from openalea.core.pkgmanager import PackageManager
-from os.path import join
+
 
 def mesh(geometry):
     #d = pgl.Tesselator()

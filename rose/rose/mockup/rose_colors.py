@@ -1,13 +1,16 @@
 #! /usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+#
+# $Id$
+#
+from openalea.core.external import Node, ISequence 
 
-from openalea.core.external import * 
-from openalea.core.logger  import *
+"""
+We define stuff to implement new colors
+"""
 
-# for Colors
 import openalea.plantgl.all as pgl
 
-from openalea.mtg.plantframe import *
 """ there are 5 builtin colors in oa.mtg.plantframe :
     0 : kind of black
     1 : copper

@@ -1,5 +1,10 @@
+#! /usr/bin/env python
+# -*- coding: iso-8859-1 -*-
+#
+# $Id$
+#
 import openalea.plantgl.all as pgl
-from openalea.mtg.turtle import pre_order2_with_filter
+#from openalea.mtg.turtle import pre_order2_with_filter
 from openalea.mtg.traversal import pre_order2_with_filter
 
 def DigitReconstructionWithTurtle(g, visitor):
@@ -17,7 +22,7 @@ radius =1.2
 #### Copy from mtg.turtle ###
 def traverse_with_turtle(g, vid, visitor, turtle=None):
     if turtle is None:
-        turtle = PglTurtle()
+        turtle = pgl.PglTurtle()
 
     def push_turtle(v):
         if g.edge_type(v) == '+':

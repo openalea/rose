@@ -13,14 +13,15 @@ import math
 from openalea.mtg import DressingData, PlantFrame #, MTG
 from openalea.plantgl.math import  Vector4, Vector3, Vector2, norm, cross, dot
 
-from openalea.core.external import * 
-from openalea.core.logger  import *
+from openalea.core.external import Node, IFunction, ISequence, IDict, IInt, IData, IFloat, IStr#* 
+from openalea.core.logger  import logging #*
 
 # for TurtleFrame
 import openalea.plantgl.all as pgl
 
+#from openalea.plantgl import PglTurtle
+
 # walk through MTG trees
-#from openalea.mtg.plantframe.turtle import pre_order2_with_filter
 from openalea.mtg.traversal import pre_order2_with_filter
 
 import rose_colors as myColors
@@ -301,7 +302,7 @@ def builtBud(stride=10):
         # so the base diameter of the paraboloid is ray * cos(pi/6)
         # its length is bud heigth * (12 -4.9) / 12
         # its concavity is fitted to make it tangent to the sphere
-        para=Paraboloid(step* 1.732,step*7.1,0.4,True, lStride,lStride)
+        para=pgl.Paraboloid(step* 1.732,step*7.1,0.4,True, lStride,lStride)
         turtle.customGeometry(para,1)
 
 #        # visual control test
@@ -682,7 +683,7 @@ def  displayNormalVector(turtle,points,color):
     turtle.push()
     turtle.move(points[0] +(points[2]-points[0]) *.5)
     turtle.setColor(color)
-    turtle.customGeometry(Cone(2,13), 1)
+    turtle.customGeometry(pgl.Cone(2,13), 1)
     turtle.pop()
 #endef  displayNormalVector(turtle,points,color)
     
@@ -2066,8 +2067,6 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         elif n.label ==  'K1' : 
             if knop_factory is not None :
 
-                # TODO : read the organ types from a .json or so
-                #orgType=11 # emerging knop
                 points=[position(n)]
                 while n.nb_children() == 1:
                     n = list(n.children())[0]
@@ -2294,7 +2293,7 @@ def traverse_with_turtle(g, vid, visitor, turtle=None ):
     :note: this function was inspired by OpenAlea.Mtg-0.9.5-py2.6.egg/openalea/mtg/turtle.py 
 """
     if turtle is None:
-        turtle = PglTurtle()
+        turtle = pgl.PglTurtle()
 
     def push_turtle(v):
         if g.edge_type(v) == '+':
@@ -2365,7 +2364,7 @@ def traverse_with_turtle4CAN02(g, vid, visitor, turtle=None, canFacts={}):
     :note: this function was derived from OpenAlea.Mtg-0.9.5-py2.6.egg/openalea/mtg/turtle.py 
 """
     if turtle is None:
-        turtle = PglTurtle()
+        turtle = pgl.PglTurtle()
 
     def push_turtle(v):
         if g.edge_type(v) == '+':

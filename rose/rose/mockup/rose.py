@@ -19,8 +19,8 @@ import urllib
 
 from openalea.mtg.algo import union
 
-from openalea.core.external import *
-from openalea.core.logger  import *
+from openalea.core.external import Node, IBool, IData, IDict, ISequence, IStr, ITuple3# *
+#from openalea.core.logger  import logger
 
 
 def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDef=[], origin=(0, 0, 800), DoFill=True, DoRotate=True):
@@ -33,7 +33,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
     :param DoFill: 'Should we fill empty places with existing data ?'
     :param DoRotate: 'Should or should we not rotate the plants used for filling'
     '''
-    plant_mtgs = []; 
+    #plant_mtgs = []; 
     if gridDef :
         n_x = int(gridDef[0])
         n_y = int(gridDef[1])
@@ -63,7 +63,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
         return origin
     # end index2coord
 
-    tablelayout = []; 
+    #tablelayout = []; 
     dictOfPositions={}
     mtgFiles={}
 
@@ -170,8 +170,6 @@ def files2MTGs(cropdict):
     :return: a list of MTG objects that were build from the dict
     '''
     listofmtgs = []; 
-
-    import os # path.(base|dir)name
     
     def BaseOfPlant(nodeOfMTG):
         """ returns the coordinates of the anchorage of the plant in the XY plane"""

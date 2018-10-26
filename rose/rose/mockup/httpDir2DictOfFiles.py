@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+#
+# $Id$
+#
 import re
 import urllib
 def httpDir2DictOfFiles(url, filtre='.mtg') :

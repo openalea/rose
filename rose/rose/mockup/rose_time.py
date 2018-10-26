@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
+#
+# $Id$
+#
 
-import math
 import re
-#from segmentInterpolation import *
 
 def bySegments(x, Xmin, Xmax, Ymin, Ymax):
     # cloud be placed somewhere else, but used only here, so it remains here.
@@ -182,7 +183,7 @@ def notation2flowerAngles(stade, avancement=0., \
     # write the node code here.
     # TODO : déterminer une priorité des entrées pour éviter
     # les incohérences tq pétales + ouverts que sépales
-    rad2deg=180./math.pi
+    #rad2deg=180./math.pi
 
     flowerHeight=20
     petalExtAngle=None
