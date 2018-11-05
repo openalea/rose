@@ -28,6 +28,7 @@ import rose_colors as myColors
 import rose_time
 
 deg2rad = math.pi / 180.  # convert degrees to radians
+rad2deg = 1/deg2rad
 
 ## G E N E R A L  functions
 def computeHeading(points):
@@ -197,7 +198,6 @@ def rawBud():
      :returns: the function computeRawBud
      """
     
-
     def computeRawBud(points, turtle=None):
         """ draws a but by using a sphere and a cone :
         puts the sphere at the bottom using the "haut1" point
@@ -687,6 +687,9 @@ def  displayNormalVector(turtle,points,color):
     turtle.pop()
 #endef  displayNormalVector(turtle,points,color)
     
+# globale calculee dans meshedLeaflet
+anglOuverture=0.
+    
 def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1], 
                        yMesh=[0.81, 0.92 , 0.94, 0]):
     """  We define here a nested function (meshedLeaflet) that computes a meshed leaflet geometry from 4 points.
@@ -701,6 +704,7 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
         """    compute leaflet geometry from 4 points
         """
 
+        global anglOuverture #  à destination de vertexVisitor4CAN02
         # if the list of points is not a complete leaf
         # we have to return without pushing the turtle ;
         #We could display a red sphere to make the miss very visible, as well
@@ -720,7 +724,9 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
         # So we treat the data as if the folks had turned CCw to digitize the leaflets.
         # 1st : compute the up axis of the (new) left(*) part of the leaflet
         # (*) left is seen from the bottom of the leaflet.
-
+        #
+        # the opening angle is computed from the arccos (lateral vectors of the leaflet)
+        #
         Axis=points[2]-points[0]
         axisLength=norm(Axis)
         Axis.normalize()
@@ -733,9 +739,11 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
         normAxis=computeUpAxis(Axis,side)
         if abs(norm(normAxis)) < 0.001 :
             print "Z.bug= %s" % points[0][2] # dbg
-        
+                
         # 2nd : compute the width of this half leaflet (sideLength * sin(angle))
-        halfWidth =  sideLength * norm(Axis^side)
+        lateralG=Axis^side # to detect closed leflets and display them differently
+        halfWidth =  sideLength * norm(lateralG)
+        lateralG.normalize()
 
         # jessica's code for  building the mesh
         # I tried to use zMesh, but it has had no efect.
@@ -752,17 +760,25 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
         geom=pgl.Scaled((axisLength,halfWidth,1),geom)
         #setHead sets the turtle such as the xy plane is displayed by it side 
         turtle.setHead(normAxis,Axis)
-        turtle.customGeometry(geom, 1)
-
+        
         # 4 testing : display normal vector for this half-leaflet
         #displayNormalVector(turtle,points,0)
 
-        # Rightmost leaflet
-        # normAxis Axis
+        # Rightmost half-leaflet
         side=points[1]-points[0]
         sideLength=norm(side)
         side.normalize()
         normAxis=computeUpAxis(side, Axis)
+        
+        lateralD=Axis^side # to detect closed leflets
+        lateralD.normalize()
+        anglOuverture=math.acos(dot(lateralG,lateralD))
+        seuil= deg2rad*90 # was 120 #
+        if anglOuverture < seuil : 
+            #print "anglOuverture : %f < %f" % (anglOuverture * rad2deg, seuil * rad2deg) 
+            myColors.setTurtleLightGreen(turtle)
+        # we draw the half-leaflet now that we comuted it's color
+        turtle.customGeometry(geom, 1)
         
         #  compute the width of the right half leaflet
         halfWidth =  sideLength * norm(side^Axis)
@@ -779,7 +795,9 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
         # setHead() see previously
         turtle.setHead(normAxis, Axis)
         turtle.customGeometry(geom, 1)
-
+        
+        # 4 testing : display normal vector for this half-leaflet
+        #displayNormalVector(turtle,points,0)
 
         turtle.pop() # against 1st push()
         
@@ -927,7 +945,6 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
         else: # say half opened
             openingAngle=math.pi*0.5
 
-        #ovary=Disc(baseRay ,luStride)
         ovary=pgl.Sphere(baseRay ,luStride)
 
         turtle.push() # we draw now
@@ -1163,7 +1180,7 @@ def fruitParameters(points, stade=None, PcStade=0):
     lPetalDims[0]=height / math.cos(lPetalAngles[0])
 
     lPetalAngles[0] /= deg2rad 
-    llPetalAngles.apend(lPetalAngles[0]*0.8)
+    lPetalAngles.apend(lPetalAngles[0]*0.8)
     lPetalDims.append(lPetalDims[0])
 
     return(Heading, height, Radius, lSepalAngles, lSepalDims,
@@ -1774,6 +1791,8 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
         knop_factory=None
     if stipuLe_factory is None : # prevent from 'tuple' object bug
         stipuLe_factory=None
+        
+
 
     def visitor(g, v, turtle, 
                 leaf_computer=leaf_factory, 
@@ -1822,6 +1841,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 
         elif n.label ==  'F1' :  # leaF          
             turtle.setColor(2) # 
+            #myColors.setTurtleGreen(turtle)
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -1965,11 +1985,18 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         stipuLe_factory=noThing
     if pathToOrgIds is None :
         return None
+    
     import json, re
-    # the same .json dict is to be read by sec2 too
-    f=open("%s/%s.json" % (re.sub("/MTG","/CAN", pathToOrgIds), "symbOrganId"),"r")
-    symbolOrganIdict=json.load(f)
-    f.close()
+    from openalea.core.pkgmanager import PackageManager
+    pm = PackageManager()
+    pkg = pm.get_wralea_path()
+    p=''
+    for path in pkg :
+        if re.search("rose/rose$", path) :
+            p=re.sub("rose$", "share/CAN", path)
+
+            with open("%s/%s.json" % (p, "symbOrganId"),"r") as f:
+                symbolOrganIdict=json.load(f)
 
     def orgNumFromStack(stack):
         """
@@ -1997,7 +2024,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 fruit_computer=fruit_factory,
                 knop_factory=knop_factory,
                 stipuLe_factory=stipuLe_factory,
-                canFacts={}, #{'titi':1},# to rip off soon or later after cleaning that code
+                canFacts={}, 
                 symbolOrganIdict=symbolOrganIdict):
         """ 
         a function that analyses the code of a vertex then 
@@ -2029,6 +2056,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         plantNum=None
         global oldOrdre     # keep the order between 2 calls
         global sOn          # keep the stack of node number between 2 calls
+        global anglOuverture
 
         orgType=666
         if symbolOrganIdict :
@@ -2077,7 +2105,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         elif n.label ==  'L1' : 
             if stipuLe_factory is not None :
                 #orgType=12 # stipule
-                 # we draw a stipule as an occultor for the bud
+                 # we draw a stipule as a partial occultor for the bud
                 points=[position(n)]
                 while n.nb_children() == 1:
                     n = list(n.children())[0]
@@ -2096,6 +2124,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 points.append(position(n))
             leaf_computer(points,turtle)
             leaf_computer(points,maTortue)
+            if anglOuverture < math.pi/4. : # young leaflet
+                orgType=symbolOrganIdict['Y']
 
         elif n.label == 'S1' :
             #orgType=6 # sepal
