@@ -634,7 +634,7 @@ class drawKnops(Node):
 #end drawKnops   
 
 ################################################  S T I P U L E
-def computeStipule3pts(): 
+def drawStipule3pts(): 
     """
     We build a stipule as a triangle the partially occultates the axil bud
     """    
@@ -659,7 +659,7 @@ def computeStipule3pts():
         turtle.pop()
         # fin triangleStipuLe
     return triangleStipuLe
-# fin computeStipule3pts()
+# fin drawStipule3pts()
 
 class drawStipule(Node):
     """ :return: a list of drawing stipule functions """
@@ -669,7 +669,7 @@ class drawStipule(Node):
                          interface = ISequence )
 
     def __call__( self, inputs ):
-        return (noThing, computeStipule3pts() )
+        return (noThing, drawStipule3pts() )
 #end drawStipule   
 
 ################################################  L E A F L E T
@@ -690,7 +690,7 @@ def  displayNormalVector(turtle,points,color):
 # globale calculee dans meshedLeaflet
 anglOuverture=0.
     
-def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1], 
+def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1], 
                        yMesh=[0.81, 0.92 , 0.94, 0]):
     """  We define here a nested function (meshedLeaflet) that computes a meshed leaflet geometry from 4 points.
 
@@ -803,9 +803,9 @@ def computeLeaflet4pts(xMesh=[0.25, 0.5, 0.75, 1],
         
     # return outputs
     return meshedLeaflet
-#endef computeLeaflet4pts(xMesh=..., yMesh=...)
+#endef computeLeafletFrom4pts(xMesh=..., yMesh=...)
 
-class ComputeLeaflet4pts(Node):
+class ComputeLeafletFrom4pts(Node):
     def __init__(self):
         Node.__init__(self)
         self.add_input( name='xMesh',
@@ -818,8 +818,8 @@ class ComputeLeaflet4pts(Node):
     def __call__( self, inputs ):
         xMesh=self.get_input('xMesh')
         yMesh=self.get_input('yMesh')
-        return computeLeaflet4pts(xMesh,yMesh)
-# end ComputeLeaflet4pts   (computeLeaflet4pts  wrapper)
+        return computeLeafletFrom4pts(xMesh,yMesh)
+# end ComputeLeafletFrom4pts   (computeLeafletFrom4pts  wrapper)
 
 #########################################
 def rawLeaflet(points, turtle=None):
@@ -866,7 +866,7 @@ class drawLeaves(Node):
                          interface = ISequence )
 
     def __call__( self, inputs ):
-        return (noThing, rawLeaflet, computeLeaflet4pts() )
+        return (noThing, rawLeaflet, computeLeafletFrom4pts() )
 # end drawLeaves  
     
 

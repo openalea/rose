@@ -17,7 +17,7 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['drawLeaflets', 'rose_geometry_VertexVisitor', 'rose_process_RunXV', 'rose_geometry_ReconstructWithTurtle', 'drawStipule', 'roseMtgDataDir', 'rose_geometry_computeLeaflet4pts', 'rose_geometry_BudArray', 'iterOnce', 'rose_CropGeneration_2011', 'rose_MTG_union', 'testMTGs', 'rose_geometry_Flower', 'rose_HttpDir2DictOfFiles', 'rose_Files2MTGs', '_140387515238352', 'rose_geometry_ReconstructionsWithTurtle', 'rose_geometry_RawBud', 'rose_geometry_computeStipule3pts', 'GetLocalFiles', 'rose_geometry_VertexVisitor4CAN02', 'rose_LocalDir2DictOfFiles', 'Canopy2011PhotoNames', '_140387515240336', 'rose_file_RootName', 'rose_geometry_scene_union', 'rose_geometry_RawFruit', 'rose_geometry_PetalMatrix', 'rose_geometry_drawKnops', 'rose_GetGrid', 'rose_file_readXls', 'CanopyReconstruction2011', 'rose_file_IntSort', 'CanopyReconstructionWithCan02', 'drawFlowers', 'rose_file_tempPickleFile', 'rose_geometry_BuiltBud', 'rose_Files2MTGs4CAN2', '_140387515040784', 'rose_geometry_PolygonLeaflet', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', 'GetWebFiles', 'rose_file_scene2Can01', 'rose_geometry_RevolutionBud', 'drawBuds', 'rose_geometry_RevolutionFig', '_140387515239760', 'rose_GetOrigin', '_140387515039824', 'ChooseOnePlant', '_140387515040592', 'rose_file_jsonDump', 'rose_process_Decode_liste', 'rose_geometry_BezierPatchFlower', 'Canopy2011Filenames', 'rose_colors_ColorFuncs', 'rose_geometry_FineBudArray', 'rose_file_readCsv', '_140387515239888']
+__all__ = ['drawLeaflets', 'rose_geometry_VertexVisitor', 'rose_process_RunXV', 'rose_geometry_ReconstructWithTurtle', 'drawStipule', 'roseMtgDataDir', 'rose_geometry_computeLeafletFrom4pts', 'rose_geometry_BudArray', 'iterOnce', 'rose_CropGeneration_2011', 'rose_MTG_union', 'testMTGs', 'rose_geometry_Flower', 'rose_HttpDir2DictOfFiles', 'rose_Files2MTGs', '_140387515238352', 'rose_geometry_ReconstructionsWithTurtle', 'rose_geometry_RawBud', 'rose_geometry_drawStipule3pts', 'GetLocalFiles', 'rose_geometry_VertexVisitor4CAN02', 'rose_LocalDir2DictOfFiles', 'Canopy2011PhotoNames', '_140387515240336', 'rose_file_RootName', 'rose_geometry_scene_union', 'rose_geometry_RawFruit', 'rose_geometry_PetalMatrix', 'rose_geometry_drawKnops', 'rose_GetGrid', 'rose_file_readXls', 'CanopyReconstruction2011', 'rose_file_IntSort', 'CanopyReconstructionWithCan02', 'drawFlowers', 'rose_file_tempPickleFile', 'rose_geometry_BuiltBud', 'rose_Files2MTGs4CAN2', '_140387515040784', 'rose_geometry_PolygonLeaflet', 'rose_geometry_RawFlower', 'rose_geometry_NoOrgan', 'GetWebFiles', 'rose_file_scene2Can01', 'rose_geometry_RevolutionBud', 'drawBuds', 'rose_geometry_RevolutionFig', '_140387515239760', 'rose_GetOrigin', '_140387515039824', 'ChooseOnePlant', '_140387515040592', 'rose_file_jsonDump', 'rose_process_Decode_liste', 'rose_geometry_BezierPatchFlower', 'Canopy2011Filenames', 'rose_colors_ColorFuncs', 'rose_geometry_FineBudArray', 'rose_file_readCsv', '_140387515239888']
 
 
 
@@ -31,7 +31,7 @@ drawLeaflets = CompositeNodeFactory(name='drawLeaflets',
       'name': 'leaflet_func'}],
                              elt_factory={  2: ('Rose.mockup', 'PolygonLeaflet'),
    3: ('Rose.mockup', 'NoOrgan'),
-   4: ('Rose.mockup', 'ComputeLeaflet4pts'),
+   4: ('Rose.mockup', 'ComputeLeafletFrom4pts'),
    5: ('openalea.data structure.list', 'list'),
    6: ('openalea.data structure.list', 'list')},
                              elt_connections={  94721356628416: (3, 0, '__out__', 0),
@@ -68,9 +68,9 @@ drawLeaflets = CompositeNodeFactory(name='drawLeaflets',
          'user_application': None,
          'user_color': None},
    4: {  'block': False,
-         'caption': 'ComputeLeaflet4pts',
+         'caption': 'ComputeLeafletFrom4pts',
          'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0xa865650> : "ComputeLeaflet4pts"',
+         'factory': '<openalea.core.node.NodeFactory object at 0xa865650> : "ComputeLeafletFrom4pts"',
          'hide': True,
          'id': 4,
          'lazy': True,
@@ -219,10 +219,10 @@ drawStipule = CompositeNodeFactory(name='drawStipule',
                              doc='',
                              inputs=[],
                              outputs=[{  'desc': '', 'interface': ISequence, 'name': 'stipule drawer'}],
-                             elt_factory={  2: ('Rose.mockup', 'computeStipule3pts'), 3: ('Rose.mockup', 'NoOrgan')},
+                             elt_factory={  2: ('Rose.mockup', 'drawStipule3pts'), 3: ('Rose.mockup', 'NoOrgan')},
                              elt_connections={  94659786961416: (3, 0, '__out__', 0), 94659786961440: (2, 0, '__out__', 0)},
                              elt_data={  2: {  'block': False,
-         'caption': 'computeStipule3pts',
+         'caption': 'drawStipule3pts',
          'delay': 0,
          'hide': True,
          'id': 2,
@@ -479,14 +479,14 @@ roseMtgDataDir = CompositeNodeFactory(name='roseMtgDataDir',
 
 
 
-rose_geometry_computeLeaflet4pts = Factory(name='ComputeLeaflet4pts',
+rose_geometry_computeLeafletFrom4pts = Factory(name='ComputeLeafletFrom4pts',
                 authors=' (rose authors)',
                 description='compute leaflet geometry from 4 points',
                 category='data processing',
                 nodemodule='rose_geometry',
-                nodeclass='computeLeaflet4pts',
+                nodeclass='computeLeafletFrom4pts',
                 inputs=[{'interface': ISequence, 'name': 'x', 'value': [0.25, 0.5, 0.075, 1.0], 'desc': ''}, {'interface': ISequence, 'name': 'y', 'value': [0.81, 0.92, 0.95, 1.0], 'desc': 'sequence of positions along the y axis'}],
-                outputs=[{'interface': IFunction, 'name': 'computeLeaflet4pts', 'desc': 'function that computes a leaflet from 4 digitization points'}],
+                outputs=[{'interface': IFunction, 'name': 'computeLeafletFrom4pts', 'desc': 'function that computes a leaflet from 4 digitization points'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -1478,12 +1478,12 @@ rose_geometry_RawBud = Factory(name='RawBud',
 
 
 
-rose_geometry_computeStipule3pts = Factory(name='computeStipule3pts',
+rose_geometry_drawStipule3pts = Factory(name='drawStipule3pts',
                 authors=' (rose authors)',
                 description='compute stipules',
                 category='data processing',
                 nodemodule='rose_geometry',
-                nodeclass='computeStipule3pts',
+                nodeclass='drawStipule3pts',
                 inputs=[],
                 outputs=[{'interface': IFunction, 'name': 'computeStipule', 'desc': 'function that displays a stipule'}],
                 widgetmodule=None,
