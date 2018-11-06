@@ -8,7 +8,7 @@
 .. moduleauthor:: H. Autret <herve.autret@inra.fr>
 """
 
-import math
+import numpy as np
 
 from openalea.mtg import DressingData, PlantFrame #, MTG
 from openalea.plantgl.math import  Vector4, Vector3, Vector2, norm, cross, dot
@@ -27,7 +27,7 @@ from openalea.mtg.traversal import pre_order2_with_filter
 import rose_colors as myColors
 import rose_time
 
-deg2rad = math.pi / 180.  # convert degrees to radians
+deg2rad = np.pi / 180.  # convert degrees to radians
 rad2deg = 1/deg2rad
 
 ## G E N E R A L  functions
@@ -150,7 +150,7 @@ def getSiCo(angle):
     :param angle: the angle to process
     :return: a pair (sin(angle), cos(angle))
     """
-    return (math.sin(angle), math.cos(angle))
+    return (np.sin(angle), np.cos(angle))
 # end fgetSiCo(angle)
 
 def printPoints(points):
@@ -172,15 +172,15 @@ def inSector(candidat, center, marge) :
     return: True if candidat belongs to the interval
     """
     # get center inside the 1st tour
-    while center > 2*math.pi:
-        center -= 2*math.pi
+    while center > 2*np.pi:
+        center -= 2*np.pi
     while center < 0:
-        center += 2*math.pi
+        center += 2*np.pi
     # get candidat inside the 1st tour
-    while candidat > 2*math.pi:
-        candidat -= 2*math.pi
+    while candidat > 2*np.pi:
+        candidat -= 2*np.pi
     while candidat < 0:
-        candidat += 2*math.pi
+        candidat += 2*np.pi
 
     if candidat >=  center-marge and candidat <  center+marge:
         #print "%f belongs to [%f - %f[" % (candidat , center-marge, center+marge)
@@ -772,7 +772,8 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         
         lateralD=Axis^side # to detect closed leflets
         lateralD.normalize()
-        anglOuverture=math.acos(dot(lateralG,lateralD))
+        
+        anglOuverture=np.arccos(dot(lateralG,lateralD))
         seuil= deg2rad*90 # was 120 #
         if anglOuverture < seuil : 
             #print "anglOuverture : %f < %f" % (anglOuverture * rad2deg, seuil * rad2deg) 
@@ -928,22 +929,22 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
         flowerHeight=norm(topPos-basePos)
         baseRay=max(flowerRay *0.2, flowerHeight*0.2) # arbitrarily
         deltaRay=flowerRay-baseRay
-        petalLength=math.sqrt(flowerHeight*flowerHeight + deltaRay*deltaRay)
+        petalLength=np.sqrt(flowerHeight*flowerHeight + deltaRay*deltaRay)
 
         # we build the generic patch
         petalMesh=pgl.BezierPatch(lControlpointmatrix,luStride, lvStride)
         # patch is scaled according to the global flower dimensions
         petalMesh=pgl.Scaled(Vector3(petalLength,max(baseRay,flowerRay)*1.1,baseRay),petalMesh)
         # 
-        rad5eTour=math.pi/2.5 # a fifth of a tour
+        rad5eTour=np.pi/2.5 # a fifth of a tour
 
         # compute the pitch angle (flower opening)
         if deltaRay > 0 : # opened flower
-            openingAngle=math.atan(flowerHeight/(deltaRay))
+            openingAngle=np.arctan(flowerHeight/(deltaRay))
         elif deltaRay < 0 : # flower not opened yet
-            openingAngle=math.pi*0.5+math.atan((-deltaRay)/flowerHeight)
+            openingAngle=np.pi*0.5+np.arctan((-deltaRay)/flowerHeight)
         else: # say half opened
-            openingAngle=math.pi*0.5
+            openingAngle=np.pi*0.5
 
         ovary=pgl.Sphere(baseRay ,luStride)
 
@@ -965,8 +966,8 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
             petal=pgl.AxisRotated((1,0,0),openingAngle*0.055, petal)# HALFTWIST 4 test 
             angle=iIndex*rad5eTour
             petal=pgl.AxisRotated((0,0,1),angle,petal)
-            petal=pgl.Translated(Vector3(baseRay *math.cos(angle) *0.8,\
-                                         baseRay *math.sin(angle) *0.8,\
+            petal=pgl.Translated(Vector3(baseRay *np.cos(angle) *0.8,\
+                                         baseRay *np.sin(angle) *0.8,\
                                          0),\
                                  petal)
             turtle.customGeometry(petal, 1) #flowerHeight) #  
@@ -1030,7 +1031,7 @@ def getValuesFromSepals(lSepales, mainAxis):
             sine = norm(cross(mainAxis,vein))
             cosine = dot(mainAxis,vein)
 
-            angle = math.atan2(sine, cosine)
+            angle = np.arctan2(sine, cosine)
             angles.append(angle/deg2rad)
             lengthes.append(veinlength)
         
@@ -1117,9 +1118,9 @@ def flowerParameters(points, stade=None, PcStade=0, lSepales=[], flowerDiameter=
 
             #print "flowerParameters::flowerRay= %s" % flowerRay
             # we compute the angle(s)
-            lPetalAngles.append (math.atan2(flowerRay, height)) 
-            #lPetalDims.append(height / math.cos(lPetalAngles[0]))
-            lPetalDims.append(math.sqrt(height*height + flowerRay*flowerRay) )
+            lPetalAngles.append (np.arctan2(flowerRay, height)) 
+            #lPetalDims.append(height / np.cos(lPetalAngles[0]))
+            lPetalDims.append(np.sqrt(height*height + flowerRay*flowerRay) )
 
             lPetalAngles[0] /= deg2rad 
             lPetalAngles.append(lPetalAngles[0]*0.8)
@@ -1176,8 +1177,8 @@ def fruitParameters(points, stade=None, PcStade=0):
     # we get the diameter
     flowerRay=  mtg.property('Diameter')[top]*0.5
     # we compute the angle(s)
-    lPetalAngles[0]= math.atan2(height,flowerRay) 
-    lPetalDims[0]=height / math.cos(lPetalAngles[0])
+    lPetalAngles[0]= np.arctan2(height,flowerRay) 
+    lPetalDims[0]=height / np.cos(lPetalAngles[0])
 
     lPetalAngles[0] /= deg2rad 
     lPetalAngles.apend(lPetalAngles[0]*0.8)
@@ -1323,7 +1324,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         #print "stage= %f" % stage, print " angle= %f" % angle
 
         #facteur = min(max(angle/0.2, 0.2),1)
-        facteur = math.sqrt(facteur)
+        facteur = np.sqrt(facteur)
 
         for line in petalMatrix:
             newLine=[]
@@ -1399,7 +1400,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     ############################ S E P A L S
     ustride = 10 # the U resolution of the patch (along z)
     vstride = 8 # the V resolution of the patch (around the axle)
-    angle72=math.pi/2.5 # the 1/5th of a tour
+    angle72=np.pi/2.5 # the 1/5th of a tour
 
     angleSepInt=angleSepExt=0 # the outer /inner sepal angles
     if lSepalAngles :
@@ -1426,7 +1427,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
             sepalMatrix=TransformSepal(sepalmatrix2, angleSepExt, angleSepInt, index)        
             thisSepal=pgl.BezierPatch(sepalMatrix, ustride, vstride)
             thisSepal=pgl.Scaled(Vector3(thisHeight,thisHeight,thisHeight), thisSepal) 
-            newSepal=pgl.AxisRotated((0,0,1),rotationAngle+math.pi,thisSepal) #
+            newSepal=pgl.AxisRotated((0,0,1),rotationAngle+np.pi,thisSepal) #
             groupe.geometryList.append(newSepal)
                 
         thisHeight -= heightInc
@@ -1490,7 +1491,7 @@ def getSepalsAzimuts(lSepales, Heading, Radius):
     # if there are 5 digitized sepals, we assume that they are correct
     if len(lSepales)==5:
         for a in xrange(73,360,72):        
-            angles.append(a*math.pi/180.)
+            angles.append(a*np.pi/180.)
         #print "Angles : %s" % angles
     else:
         for sepale in lSepales[1:]:
@@ -1504,10 +1505,10 @@ def getSepalsAzimuts(lSepales, Heading, Radius):
 
             sinAngle= norm(cross (Radius,sepalAxle)) 
             cosAngle= dot(Radius, sepalAxle)
-            angle= math.atan2(sinAngle, cosAngle) 
+            angle= np.arctan2(sinAngle, cosAngle) 
         # put it all in the same tour 
             if angle <0:
-                angle += 2* math.pi
+                angle += 2* np.pi
             angles.append(angle)
 
         #print "getSepalsAzimuts::angles= %s" % angles
@@ -2124,7 +2125,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 points.append(position(n))
             leaf_computer(points,turtle)
             leaf_computer(points,maTortue)
-            if anglOuverture < math.pi/4. : # young leaflet
+            if anglOuverture < np.pi/4. : # young leaflet
                 orgType=symbolOrganIdict['Y']
 
         elif n.label == 'S1' :

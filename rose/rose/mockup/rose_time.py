@@ -180,10 +180,8 @@ def notation2flowerAngles(stade, avancement=0., \
     sepalExtAngle = None; sepalIntAngle = None; 
     sepalLength=None;
     
-    # write the node code here.
     # TODO : déterminer une priorité des entrées pour éviter
     # les incohérences tq pétales + ouverts que sépales
-    #rad2deg=180./math.pi
 
     flowerHeight=20
     petalExtAngle=None

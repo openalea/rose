@@ -12,7 +12,7 @@
 """
 
 from openalea.mtg.aml import MTG
-import math
+import numpy as np
 import random
 import re
 import urllib
@@ -108,7 +108,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
                     # we give a random rotation 
                     if DoRotate == True :
                         # random angle in one tour
-                        randAngle = random.uniform(-1,1) * math.pi
+                        randAngle = random.uniform(-1,1) * np.pi
                     else :
                         randAngle = 0
 
@@ -213,7 +213,7 @@ def files2MTGs(cropdict):
 
             angle=shiftRot[1]
             #angle= 1. # DBG 1 rad.
-            (rc,rs)=(math.cos(angle), math.sin(angle))
+            (rc,rs)=(np.cos(angle), np.sin(angle))
 
             # load the MTG
             mtg=MTG(plante)
@@ -304,7 +304,7 @@ def files2MTGs4CAN2(cropdict):
 
             angle=shiftRot[1]
             #angle= 1. # DBG 1 rad.
-            (rc,rs)=(math.cos(angle), math.sin(angle))
+            (rc,rs)=(np.cos(angle), np.sin(angle))
 
             # load the MTG
             mtg=MTG(plante)
