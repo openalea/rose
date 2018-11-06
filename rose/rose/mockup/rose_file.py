@@ -48,7 +48,9 @@ class ReadCsv(Node):
         return readCsv
 
 def readXls(fileName, numero_feuille=0, ligne_debut=0):
-    """ we read the csv file, then we return a list of splited lines """
+    """ we used to read the "fileName" xls file, then we could return a list of splited lines 
+        There is no more an xlrd module within openalea
+    """
     import  xlrd
     retList=[]
     wb = xlrd.open_workbook(fileName)
