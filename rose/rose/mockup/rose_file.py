@@ -111,18 +111,9 @@ def scene2Can01 (maScene, fileName, makeDir=False):
     # copied from alinea.topvine
     out = []
     for obj in range (len(maScene)):
-        #print "type(truc) : %s" % type(maScene[obj].appearance.diffuseColor())
-        #print "dir(machin) : %s" % dir(maScene[obj].appearance.diffuseColor())
         couleur=maScene[obj].appearance.diffuseColor()
-        print "r,g,b : %d,%d,%d" % (couleur.red, couleur.green, couleur.blue)
+        #print "r,g,b : %d,%d,%d" % (couleur.red, couleur.green, couleur.blue)
         geometry = mesh(maScene[obj])
-        label = maScene[obj].geometry.getName()# GEOMID_ 
-        #print "%s" % dir(maScene[obj].geometry)
-        for item in  dir(maScene[obj].geometry) :
-            if re.search('colorList', item) :
-                label= maScene[obj].geometry.colorList
-                break
-        #label = "007" 
         p = geometry.pointList
         index = geometry.indexList
         for ind in index:
@@ -132,10 +123,6 @@ def scene2Can01 (maScene, fileName, makeDir=False):
         chemin=os.path.dirname(fileName)
         if not os.path.isdir(chemin):
             os.system("mkdir -p %s" % chemin)       
-#        try:
-#            os.stat(chemin)
-#        except:
-#            os.system("mkdir -p %s" % chemin)       
 
     o = open(fileName, 'w')#stockage dans un fichier can persistant
     o.write("CAN01\n")
