@@ -104,20 +104,29 @@ def mesh(geometry):
     mesh_ = tessel.triangulation
     return mesh_
 
-def canline(ind, label,p):
-    return "p 2 %s 9 3 %s"%(str(label), ' '.join(str(x) for i in ind for x in p[i]))
+def canline(ind, couleur, p):
+    return "p 2 007 0x%x%x%x 3 %s"%( couleur.red, couleur.green, couleur.blue, ' '.join(str(x) for i in ind for x in p[i]))
 
 def scene2Can01 (maScene, fileName, makeDir=False):
     # copied from alinea.topvine
     out = []
     for obj in range (len(maScene)):
+        #print "type(truc) : %s" % type(maScene[obj].appearance.diffuseColor())
+        #print "dir(machin) : %s" % dir(maScene[obj].appearance.diffuseColor())
+        couleur=maScene[obj].appearance.diffuseColor()
+        print "r,g,b : %d,%d,%d" % (couleur.red, couleur.green, couleur.blue)
         geometry = mesh(maScene[obj])
-        #label = maScene[obj].geometry.getName()# GEOMID_ 
-        label = "007" 
+        label = maScene[obj].geometry.getName()# GEOMID_ 
+        #print "%s" % dir(maScene[obj].geometry)
+        for item in  dir(maScene[obj].geometry) :
+            if re.search('colorList', item) :
+                label= maScene[obj].geometry.colorList
+                break
+        #label = "007" 
         p = geometry.pointList
         index = geometry.indexList
         for ind in index:
-            out.append(canline(ind, label,p))
+            out.append(canline(ind, couleur, p))
 
     if makeDir:
         chemin=os.path.dirname(fileName)
