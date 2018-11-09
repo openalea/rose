@@ -105,7 +105,7 @@ def mesh(geometry):
     return mesh_
 
 def canline(ind, couleur, p):
-    return "p 2 007 0x%x%x%x 3 %s"%( couleur.red, couleur.green, couleur.blue, ' '.join(str(x) for i in ind for x in p[i]))
+    return "p 2 007 0x%02X%02X%02X 3 %s"%( couleur.red, couleur.green, couleur.blue, ' '.join(str(x) for i in ind for x in p[i]))
 
 def scene2Can01 (maScene, fileName, makeDir=False):
     # copied from alinea.topvine
