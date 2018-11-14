@@ -777,7 +777,7 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         seuil= deg2rad*90 # was 120 #
         if anglOuverture < seuil : 
             #print "anglOuverture : %f < %f" % (anglOuverture * rad2deg, seuil * rad2deg) 
-            myColors.setTurtleLightGreen(turtle)
+            myColors.setTurtleAnthocyan(turtle)
         # we draw the half-leaflet now that we comuted it's color
         turtle.customGeometry(geom, 1)
         
