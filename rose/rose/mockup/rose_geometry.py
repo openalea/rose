@@ -689,14 +689,14 @@ def  displayNormalVector(turtle,points,color):
     
 # globale calculee dans meshedLeaflet
 anglOuverture=0.
-    
-def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1], 
-                       yMesh=[0.81, 0.92 , 0.94, 0]):
+def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
+                           yMesh=[0.92, 0.98, 0.666, .0]) : # was : [0.81, 0.92 , 0.94, 0] 
+                           
     """  We define here a nested function (meshedLeaflet) that computes a meshed leaflet geometry from 4 points.
-
     :param xMesh: the mesh coordinates along the axis of the leaf, as percent of the leaflet length.
-    :param yMesh: the width of the leaf at the previous points,, in percent of the leaf width.
+    :param yMesh: the width of the leaf at the corresponding point, in percent of the leaf width.
     :return: the meshedLeaflet function
+    :note: default values are to be set in __wralea__.py, not here !
     """
     meshedLeaflet = None ; 
     # write the node code here.
