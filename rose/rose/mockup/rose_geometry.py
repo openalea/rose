@@ -217,8 +217,6 @@ def rawBud():
         turtle.push()
         radius = norm(radiusOfBud)
         geometry=  pgl.Sphere(radius)
-        #return Translated(distance, Sphere(radius))
-        #geom = leaf_factory(points)
         turtle.customGeometry(geometry, 1)
         turtle.pop()
         turtle.setWidth(radius*.8)
@@ -688,7 +686,7 @@ def  displayNormalVector(turtle,points,color):
 #endef  displayNormalVector(turtle,points,color)
     
 # globale calculee dans meshedLeaflet
-anglOuverture=0.
+#anglOuverture=0.
 def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
                            yMesh=[0.92, 0.98, 0.666, .0]) : # was : [0.81, 0.92 , 0.94, 0] 
                            
@@ -704,7 +702,7 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         """    compute leaflet geometry from 4 points
         """
 
-        global anglOuverture #  à destination de vertexVisitor4CAN02
+        #global anglOuverture #  à destination de vertexVisitor4CAN02
         # if the list of points is not a complete leaf
         # we have to return without pushing the turtle ;
         #We could display a red sphere to make the miss very visible, as well
@@ -773,11 +771,11 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         lateralD=Axis^side # to detect closed leflets
         lateralD.normalize()
         
-        anglOuverture=np.arccos(dot(lateralG,lateralD))
-        seuil= deg2rad*90 # was 120 #
-        if anglOuverture < seuil : 
-            #print "anglOuverture : %f < %f" % (anglOuverture * rad2deg, seuil * rad2deg) 
-            myColors.setTurtleAnthocyan(turtle)
+        #anglOuverture=np.arccos(dot(lateralG,lateralD))
+        #seuil= deg2rad*90 # was 120 #
+        #if anglOuverture < seuil : 
+        #    #print "anglOuverture : %f < %f" % (anglOuverture * rad2deg, seuil * rad2deg) 
+        #    myColors.setTurtleAnthocyan(turtle)
         # we draw the half-leaflet now that we comuted it's color
         turtle.customGeometry(geom, 1)
         
@@ -1840,9 +1838,13 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
                     points.append(position(n)) 
                 stipuLe_factory(points,turtle)
                 
-        elif n.label ==  'F1' :  # leaF          
-            turtle.setColor(2) # 
-            #myColors.setTurtleGreen(turtle)
+        elif n.label ==  'F1' or n.label ==  'Y1' :  # leaflets         
+            
+            if n.label ==  'Y1' : # young leaflets
+                myColors.setTurtleAnthocyan(turtle) 
+            else:
+                turtle.setColor(2) # 
+                
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -2057,7 +2059,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         plantNum=None
         global oldOrdre     # keep the order between 2 calls
         global sOn          # keep the stack of node number between 2 calls
-        global anglOuverture
+        #global anglOuverture
 
         orgType=666
         if symbolOrganIdict :
@@ -2114,10 +2116,14 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 stipuLe_factory(points,maTortue,)
                 stipuLe_factory(points,turtle)
           
-        elif n.label ==  'F1' :            
-            #orgType=1 # leaf
-            turtle.setColor(2) # leaf
-            maTortue.setColor(2) # 
+        elif n.label == 'F1' or n.label == 'Y1' :    
+            if n.label ==  'Y1' : # young leaflets
+                # 'ttention, ce n'est que visuel dans OA
+                myColors.setTurtleAnthocyan(turtle) 
+                myColors.setTurtleAnthocyan(maTortue) 
+            else:
+                turtle.setColor(2) # 
+                maTortue.setColor(2) # 
             
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
@@ -2125,8 +2131,9 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 points.append(position(n))
             leaf_computer(points,turtle)
             leaf_computer(points,maTortue)
-            if anglOuverture < np.pi/4. : # young leaflet
-                orgType=symbolOrganIdict['Y']
+            # c'est maintenant à Sec2 de prendre en compte
+            # les propriété optiques de l'organe 'orgType'
+            orgType=symbolOrganIdict[n.label[0]] 
 
         elif n.label == 'S1' :
             #orgType=6 # sepal
