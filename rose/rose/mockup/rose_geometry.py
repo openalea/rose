@@ -1756,6 +1756,8 @@ def position(n):
     """
     return Vector3(n.XX, n.YY, n.ZZ)
 #endef position(n)
+
+#lSepalStore=[]
     
 ########################################
 def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
@@ -1774,7 +1776,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
     """  
     # write the node code here.   
     visitor = None; 
-    lSepalStore=[]
+    lSepalStore =[]
 
     if leaf_factory is None:
         leaf_factory=rawLeaflet
@@ -1855,8 +1857,8 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
-                points.append(position(n))
-            
+                points.append(position(n))  
+            sepal_computer(points, turtle)
             lSepalStore.append(points)
 	    
         elif n.label == "B1" : # flower Button
@@ -1869,7 +1871,8 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             # process digitized sepals 
             turtle.setColor(4) # apple green
             while lSepalStore:
-               sepal_computer(lSepalStore.pop(),turtle)
+                lSepalStore.pop()
+                #sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "O1" : # flOwer
             turtle.setColor(4) # apple green
@@ -1881,7 +1884,8 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             #turtle.setColor(len(lSepalStore)) # apple green 
             turtle.setColor(4) # apple green 
             while lSepalStore:
-                sepal_computer(lSepalStore.pop(),turtle)
+                lSepalStore.pop()
+            #    sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "C1" : # fruit (Cynorrodon)
             turtle.setColor(4) # apple green
@@ -1889,7 +1893,8 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             points=[n.parent(),n]
             fruit_computer (points, turtle, lSepalStore, -1)
             while lSepalStore:
-                sepal_computer(lSepalStore.pop(),turtle)
+                lSepalStore.pop()
+                #sepal_computer(lSepalStore.pop(),turtle)
                 #print "lSepalStore:USED in FRUIT"
 
         elif n.label == "T1": # Terminator
@@ -1970,7 +1975,6 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
     # write the node code here.   
     visitor = None; 
     lSepalStore=[]
-
 
     if leaf_factory is None:
         leaf_factory=rawLeaflet
@@ -2140,12 +2144,17 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
-                points.append(position(n))
-            
+                points.append(position(n))            
             lSepalStore.append(points)
+            maTortue.setColor(4)
+            sepal_computer(points,maTortue)
+            turtle.setColor(4) # fluo apple green
+            sepal_computer(points,turtle)
 	    
         elif n.label == "B1" :
             #orgType=7 # floawer button
+            turtle.setColor(4) # fluo apple green
+            maTortue.setColor(4)
             points = [n.parent(), n]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -2157,13 +2166,14 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             turtle.setColor(4) # fluo apple green
             maTortue.setColor(4)
             while lSepalStore:
-               sepal_computer(lSepalStore[-1],maTortue)
-               sepal_computer(lSepalStore.pop(),turtle)
+                lSepalStore.pop()
+                #sepal_computer(lSepalStore[-1],maTortue)
+                #sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "O1" :
             #orgType=8 # fleur
-            turtle.setColor(4) #fluo apple green
-            maTortue.setColor(4) 
+#            turtle.setColor(4) #fluo apple green
+#            maTortue.setColor(4) 
 
             points=[n.parent(),n]
             #print "n.Diameter=%s" % n.Diameter
@@ -2174,8 +2184,9 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             turtle.setColor(4) # fluo apple green 
             maTortue.setColor(4) # 
             while lSepalStore:
-                sepal_computer(lSepalStore[-1],maTortue)
-                sepal_computer(lSepalStore.pop(),turtle)
+                lSepalStore.pop()
+                #sepal_computer(lSepalStore[-1],maTortue)
+                #sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "C1" :
             #orgType=9 # fruit or cynorrhodon
@@ -2184,9 +2195,12 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             points=[n.parent(),n]
             fruit_computer (points, turtle, lSepalStore, -1)
             fruit_computer (points, maTortue, lSepalStore, -1)
+            turtle.setColor(4) # fluo apple green
+            maTortue.setColor(4) # 
             while lSepalStore:
-                sepal_computer(lSepalStore[-1],maTortue)
-                sepal_computer(lSepalStore.pop(),turtle)
+                lSepalStore.pop()
+                #sepal_computer(lSepalStore[-1],maTortue)
+                #sepal_computer(lSepalStore.pop(),turtle)
 
             # process terminator
         elif n.label == "T1":
