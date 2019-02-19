@@ -8,6 +8,7 @@ E	2	CONNECTED	FREE	EXPLICIT
 F	2	CONNECTED	FREE	EXPLICIT
 H	2	CONNECTED	FREE	EXPLICIT
 J	2	CONNECTED	FREE	EXPLICIT
+Y	2	CONNECTED	FREE	EXPLICIT
 O	2	CONNECTED	FREE	EXPLICIT
 P	1	CONNECTED	FREE	EXPLICIT
 R	2	CONNECTED	FREE	EXPLICIT
@@ -23,6 +24,7 @@ E	E,J,K,R,H,T	+	?
 E	E,B,H,O,T,C	<	?
 J	S	+	?
 R	F	+	?
+R	Y	+	?
 R	L	+	?
 B	B	<	?
 R	R	<	?
@@ -30,6 +32,7 @@ L	L	<	?
 F	F	<	?
 E	H	<	?
 E	T	<	?
+Y	Y	<	?
 FEATURES:
 NAME	TYPE
 XX	REAL
@@ -58,7 +61,7 @@ ENTITY-CODE				XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<R2			20.0	3.263	121.244						3.2			
 		+F1		23.0	-6.193	118.338									
 		^<F2		29.0	-8.803	109.67									
-		^<F3		27.0	-1.385	117.382							3.15		
+		^<F3		27.0	-1.385	117.382									
 	^<R3			25.0	8.56	126.466						2.1			
 		+F1		22.0	16.34	133.558									
 		^<F2		15.0	20.997	142.26									
@@ -290,9 +293,9 @@ ENTITY-CODE				XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 		^<F3		-48.0	-138.958	320.057									
 	+E1			-1.0	-119.515	320.19						1	3.16		
 		+R1		-1.0	-115.351	326.339						1.0			
-			+F1	4.0	-114.38	323.932									
-			^<F2	8.0	-115.745	321.184									
-			^<F3	3.0	-113.564	323.022									
+			+Y1	3.0	-113.564	323.022									
+			^<Y2	8.0	-115.745	321.184									
+			^<Y3	4.0	-114.38	323.932									
 		+K1		-2.169	-119.493	323.394									
 		^<K2		-1.579	-118.422	323.373									
 		^<K3		-0.831	-119.541	322.939									

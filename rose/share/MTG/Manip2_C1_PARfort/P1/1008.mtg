@@ -8,6 +8,7 @@ E	2	CONNECTED	FREE	EXPLICIT
 F	2	CONNECTED	FREE	EXPLICIT
 H	2	CONNECTED	FREE	EXPLICIT
 J	2	CONNECTED	FREE	EXPLICIT
+Y	2	CONNECTED	FREE	EXPLICIT
 O	2	CONNECTED	FREE	EXPLICIT
 P	1	CONNECTED	FREE	EXPLICIT
 R	2	CONNECTED	FREE	EXPLICIT
@@ -23,6 +24,7 @@ E	E,J,K,R,H,T	+	?
 E	E,B,H,O,T,C	<	?
 J	S	+	?
 R	F	+	?
+R	Y	+	?
 R	L	+	?
 B	B	<	?
 R	R	<	?
@@ -30,6 +32,7 @@ L	L	<	?
 F	F	<	?
 E	H	<	?
 E	T	<	?
+Y	Y	<	?
 FEATURES:
 NAME	TYPE
 XX	REAL
@@ -56,7 +59,7 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	+R1		-16.0	15.873	122.787						3.1			
 		+F1	-22.0	1.647	129.487									
 		^<F2	-13.0	-12.488	128.383									
-		^<F3	-6.0	0.821	128.4							2.5		
+		^<F3	-6.0	0.821	128.4									
 	^<R2		-16.0	15.573	122.773						3.2			
 		+F1	-3.0	23.528	130.042									
 		^<F2	2.0	39.116	127.748									
@@ -209,17 +212,17 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<L3		15.821	34.977	209.766									
 ^<E11			7.0	29.507	210.522						3	2.44		
 	+R1		1.0	39.103	220.018						2.1			
-		+F1	-9.0	41.297	223.437									
-		^<F2	-21.0	45.66	213.871									
-		^<F3	-10.0	40.738	222.694									
+		+Y1	-10.0	40.738	222.694									
+		^<Y2	-21.0	45.66	213.871									
+		^<Y3	-9.0	41.297	223.437									
 	^<R2		0.0	38.863	219.981						2.2			
-		+F1	-7.0	48.587	222.314									
-		^<F2	-5.0	60.905	215.663									
-		^<F3	-7.0	48.408	221.985									
+		+Y1	-7.0	48.587	222.314									
+		^<Y2	-5.0	60.905	215.663									
+		^<Y3	-7.0	48.408	221.985									
 	^<R3		1.0	38.807	219.431						1.0			
-		+F1	-10.0	45.741	215.402									
-		^<F2	-9.0	57.554	195.32									
-		^<F3	-12.0	46.371	214.439									
+		+Y1	-12.0	46.371	214.439									
+		^<Y2	-9.0	57.554	195.32									
+		^<Y3	-10.0	45.741	215.402									
 	+K1		5.882	32.467	210.665									
 	^<K2		5.725	32.166	211.68									
 	^<K3		5.215	31.224	210.757									
@@ -232,9 +235,9 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<L3		1.342	39.228	220.108									
 ^<E12			6.0	33.215	209.182						1	2.42		
 	+R1		7.0	27.783	221.628						1.0			
-		+F1	7.0	19.902	226.542									
-		^<F2	4.0	13.422	220.639									
-		^<F3	8.0	21.841	225.596									
+		+Y1	7.0	19.902	226.542									
+		^<Y2	4.0	13.422	220.639									
+		^<Y3	8.0	21.841	225.596									
 	+K1		6.699	33.046	213.499									
 	^<K2		6.548	32.359	213.439									
 	^<K3		5.523	33.011	212.713									

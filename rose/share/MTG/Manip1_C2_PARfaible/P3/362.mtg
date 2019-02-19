@@ -8,6 +8,7 @@ E	2	CONNECTED	FREE	EXPLICIT
 F	2	CONNECTED	FREE	EXPLICIT
 H	2	CONNECTED	FREE	EXPLICIT
 J	2	CONNECTED	FREE	EXPLICIT
+Y	2	CONNECTED	FREE	EXPLICIT
 O	2	CONNECTED	FREE	EXPLICIT
 P	1	CONNECTED	FREE	EXPLICIT
 R	2	CONNECTED	FREE	EXPLICIT
@@ -23,6 +24,7 @@ E	E,J,K,R,H,T	+	?
 E	E,B,H,O,T,C	<	?
 J	S	+	?
 R	F	+	?
+R	Y	+	?
 R	L	+	?
 B	B	<	?
 R	R	<	?
@@ -30,6 +32,7 @@ L	L	<	?
 F	F	<	?
 E	H	<	?
 E	T	<	?
+Y	Y	<	?
 FEATURES:
 NAME	TYPE
 XX	REAL
@@ -58,7 +61,7 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 		^<F3	7.0	-17.578	128.468									
 	^<R2		-2.0	-21.465	125.946						3.2			
 		+F1	-2.0	-11.178	132.709									
-		^<F2	-7.0	-8.606	138.292							2.0		
+		^<F2	-7.0	-8.606	138.292									
 		^<F3	-8.0	-17.11	132.244									
 	^<R3		-4.0	-31.714	126.063						2.1			
 		+F1	3.0	-41.496	123.606									
@@ -325,17 +328,17 @@ ENTITY-CODE			XX	YY	ZZ	AA	BB	CC	Length	Opening	LeafletID	Diameter	Stade	PcStade
 	^<L3		-19.348	-85.548	354.072									
 ^<E13			-13.0	-85.952	339.269						3	1.98		
 	+R1		-9.0	-92.93	346.807						2.1			
-		+F1	-7.0	-102.995	339.982									
-		^<F2	-3.0	-107.537	329.164									
-		^<F3	-4.0	-100.28	340.329									
+		+Y1	-4.0	-100.28	340.329									
+		^<Y2	-3.0	-107.537	329.164									
+		^<Y3	-7.0	-102.995	339.982									
 	^<R2		-9.0	-93.285	347.88						2.2			
-		+F1	-11.0	-99.41	348.366									
-		^<F2	-14.0	-111.286	342.623									
-		^<F3	-9.0	-101.788	345.035									
+		+Y1	-9.0	-101.788	345.035									
+		^<Y2	-14.0	-111.286	342.623									
+		^<Y3	-11.0	-99.41	348.366									
 	^<R3		-10.0	-98.522	345.279						1.0			
-		+F1	-11.0	-107.924	336.307									
-		^<F2	-13.0	-112.483	321.879									
-		^<F3	-8.0	-105.482	335.694									
+		+Y1	-8.0	-105.482	335.694									
+		^<Y2	-13.0	-112.483	321.879									
+		^<Y3	-11.0	-107.924	336.307									
 	+K1		-12.561	-86.405	342.164									
 	^<K2		-12.183	-87.224	341.818									
 	^<K3		-13.455	-86.997	341.243									
