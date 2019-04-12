@@ -190,7 +190,7 @@ def inSector(candidat, center, marge) :
 # end inSector(candidat, center, marge)
     
 
-################################################ BUD
+# %% ########################################### BUD
 def rawBud():
     """ We define here a function (computeRawBud) that draws a raw bud
       with a sphere and a cone.
