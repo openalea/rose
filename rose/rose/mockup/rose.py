@@ -55,7 +55,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
                 return(origin)
         if ix < 0 or iy < 0:
             print "cropGeneration_2011 : negative coordinates are not agreed."
-        elif ix >= n_x or iy >= n_y :
+        elif ix > n_x or iy > n_y :
             print "cropGeneration_2011 : coordinates out of range."
         else:
             return (ix*s_x + origin[0], iy*s_y + origin[1], origin[2])
@@ -63,6 +63,9 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
         return origin
     # end index2coord
 
+    # DEBUG
+    #print "plantlist : %s" % plantlist
+    print "len (plantlist) : %d" % len(plantlist) 
     #tablelayout = []; 
     dictOfPositions={}
     mtgFiles={}
@@ -115,7 +118,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
                     if mtgFiles[randPlant] in dictOfPositions.keys():
                         dictOfPositions[mtgFiles[randPlant]] += [[Index2Coord(coords),randAngle]]
                     else:
-                        # If extra MTGs are found in the directory, me may use them
+                        # If extra MTGs are found in the directory, we may use them
                         dictOfPositions[mtgFiles[randPlant]] = [[Index2Coord(coords),randAngle]]
 
     # returns output

@@ -362,7 +362,7 @@ def flower(points, turtle=None, lSepales=[], diameter=None):
 class Flower(Node):
     def __init__(self):
         Node.__init__(self)
-        self.add_output( name = 'compute_bud', 
+        self.add_output( name = 'compute_flower', 
                          interface = IFunction )
     def __call__( self, inputs ):
         return flower
@@ -464,7 +464,7 @@ def revolutionBud(revVol=None ):
     lRevVol=revVol
     if lRevVol is None:
         lRevVol=revolution(budArray())
-    def drawRevBud(points, turtle=None):
+    def drawRevBud(points, turtle=None, dummy=None):
         """ 
         This function draws a revolution bud
 
@@ -564,7 +564,7 @@ class drawBuds(Node):
                          interface = ISequence )
 
     def __call__( self, inputs ):
-        return (noThing, rawBud(), builtBud(), revolutionBud(), bud )
+        return (noThing, rawBud(), builtBud(), revolutionBud(), Flower() )
 #end drawBuds   
 
 ################################################  K N O P
@@ -1145,46 +1145,48 @@ def flowerParameters(points, stade=None, PcStade=0, lSepales=[], flowerDiameter=
 # end flowerParameters  
 
 
-def fruitParameters(points, stade=None, PcStade=0):
-    """ returns a serie of parameters to draw fruits """
-    Heading = Vector4(0,0,1,1)
-    height=0
-    Radius = Vector4(0,1,0,1)
-    lSepalAngles= []
-    lSepalDims = []
-    lPetalAngles = []
-    lPetalDims = []
-
-    # we extract the positions of distant points
-    ped=position(points[0])
-    top=position(points[-1]) 
-
-    # we compute the heading and size of the bud
-    (Heading,height) = computeHeading([ped, top]) 
-
-    # we check for sepals and compute their angles if any, 
-    if lSepales :
-        (lSepalAngles,lSepalDims,Radius) = getValuesFromSepals(lSepales, Heading)
-    else :
-        Radius=computeFacingFromUp(Heading)
-        # if no sepals, we check for "stade" notations
-
-        if stade: # may check for only SR, FO and FF here
-            lSepalAngles,lDummyDims = notation2flowerAngles(stade, PcStade)
-
-    # we get the diameter
-    flowerRay=  mtg.property('Diameter')[top]*0.5
-    # we compute the angle(s)
-    lPetalAngles[0]= np.arctan2(height,flowerRay) 
-    lPetalDims[0]=height / np.cos(lPetalAngles[0])
-
-    lPetalAngles[0] /= deg2rad 
-    lPetalAngles.apend(lPetalAngles[0]*0.8)
-    lPetalDims.append(lPetalDims[0])
-
-    return(Heading, height, Radius, lSepalAngles, lSepalDims,
-     lPetalAngles, lPetalDims)
-# end fruitParameters
+#def fruitParameters(points, stade=None, PcStade=0, lSepales=[]):
+#    """ returns a serie of parameters to draw fruits 
+#        Obsolete ; use flowerParameters instead
+#    """
+#    Heading = Vector4(0,0,1,1)
+#    height=0
+#    Radius = Vector4(0,1,0,1)
+#    lSepalAngles= []
+#    lSepalDims = []
+#    lPetalAngles = []
+#    lPetalDims = []
+#
+#    # we extract the positions of distant points
+#    ped=position(points[0])
+#    top=position(points[-1]) 
+#
+#    # we compute the heading and size of the bud
+#    (Heading,height) = computeHeading([ped, top]) 
+#
+#    # we check for sepals and compute their angles if any, 
+#    if lSepales :
+#        (lSepalAngles,lSepalDims,Radius) = getValuesFromSepals(lSepales, Heading)
+#    else :
+#        Radius=computeFacingFromUp(Heading)
+#        # if no sepals, we check for "stade" notations
+#
+#        if stade: # may check for only SR, FO and FF here
+#            lSepalAngles,lDummyDims = notation2flowerAngles(stade, PcStade)
+#
+#    # we get the diameter
+#    flowerRay=  mtg.property('Diameter')[top]*0.5 # spyder doesn't know about mtg
+#    # we compute the angle(s)
+#    lPetalAngles[0]= np.arctan2(height,flowerRay) 
+#    lPetalDims[0]=height / np.cos(lPetalAngles[0])
+#
+#    lPetalAngles[0] /= deg2rad 
+#    lPetalAngles.apend(lPetalAngles[0]*0.8)
+#    lPetalDims.append(lPetalDims[0])
+#
+#    return(Heading, height, Radius, lSepalAngles, lSepalDims,
+#     lPetalAngles, lPetalDims)
+## end fruitParameters
     
 
 def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
