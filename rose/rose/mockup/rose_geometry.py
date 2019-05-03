@@ -1372,6 +1372,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     # ready to draw 
     # we prolongate the ped along the heading direction : 
     turtle.push()
+    myColors.setTurtlePed(turtle)
     turtle.oLineRel(Heading *taille_fruit  ) 
     #myColors.setTurtleOrange(turtle)
     #turtle.setColor(4) 
@@ -1383,13 +1384,13 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         anglePetInt=lPetalAngles[-1]
     receptacle= pgl.Sphere(1.) 
     if anglePetExt > 90. and anglePetExt == anglePetInt: # Faded flower
-        myColors.setTurtleOrange(turtle)
+        myColors.setTurtleFruit(turtle)
         receptacle=pgl.Scaled(Vector3( 
                 taille_fruit*1.333, taille_fruit*1.333, taille_fruit), receptacle )
         #receptacle= pgl.Translated(0, 0, -taille*0.5, receptacle) 
 
     else:
-        turtle.setColor(4) 
+        myColors.setTurtleReceptacle(turtle) 
         receptacle=pgl.Scaled(Vector3( taille, taille, taille),receptacle ) 
         receptacle= pgl.Translated(0, 0, -taille*0.5, receptacle) 
 
@@ -1402,6 +1403,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     vstride = 8 # the V resolution of the patch (around the axle)
     angle72=np.pi/2.5 # the 1/5th of a tour
 
+    myColors.setTurtleSepal(turtle)
     angleSepInt=angleSepExt=0 # the outer /inner sepal angles
     if lSepalAngles :
         angleSepExt=lSepalAngles[0]
@@ -1415,7 +1417,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         heightInc=(lSepalDims[0]-lSepalDims[-1])/ (numSepals-1)
     for index in xrange(0,int(numSepals)):
         rotationAngle=angle72*index *2 #
-        turtle.setColor(index)
+        #turtle.setColor(index)
         # has this sepal been digitized ?
         Go=True 
         if lNoSepals:
@@ -1452,7 +1454,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     
     ############################ P E T A L S
     angleRepartition = angle72 * 2.1
-    myColors.setTurtleKoPink(turtle)
+    myColors.setTurtlePetal(turtle)
 
     thisLength=lPetalDims[0]
     thisInc=(lPetalDims[0]-lPetalDims[-1])/ (numPetals -1)
@@ -1593,7 +1595,7 @@ def simpleFruit(colorFunc=None):
     # write the node code here.
     myColorFunc=colorFunc
     if colorFunc is None:
-        myColorFunc=myColors.setTurtleOrange # custom 
+        myColorFunc=myColors.setTurtleFruit # custom 
         
     def rawFruit(points, turtle=None, truc=None, Bidule=None): # arity is 4
         """    
@@ -1847,7 +1849,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             if n.label ==  'Y1' : # young leaflets
                 myColors.setTurtleAnthocyan(turtle) 
             else:
-                turtle.setColor(2) # 
+                myColors.setTurtleLeaf(turtle) # 
                 
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
@@ -1860,6 +1862,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))  
+            myColors.setTurtleSepal(turtle)
             sepal_computer(points, turtle)
             lSepalStore.append(points)
 	    
@@ -2217,6 +2220,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             maTortue.oLineTo(pt)
             maTortue.setWidth(0.01) 
 
+        # tODO : pass ou continue ?
         elif symbol == 'H' : # hidden vertex
             pass
         elif symbol == 'J' : # pédoncule 
@@ -2240,7 +2244,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         if canFacts :
             numApp += 1
             #out = []
-            debutLigne=can02line(canFacts['dateDigit'], orgType, plantNum, orgNum )
+            # TODO : modifier en laissant orgType vide "%%s"
+            debutLigne=can02line(canFacts['dateDigit'], "%s", plantNum, orgNum )
             
             maTortue.stopGC();
             maScene=maTortue.getScene()
@@ -2249,10 +2254,18 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 p = geometry.pointList
                 index = geometry.indexList
                 numTri=1
+                # TODO : calculer orgType d'après la couleur et le dico de
+                # couleur qui associera couleur:orgType
+                # Cf. rose_file::scene2Can01()
                 for ind in index:
+                    # compléter debutLigne
+                    if symbol in "B O C".split() :
+                        # compute orgType
+                        # from maScene[obj].appearance.diffuseColor()
+                        pass
                     canFacts['canStream'].write(
                         "%s %d %s\n" % (
-                            debutLigne, numTri,'  '.join("%8.3f" % (x) for i in ind for x in p[i])))
+                            debutLigne % orgType, numTri,'  '.join("%8.3f" % (x) for i in ind for x in p[i])))
                     numTri += 1
         else:
             print("canFacts: %s" % canFacts)

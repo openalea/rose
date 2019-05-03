@@ -84,7 +84,7 @@ class ReadXls(Node):
         self.add_input(name= 'fileName', interface = IStr, value=None) 
         self.add_input(name= 'sheet_number', interface = IInt, value=0)         
         self.add_input(name= 'ligne_debut', interface = IInt, value=0) 
-        self.add_output( name = retList, interface = ISequence )
+        self.add_output( name = 'retList', interface = ISequence )
 
     def __call__( self, inputs ):
         return readXls
@@ -108,7 +108,7 @@ def canline(ind, couleur, p):
     return "p 2 007 0x%02X%02X%02X 3 %s"%( couleur.red, couleur.green, couleur.blue, ' '.join(str(x) for i in ind for x in p[i]))
 
 def scene2Can01 (maScene, fileName, makeDir=False):
-    # copied from alinea.topvine
+    # inspired from alinea.topvine
     out = []
     for obj in range (len(maScene)):
         couleur=maScene[obj].appearance.diffuseColor()
