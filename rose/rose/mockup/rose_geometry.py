@@ -2009,6 +2009,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
             with open("%s/%s.json" % (p, "symbOrganId"),"r") as f:
                 symbolOrganIdict=json.load(f)
+            with open("%s/%s.json" % (p, "coulOrganes"),"r") as f:
+                coulOrganesIdict=json.load(f)
 
     def orgNumFromStack(stack):
         """
@@ -2037,7 +2039,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 knop_factory=knop_factory,
                 stipuLe_factory=stipuLe_factory,
                 canFacts={}, 
-                symbolOrganIdict=symbolOrganIdict):
+                symbolOrganIdict=symbolOrganIdict,
+                coulOrganIdict=coulOrganesIdict):
         """ 
         a function that analyses the code of a vertex then 
         takes decisions about the ways to display it.
@@ -2131,8 +2134,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 myColors.setTurtleAnthocyan(turtle) 
                 myColors.setTurtleAnthocyan(maTortue) 
             else:
-                turtle.setColor(2) # 
-                maTortue.setColor(2) # 
+                myColors.setTurtleLeaf(turtle) 
+                myColors.setTurtleLeaf(maTortue) # 
             
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
@@ -2151,15 +2154,15 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 n = list(n.children())[0]
                 points.append(position(n))            
             lSepalStore.append(points)
-            maTortue.setColor(4)
+            myColors.setTurtleSepal(maTortue)
             sepal_computer(points,maTortue)
-            turtle.setColor(4) # fluo apple green
+            myColors.setTurtleSepal(turtle)
             sepal_computer(points,turtle)
 	    
         elif n.label == "B1" :
-            #orgType=7 # floawer button
-            turtle.setColor(4) # fluo apple green
-            maTortue.setColor(4)
+            #orgType=7 # flower button
+            myColors.setTurtleButton(maTortue)
+            myColors.setTurtleButton(turtle)
             points = [n.parent(), n]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -2168,8 +2171,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             bud_computer(points,maTortue,lSepalStore) 
 
             # process digitized sepals 
-            turtle.setColor(4) # fluo apple green
-            maTortue.setColor(4)
+            #turtle.setColor(4) # fluo apple green
+            #maTortue.setColor(4)
             while lSepalStore:
                 lSepalStore.pop()
                 #sepal_computer(lSepalStore[-1],maTortue)
@@ -2186,8 +2189,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             flower_computer (points, maTortue, lSepalStore, n.Diameter)
 
             # process digitized sepals (if any)
-            turtle.setColor(4) # fluo apple green 
-            maTortue.setColor(4) # 
+            #turtle.setColor(4) # fluo apple green 
+            #maTortue.setColor(4) # 
             while lSepalStore:
                 lSepalStore.pop()
                 #sepal_computer(lSepalStore[-1],maTortue)
@@ -2195,13 +2198,13 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
         elif n.label == "C1" :
             #orgType=9 # fruit or cynorrhodon
-            turtle.setColor(4) # fluo apple green
-            maTortue.setColor(4) # 
+            #turtle.setColor(4) # fluo apple green
+            #maTortue.setColor(4) # 
             points=[n.parent(),n]
             fruit_computer (points, turtle, lSepalStore, -1)
             fruit_computer (points, maTortue, lSepalStore, -1)
-            turtle.setColor(4) # fluo apple green
-            maTortue.setColor(4) # 
+            #turtle.setColor(4) # fluo apple green
+            #maTortue.setColor(4) # 
             while lSepalStore:
                 lSepalStore.pop()
                 #sepal_computer(lSepalStore[-1],maTortue)
@@ -2262,7 +2265,14 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                     if symbol in "B O C".split() :
                         # compute orgType
                         # from maScene[obj].appearance.diffuseColor()
-                        pass
+                        #laCouleur=str(maScene[obj].appearance.diffuseColor())
+                        laCouleur= re.sub('Color3','', str(maScene[obj].appearance.diffuseColor()))
+                        
+                        if laCouleur in coulOrganIdict.keys() :
+                            orgType=coulOrganIdict[laCouleur]
+                        else:
+                            print "symbol: %s : %s" % (symbol, laCouleur)
+                        
                     canFacts['canStream'].write(
                         "%s %d %s\n" % (
                             debutLigne % orgType, numTri,'  '.join("%8.3f" % (x) for i in ind for x in p[i])))

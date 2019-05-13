@@ -91,20 +91,21 @@ def LightYellow():
     return pgl.Color3(250,250,192)
 
 # The following colors are hard coding the type of the organ
+# TODO : si une des 3 valeurs dépasse 127, y a t-il mise à l'échelle ?
 def Button():
-    return pgl.Color3(35,65,5) 
+    return pgl.Color3(70,130,10) #35,65,5) 
 def Fruit():
     return pgl.Color3(255,127,0) 
 def Leaf():
-    return pgl.Color3(30,60,10) 
+    return pgl.Color3(30,60,10) #30,60,10 ; test à 64,128,21
 def Ped():
-    return pgl.Color3(65,45,15) 
+    return pgl.Color3(130,90,30) #65,45,15) 
 def Receptacle():
-    return pgl.Color3(25,55,15) 
+    return pgl.Color3(59,130,36) #25,55,15) 
 def Petal():
-    return pgl.Color3(140,25,55) 
+    return pgl.Color3(255,45,100) # 140,25,55) # 100,50,50
 def Sepal():
-    return pgl.Color3(30,60,10) 
+    return pgl.Color3(65,130,21) #30,60,10)
     
 def setTurtleButton(t):
     t.setColorAt(button, Button())
