@@ -744,14 +744,24 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         lateralG.normalize()
 
         # jessica's code for  building the mesh
-        # I tried to use zMesh, but it has had no efect.
         ls_pts=[Vector3(0.,0.,0.)]
-        for i in xrange(len(xMesh)-1):
-            ls_pts.append(Vector3(xMesh[i],yMesh[i],0))
+        for i in xrange(len(xMesh)):
             ls_pts.append(Vector3(xMesh[i],0,0))
-        ls_pts.append(Vector3(1.,0.,0.))
+            ls_pts.append(Vector3(xMesh[i],yMesh[i],0))
+        #ls_pts.append(Vector3(1.,0.,0.))
         # we build triangles C O U N T E R Clockwise
-        ls_ind=[pgl.Index3(0,2,1),pgl.Index3(1,2,3),pgl.Index3(2,4,3),pgl.Index3(3,4,5),pgl.Index3(4,6,5),pgl.Index3(5,6,7)]        
+        print "len(ls_pts) = %d" % len(ls_pts)
+        # jessica's code avec triangulation automatique
+        ls_ind=[]
+        for i in xrange(2, len(ls_pts)):
+            if  i%2 :
+                ls_ind.append(pgl.Index3(i-2,i,i-1)) 
+            elif not i==2:
+                ls_ind.append(pgl.Index3(i-1,i,i-2)) 
+            else: # i==2
+                ls_ind.append(pgl.Index3(i-2,i-1,i)) 
+        #ls_ind=[pgl.Index3(0,2,1),pgl.Index3(1,2,3),pgl.Index3(2,4,3),pgl.Index3(3,4,5),pgl.Index3(4,6,5),pgl.Index3(5,6,7)]
+        print "len(ls_ind) = %d" % len(ls_ind)
         triangleSet=pgl.TriangleSet(pgl.Point3Array(ls_pts),pgl.Index3Array(ls_ind))
 
         geom=triangleSet
@@ -786,8 +796,16 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         for meshPoint in ls_pts:
             meshPoint[1] *= -1.
         # As the Y coordinate has changed its sign, we build 
-        # the triangles C C W again.
-        ls_ind=[pgl.Index3(0,1,2),pgl.Index3(1,3,2),pgl.Index3(2,3,4),pgl.Index3(3,5,4),pgl.Index3(4,5,6),pgl.Index3(5,7,6)]
+        # automatically the triangles C C W again.
+        ls_ind=[]
+        for i in xrange(2, len(ls_pts)):
+            if  i%2 :
+                ls_ind.append(pgl.Index3(i-2,i-1,i)) 
+            elif not i==2:
+                ls_ind.append(pgl.Index3(i-1,i-2,i)) 
+            else: # i==2
+                ls_ind.append(pgl.Index3(i-2,i,i-1)) 
+  
         triangleSet=pgl.TriangleSet(pgl.Point3Array(ls_pts),pgl.Index3Array(ls_ind))
         geom=triangleSet
         geom=pgl.Scaled((axisLength,halfWidth,1),geom)
