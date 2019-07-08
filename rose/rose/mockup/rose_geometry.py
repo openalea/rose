@@ -743,14 +743,13 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         halfWidth =  sideLength * norm(lateralG)
         lateralG.normalize()
 
-        # jessica's code for  building the mesh
+        # jessica's code for building the mesh
         ls_pts=[Vector3(0.,0.,0.)]
         for i in xrange(len(xMesh)):
             ls_pts.append(Vector3(xMesh[i],0,0))
             ls_pts.append(Vector3(xMesh[i],yMesh[i],0))
         #ls_pts.append(Vector3(1.,0.,0.))
         # we build triangles C O U N T E R Clockwise
-        print "len(ls_pts) = %d" % len(ls_pts)
         # jessica's code avec triangulation automatique
         ls_ind=[]
         for i in xrange(2, len(ls_pts)):
@@ -761,7 +760,6 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
             else: # i==2
                 ls_ind.append(pgl.Index3(i-2,i-1,i)) 
         #ls_ind=[pgl.Index3(0,2,1),pgl.Index3(1,2,3),pgl.Index3(2,4,3),pgl.Index3(3,4,5),pgl.Index3(4,6,5),pgl.Index3(5,6,7)]
-        print "len(ls_ind) = %d" % len(ls_ind)
         triangleSet=pgl.TriangleSet(pgl.Point3Array(ls_pts),pgl.Index3Array(ls_ind))
 
         geom=triangleSet
@@ -1780,7 +1778,8 @@ def position(n):
 #endef position(n)
 
 #lSepalStore=[]
-    
+rangFoliole=0 # pour utiliser l'allometrie par rang
+
 ########################################
 def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
                   flower_factory=None, fruit_factory=None, knop_factory=None,
@@ -1796,16 +1795,24 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
     :return: the visitor function
     :todo: check the arity of all the versions of bud_factory
     """  
+    #from openalea.mtg.MTG import components
+    #from openalea.mtg.aml import MTG as omam
+    from openalea.mtg import MTG as omm
+    
     # write the node code here.   
     visitor = None; 
     lSepalStore =[]
 
     if leaf_factory is None:
-        leaf_factory=rawLeaflet
+        #pass
+        leaf_factory=rawLeaflet 
+    # tests
+    #leaf_factory=computeLeafletFrom4pts([0,0.5,1],[0,1,0])
     if bud_factory is None:
         bud_factory=rawBud
     if sepal_factory is None:
-        sepal_factory=polygonLeaflet() # rawLeaflet
+        #pass
+        sepal_factory=polygonLeaflet() # rawLeaflet test aussi
     if flower_factory is None:
         flower_factory=coneFlower() # bug when flower_factory is None
     if fruit_factory is None:
@@ -1828,6 +1835,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
         """ 
         a function that analyses the code of a vertex then takes decisions about the ways to display it
         """
+        global rangFoliole
         
         n = g.node(v)
         pt = position(n)
@@ -1842,6 +1850,10 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
+            if symbol =="R" :
+                # calculer le rang du foliole à venir
+                rangFoliole=len(omm.Descendants(g,v))/4
+                #print "rangFoliole : %d" % rangFoliole
 
         elif n.label ==  'K1' : # knop
             if knop_factory is not None :
@@ -1873,6 +1885,12 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
+                # NEXT : read allometry from json or so
+            if rangFoliole<2: 
+                leaf_computer=computeLeafletFrom4pts([0,0.2 ,0.4, 0.6, 0.8,1], [0, 0.86,0.95, 0.81, 0.41, 0])
+            else:
+                leaf_computer=computeLeafletFrom4pts([0,0.2 ,0.4, 0.6, 0.8,1],[0.01,0.69,0.92,0.90,0.55,0])
+            
             leaf_computer(points,turtle)
 
         elif n.label == 'S1' : # sepal
