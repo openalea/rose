@@ -1781,6 +1781,14 @@ def position(n):
 rangFoliole=0 # pour utiliser l'allometrie par rang
 
 ########################################
+def numRang2folId(rank):
+    dicRang={0:'A',1:'B',2:'C',3:'D',4:'E'}
+    vraiRang=rank/2
+    if not vraiRang in dicRang.keys():
+        vraiRang=4 # si folioles > E
+    return dicRang[vraiRang]
+
+########################################
 def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
                   flower_factory=None, fruit_factory=None, knop_factory=None,
                   stipuLe_factory=None):
@@ -1822,6 +1830,17 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
     if stipuLe_factory is None : # prevent from 'tuple' object bug
         stipuLe_factory=None
         
+    import json, re
+    from openalea.core.pkgmanager import PackageManager
+    pm = PackageManager()
+    pkg = pm.get_wralea_path()
+    p=''
+    for path in pkg :
+        if re.search("rose/rose$", path) :
+            p=re.sub("rose$", "share/MTG", path)
+
+            with open("%s/%s.json" % (p, "allometrieFolioles"),"r") as f:
+                dicAllo=json.load(f)
 
 
     def visitor(g, v, turtle, 
@@ -1885,11 +1904,9 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
-                # NEXT : read allometry from json or so
-            if rangFoliole<2: 
-                leaf_computer=computeLeafletFrom4pts([0,0.2 ,0.4, 0.6, 0.8,1], [0, 0.86,0.95, 0.81, 0.41, 0])
-            else:
-                leaf_computer=computeLeafletFrom4pts([0,0.2 ,0.4, 0.6, 0.8,1],[0.01,0.69,0.92,0.90,0.55,0])
+                
+            lesX, lesY = dicAllo[numRang2folId(rangFoliole)]
+            leaf_computer=computeLeafletFrom4pts(lesX,lesY)
             
             leaf_computer(points,turtle)
 
