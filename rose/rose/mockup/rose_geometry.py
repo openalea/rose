@@ -1436,19 +1436,22 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         #turtle.setColor(index)
         # has this sepal been digitized ?
         Go=True 
-        if lNoSepals:
-            for az in lNoSepals:
-                if inSector(rotationAngle,az, angle72*.5) :
-                    Go = False
-                    lNoSepals.remove(az)
-        if Go : # the sepal was not digitized
+        #if lNoSepals:
+        #    for az in lNoSepals:
+        #        if inSector(rotationAngle,az, angle72*.5) :
+        #            Go = False
+        #            lNoSepals.remove(az)
+                    
+        # Digitized sepals will not be drawn ; instead we draw the created ones
+        # as they fit better with the created sepals
+        if Go : # we draw "replacement" sepal
             sepalMatrix=TransformSepal(sepalmatrix2, angleSepExt, angleSepInt, index)        
             thisSepal=pgl.BezierPatch(sepalMatrix, ustride, vstride)
             thisSepal=pgl.Scaled(Vector3(thisHeight,thisHeight,thisHeight), thisSepal) 
             newSepal=pgl.AxisRotated((0,0,1),rotationAngle+np.pi,thisSepal) #
             groupe.geometryList.append(newSepal)
                 
-        thisHeight -= heightInc
+        thisHeight -= heightInc  
 
     # DBG
     if groupe.geometryList :
@@ -1484,7 +1487,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         thisPetal=pgl.AxisRotated((0,0,1), thisAngle, petal) # orientation
         thisPetal=pgl.Translated(-0.33 *taille *thisCos,
                                  -0.33 *taille *thisSin,
-                                 taille*1., thisPetal) # placement # was : taille*2.
+                                 taille*2, thisPetal) # placement # was : taille*2.
         turtle.customGeometry( thisPetal,1)
 
     turtle.pop()
@@ -1840,7 +1843,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             p=re.sub("rose$", "share/MTG", path)
 
             with open("%s/%s.json" % (p, "allometrieFolioles"),"r") as f:
-                dicAllo=json.load(f)
+                dicAllometrie=json.load(f)
 
 
     def visitor(g, v, turtle, 
@@ -1870,9 +1873,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             turtle.oLineTo(pt)
             turtle.setWidth(n.Diameter / 2.)
             if symbol =="R" :
-                # calculer le rang du foliole à venir
                 rangFoliole=len(omm.Descendants(g,v))/4
-                #print "rangFoliole : %d" % rangFoliole
 
         elif n.label ==  'K1' : # knop
             if knop_factory is not None :
@@ -1905,7 +1906,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 n = list(n.children())[0]
                 points.append(position(n))
                 
-            lesX, lesY = dicAllo[numRang2folId(rangFoliole)]
+            lesX, lesY = dicAllometrie[numRang2folId(rangFoliole)]
             leaf_computer=computeLeafletFrom4pts(lesX,lesY)
             
             leaf_computer(points,turtle)
@@ -1916,7 +1917,10 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 n = list(n.children())[0]
                 points.append(position(n))  
             myColors.setTurtleSepal(turtle)
-            sepal_computer(points, turtle)
+            
+            #lesX, lesY = dicAllometrie['S']
+            #sepal_computer=computeLeafletFrom4pts(lesX,lesY)
+            #sepal_computer(points, turtle)
             lSepalStore.append(points)
 	    
         elif n.label == "B1" : # flower Button
@@ -2051,6 +2055,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
     if pathToOrgIds is None :
         return None
     
+    from openalea.mtg import MTG as omm
     import json, re
     from openalea.core.pkgmanager import PackageManager
     pm = PackageManager()
@@ -2064,6 +2069,9 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 symbolOrganIdict=json.load(f)
             with open("%s/%s.json" % (p, "coulOrganes"),"r") as f:
                 coulOrganesIdict=json.load(f)
+            p=re.sub("rose$", "share/MTG", path)
+            with open("%s/%s.json" % (p, "allometrieFolioles"),"r") as f:
+                dicAllometrie=json.load(f)
 
     def orgNumFromStack(stack):
         """
@@ -2101,6 +2109,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         Sec2/Sources/Canopy/Organ.hpp's codification.
         """
         from openalea.mtg import algo
+        global rangFoliole
 
         # A 2nd turtle to duplicate the local geometry, so we still
         # know the organ number when writing it into the CAN file
@@ -2137,6 +2146,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             if n.Diameter is None:
                 logging.error('ERROR: vertex %d (name: %s, line around %d)'%(v,n.label,n._line))
                 n.Diameter = 0.75
+            if symbol =="R" :
+                rangFoliole=len(omm.Descendants(g,v))/4
                 
             if symbol=='E':
                 #orgType=2 # Sec2/Sources/Canopy/CANReader.cpp
@@ -2194,6 +2205,10 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
+                
+            lesX, lesY = dicAllometrie[numRang2folId(rangFoliole)]
+            leaf_computer=computeLeafletFrom4pts(lesX,lesY)
+                
             leaf_computer(points,turtle)
             leaf_computer(points,maTortue)
             # c'est maintenant à Sec2 de prendre en compte
