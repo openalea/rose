@@ -5,13 +5,27 @@
 #
 """
 .. module rose_file 
-.. moduleauthor:: H. Autret <hautret@angers.inra.fr>
+.. moduleauthor:: H. Autret <herve.autret@inrae.fr>
 """
 # for csv
 from openalea.core.external import Node, IBool, IInt, ISequence, IStr# * 
 import openalea.core.logger  as ocl
 import re
 
+def getHomeDir():
+    """
+    On 2020/02/24, the packagedir and expand_user_dir stopped 
+    to run.
+    """
+    import os
+    return os.getenv("HOME")
+    
+class GetHomeDir(Node):
+    def __init__(self):
+        self.add_output( name = 'homeDir', interface = IStr )
+        
+    def __call__(self):
+        return getHomeDir
 
 def readCsv(fileName, delimiter=',', ligne_debut=0):
     """ we read the csv file, then we return a list of splited lines """
