@@ -1782,6 +1782,7 @@ def position(n):
 
 #lSepalStore=[]
 rangFoliole=0 # pour utiliser l'allometrie par rang
+dicAllometrie={}
 
 ########################################
 def numRang2folId(rank):
@@ -1833,17 +1834,26 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
     if stipuLe_factory is None : # prevent from 'tuple' object bug
         stipuLe_factory=None
         
-    import json, re
-    from openalea.core.pkgmanager import PackageManager
-    pm = PackageManager()
-    pkg = pm.get_wralea_path()
-    p=''
-    for path in pkg :
-        if re.search("rose/rose$", path) :
-            p=re.sub("rose$", "share/MTG", path)
-
-            with open("%s/%s.json" % (p, "allometrieFolioles"),"r") as f:
-                dicAllometrie=json.load(f)
+    #import json, os, re
+    #from openalea.core.pkgmanager import PackageManager
+    #pm = PackageManager()
+    #pkg = pm.get_wralea_path() # WTF ?
+    #print "PKG : %s" % pkg
+    #p=''
+    #global dicAllometrie
+    #for path in pkg :
+    # hard times :
+#    path="%s/outils/OA/openaleapkg/rose/rose" % os.getenv("HOME")
+#    if re.search("rose/rose$", path) :
+#        p=re.sub("rose$", "share/MTG", path)
+#        fjs= open("%s/%s.json" % (p, "allometrieFolioles"),"r") 
+#            # beware : the enclosed scoop of dicAllometrie
+#        dicAllometrie=json.load(fjs)
+#        fjs.close()
+#    else:
+#        print "Et merde !"
+#        dicAllometrie={}
+                
 
 
     def visitor(g, v, turtle, 
@@ -1858,6 +1868,20 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
         a function that analyses the code of a vertex then takes decisions about the ways to display it
         """
         global rangFoliole
+        #global dicAllometrie
+        import json, os, re
+        path="%s/outils/OA/openaleapkg/trunk/rose/rose" % os.getenv("HOME")
+        if re.search("rose/rose$", path) :
+            p=re.sub("rose$", "share/MTG", path)
+            fjs= open("%s/%s.json" % (p, "allometrieFolioles"),"r") 
+            # beware : the enclosed scoop of dicAllometrie
+            dicAllometrie=json.load(fjs)
+            fjs.close()
+        else:
+            print "Et merde !"
+            dicAllometrie={}
+                
+
         
         n = g.node(v)
         pt = position(n)
