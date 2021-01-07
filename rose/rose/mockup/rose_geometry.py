@@ -1068,6 +1068,9 @@ def notation2flowerAngles(stade, PcStade):
     :param PcStade: the percent of evolution within the stage "stade"
     :return: a list of two lists containing the angles described above
     :bugs: the fruits are not at their right place.
+    TODO : read from a .json dict a relationship established 
+    from the notations at the manip date
+    (~/modeleChambre/documentation/PlantesDigit_Stades.xlsx)
     """
     return ([0,0],[0,0])
 # end notation2flowerAngles
@@ -1571,7 +1574,7 @@ def coneFlower(colorFunc=None):
     if colorFunc is None:
         myColorFunc=myColors.setTurtlePink # custom 
         
-    def rawFlower(pointsnDiameters, turtle=None):
+    def rawFlower(pointsnDiameters, turtle=None, oneMore="yes", noWay="really"):
         """    computes a flower from 2 pairs [position, diameter]
         """
         # 
@@ -1579,10 +1582,17 @@ def coneFlower(colorFunc=None):
         # 
         myColorFunc(turtle)
         #print "point= %s" % pointsnDiameters
+        #turtle.oLineTo(pointsnDiameters[0][0])
         
-        turtle.oLineTo(pointsnDiameters[0][0])
-        Diameter=pointsnDiameters[2][1]
-        turtle.oLineTo(pointsnDiameters[2][0]) 
+        newProp=pointsnDiameters[0].properties()
+        newCoord=[newProp["XX"],newProp["YY"],newProp["ZZ"]]
+        turtle.oLineTo(newCoord)
+        Diameter=pointsnDiameters[0].properties()["Diameter"]*10 
+        #turtle.oLineTo(pointsnDiameters[2][0]) 
+        newProp=pointsnDiameters[-1].properties()
+        newCoord=[newProp["XX"],newProp["YY"],newProp["ZZ"]]
+        turtle.oLineTo(newCoord)
+        
         turtle.setWidth(Diameter*.5)
         turtle.pop()
         # end rawFlower
@@ -1668,12 +1678,23 @@ class RawFruit(Node):
 
 ########################################
 
-def noThing(points, turtle=None, dummy=None):
+def noThing(points, turtle=None, dummy=None, noWay="really"):
     """ A function that makes nothing 
 
     :param points: unused
     :param turtle: unused
     """
+    #print "%s" % points
+    #print "type of points: %s" % type(points)
+    #print "len(points): %s" % len(points)
+    #for iDx in xrange(len(points)):
+    #    print "dir(points[%d]): %s" % (iDx, dir(points[iDx]))
+    #    laProp="Diameter"
+    #    lesProps=points[iDx].properties()
+    #    print "points[%d].properties(): %s" % (iDx, lesProps)
+    #    if laProp in lesProps.keys():
+    #        print "points[%d].properties()[\"%s\"]: %s" % (iDx, laProp, points[iDx].properties()[laProp])
+    #    print " % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % " 
     pass
 #endef noThing(points, turtle=None, dummy=None)
 

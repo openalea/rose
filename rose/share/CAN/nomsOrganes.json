@@ -1,0 +1,17 @@
+{
+    "1": "feuille", 
+    "2": "tige", 
+    "4": "rachis", 
+    "5": "pedoncule", 
+    "6": "sepale", 
+    "7": "bouton", 
+    "8": "receptacle", 
+    "9": "fruit", 
+    "10": "petale", 
+    "20": "terminateur", 
+    "21": "bourgeon", 
+    "22": "stipule", 
+    "23": "foliole_jeune", 
+    "251": "feuille_inf", 
+    "255": "invisible"
+}
