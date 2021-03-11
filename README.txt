@@ -14,7 +14,6 @@
 
 === Description ===
 
-<<<<<<< HEAD
 Alinea.Rose is a package for building virtual 3D rosebush trees. It is intended to study the relationship between structure and function.
 
 === Content ===
