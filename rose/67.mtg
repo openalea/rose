@@ -27,6 +27,7 @@ BB	REAL
 CC	REAL												
 Length	REAL												
 Ouverture	REAL												
+
 MTG:													
 ENTITY-CODE				XX	YY	ZZ	AA	BB	CC	Length	Ouverture		    
  /P1				7.51	8.27	-0.15	160.57	-21.34	6.2				          
