@@ -1854,27 +1854,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
         knop_factory=None
     if stipuLe_factory is None : # prevent from 'tuple' object bug
         stipuLe_factory=None
-        
-    #import json, os, re
-    #from openalea.core.pkgmanager import PackageManager
-    #pm = PackageManager()
-    #pkg = pm.get_wralea_path() # WTF ?
-    #print "PKG : %s" % pkg
-    #p=''
-    #global dicAllometrie
-    #for path in pkg :
-    # hard times :
-#    path="%s/outils/OA/openaleapkg/rose/rose" % os.getenv("HOME")
-#    if re.search("rose/rose$", path) :
-#        p=re.sub("rose$", "share/MTG", path)
-#        fjs= open("%s/%s.json" % (p, "allometrieFolioles"),"r") 
-#            # beware : the enclosed scoop of dicAllometrie
-#        dicAllometrie=json.load(fjs)
-#        fjs.close()
-#    else:
-#        print "Et merde !"
-#        dicAllometrie={}
-                
 
 
     def visitor(g, v, turtle, 
@@ -1891,16 +1870,19 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
         global rangFoliole
         #global dicAllometrie
         import json, os, re
-        path="%s/outils/OA/openaleapkg/trunk/rose/rose" % os.getenv("HOME")
-        if re.search("rose/rose$", path) :
-            p=re.sub("rose$", "share/MTG", path)
-            fjs= open("%s/%s.json" % (p, "allometrieFolioles"),"r") 
-            # beware : the enclosed scoop of dicAllometrie
-            dicAllometrie=json.load(fjs)
-            fjs.close()
+        import alinea.rose
+        p = re.sub("rose$", "share", alinea.rose.__path__[0])
+
+        dicAllometrie={}
+        if os.path.isdir(p):
+            ficJson="%s/MTG/allometrieFolioles.json" % p
+            if os.path.isfile(ficJson):
+                with open(ficJson,"r") as fjs:
+                    dicAllometrie=json.load(fjs)
+            else:
+                print "Pas de fichier %s" % ficJson
         else:
-            print "Et merde !"
-            dicAllometrie={}
+            print """Pas de dossier %s" !""" % (p)
                 
 
         
@@ -2102,11 +2084,11 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
     
     from openalea.mtg import MTG as omm
     import json, re
-    from openalea.core.pkgmanager import PackageManager
-    pm = PackageManager()
-    pkg = pm.get_wralea_path()
-    p=''
+    import alinea.rose
+    pkg =alinea.rose.__path__
+
     for path in pkg :
+        #print "Path : %s" % path
         if re.search("rose/rose$", path) :
             p=re.sub("rose$", "share/CAN", path)
 
@@ -2744,16 +2726,18 @@ def dateDigit(dirName, plantnum) :
     #import time
     #return time.strftime('%Y%m%d',time.localtime())
     import json, re
-    from openalea.core.pkgmanager import PackageManager
-    pm = PackageManager()
-    pkg = pm.get_wralea_path()
-    p=''
-    for path in pkg :
-        if re.search("rose/rose$", path) :
-            p=path
+#    from openalea.core.pkgmanager import PackageManager
+#    pm = PackageManager()
+#    pkg = pm.get_wralea_path()
+    import alinea.rose
+    p = re.sub("rose$", "share", alinea.rose.__path__[0])
+#    pkg.append(p)
+#    p=''
+#    for path in pkg :
+#        if re.search("rose-master/rose$", path) :
+#            p=path
     if p :
-        with open('%s/../share/CAN/datesPrelevements.json' % p, 'r') as f:
-        #with open('/home/hautret/outils/OA/openaleapkg/rose/share/datesPrelevements.json', 'r') as f:
+        with open('%s/CAN/datesPrelevements.json' % p, 'r') as f:
             dicoPrel = json.load(f)
         
     chemin = dirName.split('/')
