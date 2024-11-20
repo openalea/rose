@@ -1,0 +1,8 @@
+# Dressing file for Rosa hybrida
+SMBPath = D:\SurSamba\ModelStructure\Geom_Rose
+SMBModel segment = nentn125
+#SMBModel fol = folpisum2
+#geometry=D:\SurSamba\ModelStructure\Geom_Rose\disc
+Class R = segment
+Class E = segment
+#Class O = disc

@@ -1,2 +1,0 @@
-active_transport_coef,0.5
-diffusion_coef,0.02

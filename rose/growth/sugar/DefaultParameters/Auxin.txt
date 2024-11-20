@@ -1,6 +1,0 @@
-auxin_synth_coef,10.0
-residual_auxin_synth_coef,0.0
-min_level,2.5
-max_level,10.0
-auxin_degrad_coef,0.005
-auxin_degrad_coef_root,1.0
