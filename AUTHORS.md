@@ -1,4 +1,4 @@
 
 * Jessica Bertheloot
-* Hervé Autret
+* HervÃ© Autret
 * Christophe Pradal
