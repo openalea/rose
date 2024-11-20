@@ -24,8 +24,8 @@ import openalea.plantgl.all as pgl
 # walk through MTG trees
 from openalea.mtg.traversal import pre_order2_with_filter
 
-from . import rose_colors as myColors
-from . import rose_time
+from openalea.rose.mockup import rose_colors as myColors
+from openalea.rose.mockup import rose_time
 
 deg2rad = np.pi / 180.  # convert degrees to radians
 rad2deg = 1/deg2rad
@@ -702,7 +702,7 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         """    compute leaflet geometry from 4 points
         """
 
-        #global anglOuverture #  à destination de vertexVisitor4CAN02
+        #global anglOuverture #  ï¿½ destination de vertexVisitor4CAN02
         # if the list of points is not a complete leaf
         # we have to return without pushing the turtle ;
         #We could display a red sphere to make the miss very visible, as well
@@ -1354,7 +1354,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         ################ 
         # we rotate the last groups of points in order to open the flower
         # N O T E Visually, petals bend more than sepal for large angles,
-        # so we must limit the angle below 90°.
+        # so we must limit the angle below 90ï¿½.
         lignes=[]
         for numRang in range(2):
             ligne=newPetalMatrix.pop()
@@ -1854,27 +1854,6 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
         knop_factory=None
     if stipuLe_factory is None : # prevent from 'tuple' object bug
         stipuLe_factory=None
-        
-    #import json, os, re
-    #from openalea.core.pkgmanager import PackageManager
-    #pm = PackageManager()
-    #pkg = pm.get_wralea_path() # WTF ?
-    #print "PKG : %s" % pkg
-    #p=''
-    #global dicAllometrie
-    #for path in pkg :
-    # hard times :
-#    path="%s/outils/OA/openaleapkg/rose/rose" % os.getenv("HOME")
-#    if re.search("rose/rose$", path) :
-#        p=re.sub("rose$", "share/MTG", path)
-#        fjs= open("%s/%s.json" % (p, "allometrieFolioles"),"r") 
-#            # beware : the enclosed scoop of dicAllometrie
-#        dicAllometrie=json.load(fjs)
-#        fjs.close()
-#    else:
-#        print "Et merde !"
-#        dicAllometrie={}
-                
 
 
     def visitor(g, v, turtle, 
@@ -1891,16 +1870,20 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
         global rangFoliole
         #global dicAllometrie
         import json, os, re
-        path="%s/outils/OA/openaleapkg/trunk/rose/rose" % os.getenv("HOME")
-        if re.search("rose/rose$", path) :
-            p=re.sub("rose$", "share/MTG", path)
-            fjs= open("%s/%s.json" % (p, "allometrieFolioles"),"r") 
-            # beware : the enclosed scoop of dicAllometrie
-            dicAllometrie=json.load(fjs)
-            fjs.close()
+        import openalea.rose
+        p = re.sub("rose", "share", openalea.rose.__path__[0])
+
+        dicAllometrie={}
+        if os.path.isdir(p):
+            ficJson="%s/MTG/allometrieFolioles.json" % p
+            if os.path.isfile(ficJson):
+                with open(ficJson,"r") as fjs:
+                    dicAllometrie=json.load(fjs)
+            else:
+                print("Pas de fichier %s" % ficJson)
         else:
-            print("Et merde !")
             dicAllometrie={}
+            print("""Pas de dossier %s" !""" % (p))
                 
 
         
@@ -2006,7 +1989,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
         elif n.label == "T1": # Terminator
             # The turtle is supposed to be at the top of the previous vertex
-            turtle.stopGC() # à cause des <T1, à débuguer ds donnéesMSD
+            turtle.stopGC() # ï¿½ cause des <T1, ï¿½ dï¿½buguer ds donnï¿½esMSD
             myColors.setTurtleAnthocyan(turtle)
             turtle.startGC()
             turtle.oLineTo(pt)
@@ -2102,11 +2085,11 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
     
     from openalea.mtg import MTG as omm
     import json, re
-    from openalea.core.pkgmanager import PackageManager
-    pm = PackageManager()
-    pkg = pm.get_wralea_path()
-    p=''
+    import alinea.rose
+    pkg =alinea.rose.__path__
+
     for path in pkg :
+        #print "Path : %s" % path
         if re.search("rose/rose$", path) :
             p=re.sub("rose$", "share/CAN", path)
 
@@ -2256,8 +2239,8 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 
             leaf_computer(points,turtle)
             leaf_computer(points,maTortue)
-            # c'est maintenant à Sec2 de prendre en compte
-            # les propriété optiques de l'organe 'orgType'
+            # c'est maintenant ï¿½ Sec2 de prendre en compte
+            # les propriï¿½tï¿½ optiques de l'organe 'orgType'
             orgType=symbolOrganIdict[n.label[0]] 
 
         elif n.label == 'S1' :
@@ -2339,7 +2322,7 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
         # tODO : pass ou continue ?
         elif symbol == 'H' : # hidden vertex
             pass
-        elif symbol == 'J' : # pédoncule 
+        elif symbol == 'J' : # pï¿½doncule 
             pass
         # A  CAN02 file may contain several plants, but we don't use this here
         elif symbol == 'P':
@@ -2370,11 +2353,11 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                 p = geometry.pointList
                 index = geometry.indexList
                 numTri=1
-                # TODO : calculer orgType d'après la couleur et le dico de
+                # TODO : calculer orgType d'aprï¿½s la couleur et le dico de
                 # couleur qui associera couleur:orgType
                 # Cf. rose_file::scene2Can01()
                 for ind in index:
-                    # compléter debutLigne
+                    # complï¿½ter debutLigne
                     if symbol in "B O C".split() :
                         # compute orgType
                         # from maScene[obj].appearance.diffuseColor()
@@ -2644,7 +2627,7 @@ def TurtleFrame4CAN02(g, visitor, plantFacts):
 #endef TurtleFrame4CAN02(g, visitor)
 
 def reconstructWithTurtle(mtg, visitor, powerParam):
-    """ Builds a scene from an MTG object using a « vertex visitor »
+    """ Builds a scene from an MTG object using a ï¿½ vertex visitor ï¿½
     function and a number to help compute the diameter of the nodes of the trunk.
     
     :param mtg: an MTG object
@@ -2744,16 +2727,18 @@ def dateDigit(dirName, plantnum) :
     #import time
     #return time.strftime('%Y%m%d',time.localtime())
     import json, re
-    from openalea.core.pkgmanager import PackageManager
-    pm = PackageManager()
-    pkg = pm.get_wralea_path()
-    p=''
-    for path in pkg :
-        if re.search("rose/rose$", path) :
-            p=path
+#    from openalea.core.pkgmanager import PackageManager
+#    pm = PackageManager()
+#    pkg = pm.get_wralea_path()
+    import alinea.rose
+    p = re.sub("rose$", "share", alinea.rose.__path__[0])
+#    pkg.append(p)
+#    p=''
+#    for path in pkg :
+#        if re.search("rose-master/rose$", path) :
+#            p=path
     if p :
-        with open('%s/../share/CAN/datesPrelevements.json' % p, 'r') as f:
-        #with open('/home/hautret/outils/OA/openaleapkg/rose/share/datesPrelevements.json', 'r') as f:
+        with open('%s/CAN/datesPrelevements.json' % p, 'r') as f:
             dicoPrel = json.load(f)
         
     chemin = dirName.split('/')
@@ -2764,7 +2749,7 @@ def dateDigit(dirName, plantnum) :
 # end dateDigit
 
 def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
-    """ Builds a list of scenes from a liste of MTG object using a « vertex visitor »
+    """ Builds a list of scenes from a liste of MTG object using a ï¿½ vertex visitor ï¿½
     function and a number to help compute the diameter of the nodes of the trunk.
     
     :param mtgs: a list of MTG objects
