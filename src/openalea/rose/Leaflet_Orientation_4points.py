@@ -1,6 +1,6 @@
 from openalea.plantgl.all import *
 from openalea.mtg.aml import MTG
-from openalea.mtg.dresser import dressing_data_from_file
+from openalea.mtg.plantframe.dresser import dressing_data_from_file
 from math import sqrt
 
 #def ortho_transfo(vector1,vector2):

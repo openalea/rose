@@ -1,7 +1,7 @@
 from openalea.mtg.aml import *
 from math import cos,sin,radians,atan
 from openalea.mtg.aml import MTG
-from openalea.mtg.dresser import dressing_data_from_file
+from openalea.mtg.plantframe.dresser import dressing_data_from_file
 import random
 from openalea.plantgl.all import *
 import time
