@@ -1,6 +1,6 @@
 from openalea.mtg.aml import MTG
 from openalea.mtg.plantframe.dresser import dressing_data_from_file
-from openalea.mtg.plantframe import PlantFrame, compute_axes, build_scene
+from openalea.mtg.plantframe.plantframe import PlantFrame, compute_axes, build_scene
 from openalea.plantgl.all import *
 from math import radians
 import numpy

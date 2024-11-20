@@ -1,4 +1,4 @@
-from vplants.plantgl.all import *
+from openalea.plantgl.all import *
 from math import radians
 
 def SceneRotation(scene):
