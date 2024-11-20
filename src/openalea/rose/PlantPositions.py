@@ -9,5 +9,6 @@ def PlantPositions(txtfile):
         x,y,z=line.split()[1:]
         dico.setdefault(plt,[]).append([float(x),float(y),float(z)])
     plts=dico.keys()
-    # return outputs
+    coords_file.close()
+
     return dico,plts

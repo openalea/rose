@@ -18,7 +18,7 @@ def CropGeneration(txtfile, Plt_Not_Use, filling=True, crop_width=90.0, crop_len
 
     # Create a copy of the first dictionnary in the right form
     dico_copy={}
-    for k in dico.keys():
+    for k in dico:
         dico_copy[k]=dico[k][0]
 
     # If we want to fill the crop digitized with plants chosen randomly,
@@ -34,17 +34,19 @@ def CropGeneration(txtfile, Plt_Not_Use, filling=True, crop_width=90.0, crop_len
                 y=py*spacing-spacing/2
                 pos_list.append([x,y,z])
         # identification of the missing plants, attribution of a plant ID, and dictionnary filling with the random plants
-        keys=dico_copy.keys()
+        keys = list(dico_copy)
         keys.remove(Plt_Not_Use)
+
+        points = set(dico_copy.values())
         for p in pos_list:
-            if p not in dico_copy.values():
-                pltID=random.sample(keys,1)
-                pltID=''.join(pltID)
+            if p not in points:
+                pltID = random.sample(keys,1)
+                pltID = ''.join(pltID)
                 dico[pltID].append(p)
         
     IDplants=[]
-    for key in dico.keys():
-        for i in xrange(len(dico[key])):
+    for key in dico:
+        for i in range(len(dico[key])):
             ID=key+'-'+str(i+1)
             IDplants.append(ID)
 
