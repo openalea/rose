@@ -24,8 +24,8 @@ import openalea.plantgl.all as pgl
 # walk through MTG trees
 from openalea.mtg.traversal import pre_order2_with_filter
 
-import rose_colors as myColors
-import rose_time
+from . import rose_colors as myColors
+from . import rose_time
 
 deg2rad = np.pi / 180.  # convert degrees to radians
 rad2deg = 1/deg2rad
@@ -159,7 +159,7 @@ def printPoints(points):
     :param points: unchecked list of 4 Vector3 (or Vector4 as well).
     :note: this a debugging purpose routine.
     """
-    print "Zs : %7.3f  %7.3f %7.3f %7.3f"%(points[0][2],points[1][2],points[2][2],points[3][2])
+    print("Zs : %7.3f  %7.3f %7.3f %7.3f"%(points[0][2],points[1][2],points[2][2],points[3][2]))
 # end printPoints(points)
 
 def inSector(candidat, center, marge) :
@@ -736,7 +736,7 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         side.normalize()
         normAxis=computeUpAxis(Axis,side)
         if abs(norm(normAxis)) < 0.001 :
-            print "Z.bug= %s" % points[0][2] # dbg
+            print("Z.bug= %s" % points[0][2]) # dbg
                 
         # 2nd : compute the width of this half leaflet (sideLength * sin(angle))
         lateralG=Axis^side # to detect closed leflets and display them differently
@@ -745,14 +745,14 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
 
         # jessica's code for building the mesh
         ls_pts=[Vector3(0.,0.,0.)]
-        for i in xrange(len(xMesh)):
+        for i in range(len(xMesh)):
             ls_pts.append(Vector3(xMesh[i],0,0))
             ls_pts.append(Vector3(xMesh[i],yMesh[i],0))
         #ls_pts.append(Vector3(1.,0.,0.))
         # we build triangles C O U N T E R Clockwise
         # jessica's code avec triangulation automatique
         ls_ind=[]
-        for i in xrange(2, len(ls_pts)):
+        for i in range(2, len(ls_pts)):
             if  i%2 :
                 ls_ind.append(pgl.Index3(i-2,i,i-1)) 
             elif not i==2:
@@ -796,7 +796,7 @@ def computeLeafletFrom4pts(xMesh=[0.25, 0.5, 0.75, 1],
         # As the Y coordinate has changed its sign, we build 
         # automatically the triangles C C W again.
         ls_ind=[]
-        for i in xrange(2, len(ls_pts)):
+        for i in range(2, len(ls_pts)):
             if  i%2 :
                 ls_ind.append(pgl.Index3(i-2,i-1,i)) 
             elif not i==2:
@@ -1434,7 +1434,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
     if lSepalDims:
         thisHeight=lSepalDims[0]
         heightInc=(lSepalDims[0]-lSepalDims[-1])/ (numSepals-1)
-    for index in xrange(0,int(numSepals)):
+    for index in range(0,int(numSepals)):
         rotationAngle=angle72*index *2 #
         #turtle.setColor(index)
         # has this sepal been digitized ?
@@ -1480,7 +1480,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
 
     thisLength=lPetalDims[0]
     thisInc=(lPetalDims[0]-lPetalDims[-1])/ (numPetals -1)
-    for index in xrange(int(numPetals)):
+    for index in range(int(numPetals)):
         petalMatrix= TransformPetal(petalmatrix2, anglePetExt, anglePetInt, index)
         petal=pgl.BezierPatch(petalMatrix, ustride, vstride)
         petal=pgl.Scaled(Vector3(thisLength,thisLength,thisLength), petal) 
@@ -1514,7 +1514,7 @@ def getSepalsAzimuts(lSepales, Heading, Radius):
     
     # if there are 5 digitized sepals, we assume that they are correct
     if len(lSepales)==5:
-        for a in xrange(73,360,72):        
+        for a in range(73,360,72):        
             angles.append(a*np.pi/180.)
         #print "Angles : %s" % angles
     else:
@@ -1809,7 +1809,7 @@ dicAllometrie={}
 def numRang2folId(rank):
     dicRang={0:'A',1:'B',2:'C',3:'D',4:'E'}
     vraiRang=rank/2
-    if not vraiRang in dicRang.keys():
+    if not vraiRang in list(dicRang.keys()):
         vraiRang=4 # si folioles > E
     return dicRang[vraiRang]
 
@@ -1899,7 +1899,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             dicAllometrie=json.load(fjs)
             fjs.close()
         else:
-            print "Et merde !"
+            print("Et merde !")
             dicAllometrie={}
                 
 
@@ -2381,17 +2381,17 @@ def vertexVisitor4CAN02(leaf_factory=None, bud_factory=None, sepal_factory=None,
                         #laCouleur=str(maScene[obj].appearance.diffuseColor())
                         laCouleur= re.sub('Color3','', str(maScene[obj].appearance.diffuseColor()))
                         
-                        if laCouleur in coulOrganIdict.keys() :
+                        if laCouleur in list(coulOrganIdict.keys()) :
                             orgType=coulOrganIdict[laCouleur]
                         else:
-                            print "symbol: %s : %s" % (symbol, laCouleur)
+                            print("symbol: %s : %s" % (symbol, laCouleur))
                         
                     canFacts['canStream'].write(
                         "%s %d %s\n" % (
                             debutLigne % orgType, numTri,'  '.join("%8.3f" % (x) for i in ind for x in p[i])))
                     numTri += 1
         else:
-            print("canFacts: %s" % canFacts)
+            print(("canFacts: %s" % canFacts))
     # end visitor
 
     # return outputs
@@ -2603,13 +2603,13 @@ def TurtleFrame(g, visitor):
     for plant_id in g.vertices(scale=1):
         plant_node = g.node(plant_id)
         if debug :
-            print "plant_node = %s" % plant_id
+            print("plant_node = %s" % plant_id)
         # moved the "position" function away
         origin = pgl.Vector3(plant_node.XX, plant_node.YY, plant_node.ZZ)
         turtle.move(origin)
         #vid =  g.component_roots_at_scale(plant_id, scale=n).next() # does not run 
         tmp= iter(g.component_roots_at_scale(plant_id, scale=n))
-        vid = tmp.next()
+        vid = next(tmp)
 
         traverse_with_turtle(g, vid, visitor, turtle)
     return turtle.getScene()
@@ -2633,11 +2633,11 @@ def TurtleFrame4CAN02(g, visitor, plantFacts):
     for plant_id in g.vertices(scale=1):
         plant_node = g.node(plant_id)
         if debug :
-            print "plant_node = %s" % plant_id
+            print("plant_node = %s" % plant_id)
         origin = pgl.Vector3(plant_node.XX, plant_node.YY, plant_node.ZZ)
         turtle.move(origin)
         tmp= iter(g.component_roots_at_scale(plant_id, scale=n))
-        vid = tmp.next()
+        vid = next(tmp)
 
         traverse_with_turtle4CAN02(g, vid, visitor, turtle, plantFacts)
     return turtle.getScene()
@@ -2703,7 +2703,7 @@ def buildCanPath(path ):
 def clearCanPath(path ):
     """ we clear all the *.can files within the directory "path"  """
     import glob, os
-    for can in glob.glob(u'%s/*.can'%buildCanPath(path )):
+    for can in glob.glob('%s/*.can'%buildCanPath(path )):
         os.unlink (can)   
 #end clearCanPath()
 

@@ -138,7 +138,7 @@ def computeStage(stade, avancement):
         time01=plageCPV + plageSR + plageFO * tauxAvancement # petals opening
     elif re.search("(?i)ff",stade):
         time01=1                      # or 1.00 ?
-    print "time01=%f" % time01
+    print("time01=%f" % time01)
     return time01
 
 # parameters
@@ -265,19 +265,19 @@ def test():
     #direct
     for x in range(int(thisX*factor),int(thatX*factor)):
       y=x/float(factor)
-      print "%f %f" % (y,bySegments(y,minX, maxX, minY,maxY))
-    print
+      print("%f %f" % (y,bySegments(y,minX, maxX, minY,maxY)))
+    print()
 
     #inverse
     for x in range(int(maxY*factor),int(minY*factor),-1):
       y=x/float(factor)
-      print "%f %f" % (y,invBySegments(y,minX, maxX, minY, maxY))
+      print("%f %f" % (y,invBySegments(y,minX, maxX, minY, maxY)))
 
-    print
+    print()
     # reciprocity
     for x in range(int(thisX*factor),int(thatX*factor)):
       y=x/float(factor)
-      print "%f %f" % (y,invBySegments(bySegments(y,minX, maxX, minY,maxY),minX, maxX, minY,maxY))
+      print("%f %f" % (y,invBySegments(bySegments(y,minX, maxX, minY,maxY),minX, maxX, minY,maxY)))
 
 # e.g. inside gnuplot (plot "< bySegments.py" w l)
 if __name__ == "__main__":

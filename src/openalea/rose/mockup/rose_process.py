@@ -29,9 +29,9 @@ def decode_liste(codes=[], colonnes=[]):
     dictOfDirs={}
     listOfPlants=[]
 
-    #print "Entrée: \"%s\"" % codes
+    #print "Entrï¿½e: \"%s\"" % codes
 
-    map(lambda k, v: dictOfDirs.update({k: v}), clefs, manips)
+    list(map(lambda k, v: dictOfDirs.update({k: v}), clefs, manips))
     col_manip=0
     col_plante=2
     if colonnes :
@@ -39,7 +39,7 @@ def decode_liste(codes=[], colonnes=[]):
             col_manip = colonnes[0]
             col_plante = colonnes[1]
         else:
-            print "decode_liste() : Attention : préciser deux colonnes ou rien"
+            print("decode_liste() : Attention : preciser deux colonnes ou rien")
 
     for ligne in codes:
         #print "ligne : \"%s\"" % ligne
@@ -50,12 +50,12 @@ def decode_liste(codes=[], colonnes=[]):
             for cle in clefs :
                 if re.search(cle, manip):
                     outDir += "%s_" % dictOfDirs[cle]
-            outDir=re.sub("_$","/", outDir) # le dernier souligné
+            outDir=re.sub("_$","/", outDir) # le dernier soulignï¿½
             for prelev in prelevements:
                 if re.search(prelev, manip):
                     outDir += "%s/" % prelev
             #print "DIR : \"%s\"" % result
-            # le répertoire devrait être reconstitué
+            # le rï¿½pertoire devrait ï¿½tre reconstituï¿½
             if not outDir == "" :
                 plante=re.sub("^([0-9]+)_.*","\\1", plante_ID)
                 # print "Plante : %s" % plante
@@ -103,7 +103,7 @@ if __name__ == "__main__":
          return False
 
     def Help(code, msg):
-         print "%s" % msg
+         print("%s" % msg)
          sys.exit(code)
          
     import unittest
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         elif arg in helpTag:
             Help(0, helpString)
         else:
-            print """Argument "%s" non reconnu :  S T O P  !""" % arg
+            print("""Argument "%s" non reconnu :  S T O P  !""" % arg)
             Help(-1, helpString)
 
     # anyway :

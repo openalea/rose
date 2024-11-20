@@ -76,7 +76,7 @@ def readXls(fileName, numero_feuille=0, ligne_debut=0):
         try:
             sh1=wb.sheet_by_index(numero_feuille)
         except:
-            print "Le classeur %s n'a pas de feuille numéro %d" %  (fileName, numero_feuille)
+            print("Le classeur %s n'a pas de feuille numéro %d" %  (fileName, numero_feuille))
             return retList
 #        rep=""
 #        plantID=""

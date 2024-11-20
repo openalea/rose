@@ -4,14 +4,14 @@
 # $Id$
 #
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 def httpDir2DictOfFiles(url, filtre='.mtg') :
     # downloads files from a web server in temp. files, then return the dictionnary that associates temp files and filenames.
     dictoffiles = {}
     listoffiles=[]
     htmlfile=""
     # write the node code here.
-    (htmlFileName, h) = urllib.urlretrieve ( url +"/", None, urllib.reporthook)
+    (htmlFileName, h) = urllib.request.urlretrieve ( url +"/", None, urllib.reporthook)
     htmlfile=open(htmlFileName,"r")
     htmlfileContent=htmlfile.read()
     htmlfileContent = htmlfileContent.split("\n")
@@ -28,7 +28,7 @@ def httpDir2DictOfFiles(url, filtre='.mtg') :
 
         #objet=url.open_file(webserver +"/"+ fichier)
 
-        fn, h = urllib.urlretrieve(url +"/"+ fichier, None, urllib.reporthook)
+        fn, h = urllib.request.urlretrieve(url +"/"+ fichier, None, urllib.reporthook)
         #print "(fn,h) =  (%s, %s)" % (fn,h)
         dictoffiles[fichier] = fn
         

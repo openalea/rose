@@ -4,7 +4,6 @@
 # $Id$
 #
 import openalea.plantgl.all as pgl
-#from openalea.mtg.turtle import pre_order2_with_filter
 from openalea.mtg.traversal import pre_order2_with_filter
 
 def DigitReconstructionWithTurtle(g, visitor):
@@ -57,6 +56,6 @@ def TurtleFrame(g, visitor):
         origin = pgl.Vector3(plant_node.XX, plant_node.YY, plant_node.ZZ)
         turtle.move(origin)
 
-        vid =  g.component_roots_at_scale_iter(plant_id, scale=n).next()
+        vid =  next(g.component_roots_at_scale_iter(plant_id, scale=n))
         traverse_with_turtle(g, vid, visitor, turtle)
     return turtle.getScene()

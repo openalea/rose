@@ -15,7 +15,7 @@ from openalea.mtg.aml import MTG
 import numpy as np
 import random
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from openalea.mtg.algo import union
 
@@ -51,12 +51,12 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
                 iy=ix[1]
                 ix=ix[0]
             else:
-                print "cropGeneration_2011 : bad list of coordinates : %s"%ix
+                print("cropGeneration_2011 : bad list of coordinates : %s"%ix)
                 return(origin)
         if ix < 0 or iy < 0:
-            print "cropGeneration_2011 : negative coordinates are not agreed."
+            print("cropGeneration_2011 : negative coordinates are not agreed.")
         elif ix > n_x or iy > n_y :
-            print "cropGeneration_2011 : coordinates out of range."
+            print("cropGeneration_2011 : coordinates out of range.")
         else:
             return (ix*s_x + origin[0], iy*s_y + origin[1], origin[2])
 
@@ -65,27 +65,27 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
 
     # DEBUG
     #print "plantlist : %s" % plantlist
-    print "len (plantlist) : %d" % len(plantlist) 
+    print("len (plantlist) : %d" % len(plantlist)) 
     #tablelayout = []; 
     dictOfPositions={}
     mtgFiles={}
 
     # We extract plant numbers from filenames
     # and we build the mtgFiles dict as pairs of {plantNum:fileName}
-    for plantFile in existingmtglist.keys():
+    for plantFile in list(existingmtglist.keys()):
         mtgFiles[int(plantFile.rsplit(".",1)[0])]=existingmtglist[plantFile]
 
     #  list of initial positions.
     # It HAS to be completed before we can add up ancillary positions
-    for plante in plantlist.keys():
-        if int(plante) in mtgFiles.keys() :
+    for plante in list(plantlist.keys()):
+        if int(plante) in list(mtgFiles.keys()) :
             # we make a dict with file:[3D position, angle]
             dictOfPositions[mtgFiles[int(plante)]] = [[Index2Coord(plantlist[plante][0]),0.]]
     # if we want to fill up empty places with a random plant num
     if DoFill :
         listOfNums=[]
         # The list of plants whe have data about.
-        for clef in  mtgFiles.keys() :
+        for clef in  list(mtgFiles.keys()) :
             listOfNums += [clef]
         # there may be plants we do not want to use for filling.
         for noClef in excludelist:
@@ -99,9 +99,9 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
         # list of coordinates of P'
         # We can process a missing plant with several coordinates
         # so we may have used dummy numbers for missing plants
-        for plante in plantlist.keys():
+        for plante in list(plantlist.keys()):
             # if we have no data for this plant
-            if not int(plante) in mtgFiles.keys() :
+            if not int(plante) in list(mtgFiles.keys()) :
                 listOfCoords=plantlist[plante]
                 for coords in listOfCoords:
                     # get a random index number
@@ -115,7 +115,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
                     else :
                         randAngle = 0
 
-                    if mtgFiles[randPlant] in dictOfPositions.keys():
+                    if mtgFiles[randPlant] in list(dictOfPositions.keys()):
                         dictOfPositions[mtgFiles[randPlant]] += [[Index2Coord(coords),randAngle]]
                     else:
                         # If extra MTGs are found in the directory, we may use them
@@ -204,7 +204,7 @@ def files2MTGs(cropdict):
         noeud.ZZ += shiftz
 
     # creates output list (to be improved with rotates and shifts)
-    for plante in cropdict.keys():
+    for plante in list(cropdict.keys()):
 
         for shiftRot in cropdict[plante]:
             
@@ -294,7 +294,7 @@ def files2MTGs4CAN2(cropdict):
         noeud.ZZ += shiftz
 
     # creates output list (to be improved with rotates and shifts)
-    for plante in cropdict.keys():
+    for plante in list(cropdict.keys()):
 
         index=0 # the 1st occurence is the plant we're interested in
         for shiftRot in cropdict[plante]:
@@ -396,9 +396,9 @@ def getOrigin(originFilename):
     origin=None
     origin_file = open(originFilename, 'r')
     originCsv = csv.reader(origin_file,delimiter=',')
-    header=originCsv.next()
+    header=next(originCsv)
     if header == ['x','y','z']:
-        origin = [ float(item) for item in originCsv.next()]
+        origin = [ float(item) for item in next(originCsv)]
     return origin
 
 class GetOrigin(Node):
@@ -464,7 +464,7 @@ def httpDir2DictOfFiles(url, filtre='.mtg') :
     listoffiles=[]
     htmlfile=""
     
-    (htmlFileName, h) = urllib.urlretrieve ( url +"/", None, urllib.reporthook)
+    (htmlFileName, h) = urllib.request.urlretrieve ( url +"/", None, urllib.reporthook)
     htmlfile=open(htmlFileName,"r")
     htmlfileContent=htmlfile.read()
     htmlfileContent = htmlfileContent.split("\n")
@@ -481,7 +481,7 @@ def httpDir2DictOfFiles(url, filtre='.mtg') :
 
         #objet=url.open_file(webserver +"/"+ fichier)
 
-        fn, h = urllib.urlretrieve(url +"/"+ fichier, None, urllib.reporthook)
+        fn, h = urllib.request.urlretrieve(url +"/"+ fichier, None, urllib.reporthook)
         #print "(fn,h) =  (%s, %s)" % (fn,h)
         dictoffiles[fichier] = fn
         
