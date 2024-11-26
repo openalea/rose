@@ -198,7 +198,7 @@ def rawBud():
      :returns: the function computeRawBud
      """
     
-    def computeRawBud(points, turtle=None):
+    def computeRawBud(points, turtle=None, dummy=None):
         """ draws a but by using a sphere and a cone :
         puts the sphere at the bottom using the "haut1" point
         and then draws the cone from the bottom to the top "haut2".
@@ -936,8 +936,8 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
         #ustride=5 
         #vstride=5 
         # pointsNdiamters is : [[base_pos, base_diam], [None,None], [top_pos, top_diam], [...]]
-        basePos=pointsnDiameters[0][0] # TypeError: '_ProxyNode' object does not support indexing
-        topPos=pointsnDiameters[2][0]
+        basePos=pointsnDiameters[0] # TypeError: '_ProxyNode' object does not support indexing
+        topPos=pointsnDiameters[2]
         #pedDiam=pointsnDiameters[0][1]
         flowerRay=pointsnDiameters[2][1] * 0.5
         flowerHeight=norm(topPos-basePos)
@@ -1354,7 +1354,7 @@ def floralOrgan(Heading, height, Radius, lSepalAngles=[], lSepalDims=[],
         ################ 
         # we rotate the last groups of points in order to open the flower
         # N O T E Visually, petals bend more than sepal for large angles,
-        # so we must limit the angle below 90�.
+        # so we must limit the angle below 90°.
         lignes=[]
         for numRang in range(2):
             ligne=newPetalMatrix.pop()
@@ -1838,11 +1838,11 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
 
     if leaf_factory is None:
         #pass
-        leaf_factory=rawLeaflet 
+        leaf_factory=rawLeaflet
     # tests
     #leaf_factory=computeLeafletFrom4pts([0,0.5,1],[0,1,0])
     if bud_factory is None:
-        bud_factory=rawBud
+        bud_factory=rawBud()
     if sepal_factory is None:
         #pass
         sepal_factory=polygonLeaflet() # rawLeaflet test aussi
@@ -1870,20 +1870,23 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
         global rangFoliole
         #global dicAllometrie
         import json, os, re
-        import openalea.rose
-        p = re.sub("rose", "share", openalea.rose.__path__[0])
+        #import openalea.rose
+        from openalea.rose import data
+
+        #p = re.sub("rose", "share", openalea.rose.__path__[0])
+        p = data.mtg_dir() 
 
         dicAllometrie={}
         if os.path.isdir(p):
-            ficJson="%s/MTG/allometrieFolioles.json" % p
+            ficJson=p/"allometrieFolioles.json"
             if os.path.isfile(ficJson):
                 with open(ficJson,"r") as fjs:
                     dicAllometrie=json.load(fjs)
             else:
-                print("Pas de fichier %s" % ficJson)
+                print("No file %s" % ficJson)
         else:
             dicAllometrie={}
-            print("""Pas de dossier %s" !""" % (p))
+            print("""No dir %s" !""" % (p))
                 
 
         
@@ -1952,10 +1955,10 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             lSepalStore.append(points)
 	    
         elif n.label == "B1" : # flower Button
-            points = [n.parent(), n]
+            points = [position(n.parent()), position(n)]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
-                points.append(n)
+                points.append(position(n))
             bud_computer(points,turtle,lSepalStore) 
 
             # process digitized sepals 
@@ -1981,7 +1984,7 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             turtle.setColor(4) # apple green
             # process sepals
             points=[n.parent(),n]
-            fruit_computer (points, turtle, lSepalStore, -1)
+            fruit_computer(points, turtle, lSepalStore, -1)
             while lSepalStore:
                 lSepalStore.pop()
                 #sepal_computer(lSepalStore.pop(),turtle)

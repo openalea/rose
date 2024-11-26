@@ -57,6 +57,8 @@ setup(
     include_package_data = True,
     package_data = {'' : ['*.mtg', '*.drf', '*.txt', '*.csv'],},
 
+    share_dirs = {'share': 'share'},
+
     # Declare scripts and wralea as entry_points (extensions) of your package
     entry_points = {'wralea' : ['rose = openalea.rose','rose.mockup = openalea.rose.mockup'],},
     )

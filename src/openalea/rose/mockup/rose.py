@@ -72,20 +72,20 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
 
     # We extract plant numbers from filenames
     # and we build the mtgFiles dict as pairs of {plantNum:fileName}
-    for plantFile in list(existingmtglist.keys()):
+    for plantFile in existingmtglist:
         mtgFiles[int(plantFile.rsplit(".",1)[0])]=existingmtglist[plantFile]
 
     #  list of initial positions.
     # It HAS to be completed before we can add up ancillary positions
-    for plante in list(plantlist.keys()):
-        if int(plante) in list(mtgFiles.keys()) :
+    for plante in plantlist:
+        if int(plante) in mtgFiles:
             # we make a dict with file:[3D position, angle]
             dictOfPositions[mtgFiles[int(plante)]] = [[Index2Coord(plantlist[plante][0]),0.]]
     # if we want to fill up empty places with a random plant num
     if DoFill :
         listOfNums=[]
         # The list of plants whe have data about.
-        for clef in  list(mtgFiles.keys()) :
+        for clef in  mtgFiles:
             listOfNums += [clef]
         # there may be plants we do not want to use for filling.
         for noClef in excludelist:
@@ -99,9 +99,9 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
         # list of coordinates of P'
         # We can process a missing plant with several coordinates
         # so we may have used dummy numbers for missing plants
-        for plante in list(plantlist.keys()):
+        for plante in plantlist:
             # if we have no data for this plant
-            if not int(plante) in list(mtgFiles.keys()) :
+            if not int(plante) in mtgFiles :
                 listOfCoords=plantlist[plante]
                 for coords in listOfCoords:
                     # get a random index number
@@ -115,7 +115,7 @@ def cropGeneration_2011(plantlist={}, existingmtglist={}, excludelist=[], gridDe
                     else :
                         randAngle = 0
 
-                    if mtgFiles[randPlant] in list(dictOfPositions.keys()):
+                    if mtgFiles[randPlant] in dictOfPositions:
                         dictOfPositions[mtgFiles[randPlant]] += [[Index2Coord(coords),randAngle]]
                     else:
                         # If extra MTGs are found in the directory, we may use them
@@ -204,7 +204,7 @@ def files2MTGs(cropdict):
         noeud.ZZ += shiftz
 
     # creates output list (to be improved with rotates and shifts)
-    for plante in list(cropdict.keys()):
+    for plante in cropdict:
 
         for shiftRot in cropdict[plante]:
             
