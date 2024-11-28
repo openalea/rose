@@ -936,10 +936,11 @@ def bezierPatchFlower(controlpointmatrix=None,ustride=5,vstride=5,colorFunc=None
         #ustride=5 
         #vstride=5 
         # pointsNdiamters is : [[base_pos, base_diam], [None,None], [top_pos, top_diam], [...]]
-        basePos=pointsnDiameters[0] # TypeError: '_ProxyNode' object does not support indexing
-        topPos=pointsnDiameters[2]
+        basePos=pointsnDiameters[0][0] # TypeError: '_ProxyNode' object does not support indexing
+        topPos=pointsnDiameters[2][0]
         #pedDiam=pointsnDiameters[0][1]
-        flowerRay=pointsnDiameters[2][1] * 0.5
+        flowerRay=pointsnDiameters[2][1] if pointsnDiameters[2][1] else pointsnDiameters[0][1]
+        flowerRay *= 0.5
         flowerHeight=norm(topPos-basePos)
         baseRay=max(flowerRay *0.2, flowerHeight*0.2) # arbitrarily
         deltaRay=flowerRay-baseRay
@@ -1956,10 +1957,17 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
 	    
         elif n.label == "B1" : # flower Button
             points = [position(n.parent()), position(n)]
+            
+            # CPL 
+            parent = n.parent()
+            pointsnDiameter = [[position(parent), parent.Diameter]]
+            pointsnDiameter.append([None, None])
+            pointsnDiameter.append([position(n), n.Diameter])
+
             while n.nb_children() == 1:
                 n = list(n.children())[0]
                 points.append(position(n))
-            bud_computer(points,turtle,lSepalStore) 
+            bud_computer(pointsnDiameter,turtle,lSepalStore) 
 
             # process digitized sepals 
             turtle.setColor(4) # apple green
@@ -1970,8 +1978,12 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
         elif n.label == "O1" : # flOwer
             turtle.setColor(4) # apple green
 
-            points=[n.parent(),n]
-            flower_computer (points, turtle, lSepalStore, n.Diameter)
+            points=[position(n.parent()),position(n)]
+            parent = n.parent()
+            pointsnDiameter = [[position(parent), parent.Diameter]]
+            pointsnDiameter.append([None, None])
+            pointsnDiameter.append([position(n), n.Diameter])
+            flower_computer (pointsnDiameter, turtle, lSepalStore, n.Diameter)
 
             # process digitized sepals (if any)
             #turtle.setColor(len(lSepalStore)) # apple green 
@@ -1984,7 +1996,14 @@ def vertexVisitor(leaf_factory=None, bud_factory=None, sepal_factory=None,
             turtle.setColor(4) # apple green
             # process sepals
             points=[n.parent(),n]
-            fruit_computer(points, turtle, lSepalStore, -1)
+            #CPL
+            parent = n.parent()
+            pointsnDiameter = [[position(parent), parent.Diameter]]
+            pointsnDiameter.append([None, None])
+            pointsnDiameter.append([position(n), n.Diameter])
+
+            #fruit_computer(points, turtle, lSepalStore, -1)
+            fruit_computer(pointsnDiameter, turtle, lSepalStore, -1)
             while lSepalStore:
                 lSepalStore.pop()
                 #sepal_computer(lSepalStore.pop(),turtle)

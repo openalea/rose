@@ -44,13 +44,16 @@ def origin(dir):
 
 def test_one():
     dir = get_one_expe()
+    return myMTG(dir)
+
+def myMTG(dir):
     grid_fn = grid(dir)
     origin_fn = origin(dir)
 
     dictofindices, gridSpecs = rose.getGrid(grid_fn)
-    print(f'Grid : {dictofindices}, {gridSpecs}')
+    #print(f'Grid : {dictofindices}, {gridSpecs}')
     _origin = rose.getOrigin(origin_fn)
-    print(f'Origins : {_origin}')
+    #print(f'Origins : {_origin}')
 
     plantlist = dictofindices
     existingmtglist, = rose.localDir2DictOfFiles([str(fn) for fn in dir.glob('*.mtg')])
@@ -69,15 +72,16 @@ def test_one():
         DoFill=DoFill,
         DoRotate=DoRotate)
     
-    print(dictOfPositions)
+    #print(dictOfPositions)
 
     listofmtgs, = rose.files2MTGs(dictOfPositions)
 
-    print(listofmtgs)
+    #print(listofmtgs)
 
     mtg_union, = rose.mTG_union(listofmtgs)
 
     return mtg_union
+
 
 def reconstruct(g):
     lx = [0, 0.2, 0.4, 0.6, 0.8, 1.]
@@ -98,4 +102,18 @@ def reconstruct(g):
                             fruit_factory=fruit_factory,
                             knop_factory=knop_factory,
                             stipuLe_factory=stipule_factory)
-    return reconstructWithTurtle(g, visitor, 2.1)
+    scene, = reconstructWithTurtle(g, visitor, 2.1)
+    return scene
+
+def run_all():
+    expes = get_all_expe()
+    gs = [myMTG(d) for d in expes]
+    scenes = [reconstruct(g) for g in gs]
+    return scenes
+
+def bug1():
+    expes = get_all_expe()
+    d = expes[10]
+    g=myMTG(d)
+    scene = reconstruct(g)
+    return scene
