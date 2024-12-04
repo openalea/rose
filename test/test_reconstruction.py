@@ -1,4 +1,5 @@
 from openalea.rose import data
+from openalea.plantgl.all import Scene
 
 from openalea.rose.mockup import rose
 from openalea.rose.mockup.rose_geometry import (
@@ -117,3 +118,13 @@ def bug1():
     g=myMTG(d)
     scene = reconstruct(g)
     return scene
+
+def environment():
+    expes = get_all_expe()
+    d = expes[6]
+    g=myMTG(d)
+    scene = reconstruct(g)
+    env = Scene(data.environments()[0])
+    scene.add(env)
+    return scene
+

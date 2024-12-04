@@ -13,6 +13,17 @@ def mtg_dir():
 
     mtg_dir = next(p.glob('MTG'))
     return mtg_dir
+    
+def geom_dir():
+    p = data()
+    print(p)
+    geom_dir = next(p.glob('GEOM'))
+    return geom_dir
+
+def environments():
+    geom_d = geom_dir()
+    env_dir = [p for p in geom_d.glob('*') if p.is_file()]
+    return [str(geom_d / p.name) for p in env_dir]
 
 def manip_dir():
     mtg_d = mtg_dir()
