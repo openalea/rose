@@ -37,7 +37,7 @@ class GetHomeDir(Node):
 
 
 def readCsv(fileName, delimiter=",", ligne_debut=0):
-    """we read the csv file, then we return a list of splited lines"""
+    """we read the csv file, then we return a list of split lines"""
     retList = []
     fIn = open(fileName, "U")
     if not fIn:
@@ -74,7 +74,7 @@ class ReadCsv(Node):
 
 
 def readXls(fileName, numero_feuille=0, ligne_debut=0):
-    """we used to read the "fileName" xls file, then we could return a list of splited lines
+    """we used to read the "fileName" xls file, then we could return a list of split lines
     There is no more a xlrd module within openalea
     """
     import xlrd
@@ -102,8 +102,6 @@ def readXls(fileName, numero_feuille=0, ligne_debut=0):
                     sortie.append(item.value)
                 retList.append(sortie)
 
-        # print "%s" % dir(rep)
-        # print "%s %s" % (rep, plantID)
     return retList
 
 
@@ -151,7 +149,6 @@ def scene2Can01(maScene, fileName, makeDir=False):
     out = []
     for obj in range(len(maScene)):
         couleur = maScene[obj].appearance.diffuseColor()
-        # print "r,g,b : %d,%d,%d" % (couleur.red, couleur.green, couleur.blue)
         geometry = mesh(maScene[obj])
         p = geometry.pointList
         index = geometry.indexList
@@ -163,9 +160,8 @@ def scene2Can01(maScene, fileName, makeDir=False):
         if not os.path.isdir(chemin):
             os.system("mkdir -p %s" % chemin)
 
-    o = open(fileName, "w")  # stockage dans un fichier can persistant
+    o = open(fileName, "w")  # storage in a persistent can file
     o.write("CAN01\n")
-    # print "len(out) = %s" % len(out)
     for i in range(len(out)):
         o.write(out[i] + "\n")
 
@@ -230,7 +226,7 @@ def tempPickleFile(filename):
 
 
 def jsonDump(data, file_path):
-    # unfortunately, json says that an MTG is not serialisable
+    # unfortunately, json says that an MTG is not serializable
     #
     f = open(file_path, "w")
     json.dump(data, f, indent=4)
@@ -251,7 +247,7 @@ def jsonLoad(file_path):
 
 
 def rootName(nom):
-    """renvoie la séquence numérique en début du nom de fichier"""
+    """returns the numeric sequence at the beginning of the file name"""
     root = nom.rsplit("/", 1)[-1]
     root = root.split(".", 1)[0]
     root = re.sub("^([0-9]+).*", "\\1", root)
@@ -304,11 +300,11 @@ if __name__ == "__main__":
             random.shuffle(l1)
             liste = ["%s" % elt for elt in l1]
             random.shuffle(liste)
-            # il y a une chance sur (10!)² que le résultat du test soit dû au hasard
+            # there is a one in (10!)² chance that the test result is due to chance
             self.assertEqual(self.tupleInt, tuple(intSort(liste)))
 
             t1 = tuple(l1)
-            # il n'est plus dû au hasard :
+            # it is no longer due to chance:
             self.assertNotEqual(t1, tuple(intSort(liste)))
 
     unittest.main()

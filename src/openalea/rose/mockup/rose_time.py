@@ -30,7 +30,6 @@ def bySegments(x, Xmin, Xmax, Ymin, Ymax):
     :param Ymax: the high value of the y range
     :return: the interpolated y value
     """
-    # print "Xmin, Xmax, Ymin, Ymax = %f, %f, %f, %f" %(Xmin, Xmax, Ymin, Ymax)
     if (Xmax <= Xmin) or (Ymin == Ymax):
         raise ValueError
     if x <= Xmin:
@@ -93,7 +92,6 @@ def checkIfIn(left, right, value):
                 value = right  # if so : value is set to the lower border
         elif value < left:  # else : is value inside the interval ?
             value = left  # if so : value is set to the higher border
-    # print "value=%s" % value
     return value
 
 
@@ -133,7 +131,6 @@ plageFO = 1 - finSR  # =0.52
 
 def computeStage(stade, avancement):
     tauxAvancement = avancement / 100.0  # back to decimal value
-    # print "tauxAvancement=%s" % tauxAvancement
 
     # re.search ("(?i)...) : case insensitive search
     if re.search("(?i)bfv", stade):

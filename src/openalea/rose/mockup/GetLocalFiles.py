@@ -4,8 +4,10 @@
 import os
 
 
-def GetLocalFiles(filesInPath=[]):
-    """Create a dictionnary from the list of available files"""
+def GetLocalFiles(filesInPath=None):
+    """Create a dictionary from the list of available files"""
+    if filesInPath is None:
+        filesInPath = []
     dictoffilenames = {}
     # write the node code here.
     # filesInPath=filesInPath.split("\n")

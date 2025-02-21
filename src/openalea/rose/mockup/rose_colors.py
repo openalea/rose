@@ -131,7 +131,7 @@ def LightYellow():
 
 
 # The following colors are hard coding the type of the organ
-# TODO : si une des 3 valeurs dépasse 127, y a t-il mise à l'échelle ?
+# TODO : if one of the 3 values exceeds 127, is there scaling?
 def Button():
     return pgl.Color3(70, 130, 10)  # 35,65,5)
 

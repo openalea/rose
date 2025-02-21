@@ -38,8 +38,6 @@ def decode_liste(codes=None, colonnes=None):
     dictOfDirs = {}
     listOfPlants = []
 
-    # print "Entrï¿½e: \"%s\"" % codes
-
     list(map(lambda k, v: dictOfDirs.update({k: v}), clefs, manips))
     col_manip = 0
     col_plante = 2
@@ -51,7 +49,6 @@ def decode_liste(codes=None, colonnes=None):
             print("decode_liste() : Attention : preciser deux colonnes ou rien")
 
     for ligne in codes:
-        # print "ligne : \"%s\"" % ligne
         if ligne:
             manip = ligne[col_manip]
             plante_ID = ligne[col_plante]
@@ -59,17 +56,14 @@ def decode_liste(codes=None, colonnes=None):
             for cle in clefs:
                 if re.search(cle, manip):
                     outDir += "%s_" % dictOfDirs[cle]
-            outDir = re.sub("_$", "/", outDir)  # le dernier soulignï¿½
+            outDir = re.sub("_$", "/", outDir)  # The last underlined
             for prelev in prelevements:
                 if re.search(prelev, manip):
                     outDir += "%s/" % prelev
-            # print "DIR : \"%s\"" % result
-            # le rï¿½pertoire devrait ï¿½tre reconstituï¿½
+            # the directory should be reconstructed
             if not outDir == "":
                 plante = re.sub("^([0-9]+)_.*", "\\1", plante_ID)
-                # print "Plante : %s" % plante
                 result = "%s%s" % (outDir, plante)
-                # result += "%s" % plante
                 if result not in listOfPlants:
                     listOfPlants.append(result)
                     retVal.append(result)
@@ -115,7 +109,6 @@ if __name__ == "__main__":
 
     def Help(code, msg):
         print("%s" % msg)
-        sys.exit(code)
 
     import unittest
 

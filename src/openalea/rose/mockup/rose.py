@@ -53,7 +53,6 @@ def cropGeneration_2011(
     :param DoFill: 'Should we fill empty places with existing data ?'
     :param DoRotate: 'Should or should we not rotate the plants used for filling'
     """
-    # plant_mtgs = [];
     if gridDef is None:
         gridDef = []
     if excludelist is None:
@@ -93,7 +92,6 @@ def cropGeneration_2011(
     # end index2coord
 
     # DEBUG
-    # print "plantlist : %s" % plantlist
     print("len (plantlist) : %d" % len(plantlist))
     # tablelayout = [];
     dictOfPositions = {}
@@ -469,7 +467,7 @@ def getGrid(gridfilename):
         ligne = ligne[0].split("\t")
         return ligne
 
-    # Create a dictionnary whose keys are plants ID and values are lists of plant positions
+    # Create a dictionary whose keys are plants ID and values are lists of plant positions
     # From J. Berhteloot's CropGeneration
     coords_file = open(gridfilename, "r")
     dictofindices = {}
@@ -494,7 +492,7 @@ class GetGrid(Node):
     def __call__(self, inputs):
         gridFileName = self.get_input("gridFileName")
         (dico, liste) = getGrid(gridFileName)
-        return (dico, liste)
+        return dico, liste
 
 
 # end GrifFile2dict
@@ -511,20 +509,14 @@ def httpDir2DictOfFiles(url, filtre=".mtg"):
     htmlfileContent = htmlfile.read()
     htmlfileContent = htmlfileContent.split("\n")
     for ligne in htmlfileContent:
-        # print "ligne= %s" % ligne
         if re.search(filtre, ligne):
             filename = re.sub('<li><a href="', "", ligne)
             filename = re.sub('">.*</a></li>$', "", filename)
-            # print "(filtre, ligne) = (%s,%s)" % (filtre, ligne)
             listoffiles += [filename]
     htmlfile.close()
     for fichier in listoffiles:
-        # url=urllib.URLopener(open_http)
-
-        # objet=url.open_file(webserver +"/"+ fichier)
 
         fn, h = urllib.request.urlretrieve(url + "/" + fichier, None, urllib.reporthook)
-        # print "(fn,h) =  (%s, %s)" % (fn,h)
         dictoffiles[fichier] = fn
 
     # return outputs
@@ -580,8 +572,6 @@ class LocalDir2DictOfFiles(Node):
 #################################################################
 def mTG_union(mtgsin):
     """make the union of MTGs"""
-    mtgout = None
-    # print "len(mtgsin)=%d" % len(mtgsin)
     if isinstance(mtgsin, list):
         if len(mtgsin) >= 2:
             mtgout = union(mtgsin[0], mtgsin[1])
