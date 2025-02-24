@@ -126,9 +126,6 @@ class ReadXls(Node):
 
 
 def mesh(geometry):
-    # d = pgl.Tesselator()
-    # geometry.apply(d)
-    # return d.result
     tessel = pgl.Tesselator()
     geometry.apply(tessel)
     mesh_ = tessel.triangulation

@@ -93,7 +93,6 @@ def cropGeneration_2011(
 
     # DEBUG
     print("len (plantlist) : %d" % len(plantlist))
-    # tablelayout = [];
     dictOfPositions = {}
     mtgFiles = {}
 
@@ -175,8 +174,6 @@ class CropGeneration_2011(Node):
         self.add_input(name="DoFill", interface=IBool)
         self.add_input(name="DoRotate", interface=IBool)
         self.add_output(name="dictOfPositions", interface=IDict)
-        # self.add_input( name = '',
-        # interface = )
 
     def __call__(self, inputs):
         plantlist = self.get_input("plantlist")
@@ -247,7 +244,6 @@ def files2MTGs(cropdict):
             sz = shift[2]
 
             angle = shiftRot[1]
-            # angle= 1. # DBG 1 rad.
             (rc, rs) = (np.cos(angle), np.sin(angle))
 
             # load the MTG
@@ -339,7 +335,6 @@ def files2MTGs4CAN2(cropdict):
             sz = shift[2]
 
             angle = shiftRot[1]
-            # angle= 1. # DBG 1 rad.
             (rc, rs) = (np.cos(angle), np.sin(angle))
 
             # load the MTG

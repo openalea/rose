@@ -195,9 +195,6 @@ def notation2flowerAngles(stade, avancement=0.0, sepalAngles=None, flowerAngles=
         sepalAngles = []
     if flowerAngles is None:
         flowerAngles = []
-    sepalExtAngle = None
-    sepalIntAngle = None
-    sepalLength = None
 
     # TODO : déterminer une priorité des entrées pour éviter
     # les incohérences tq pétales + ouverts que sépales
@@ -223,7 +220,6 @@ def notation2flowerAngles(stade, avancement=0.0, sepalAngles=None, flowerAngles=
                 if len(sepalAngles) > 2:
                     sepalExtAngle = sepalAngles[2]  # angle degrees
 
-    time01 = 0.0
     avancement = checkIfIn(0.0, 100.0, avancement)  # avancement must inside [0,100]
     time01 = computeStage(stade, avancement)
 
@@ -239,9 +235,6 @@ def notation2flowerAngles(stade, avancement=0.0, sepalAngles=None, flowerAngles=
             [petalExtAngle, petalIntAngle],
         ]
     elif re.search("(?i)ff", stade):
-        sepalExtAngle = outerSepalAngle(time01)
-        sepalIntAngle = innerSepalAngle(time01)
-        petalExtAngle = outerPetalAngle(time01)
         return [], [0, [120, 120]]
 
     if sepalExtAngle is None:  # no measure for  sepal angles, so
@@ -283,14 +276,12 @@ def test():
     for x in range(int(thisX * factor), int(thatX * factor)):
         y = x / float(factor)
         print("%f %f" % (y, bySegments(y, minX, maxX, minY, maxY)))
-    print()
 
     # inverse
     for x in range(int(maxY * factor), int(minY * factor), -1):
         y = x / float(factor)
         print("%f %f" % (y, invBySegments(y, minX, maxX, minY, maxY)))
 
-    print()
     # reciprocity
     for x in range(int(thisX * factor), int(thatX * factor)):
         y = x / float(factor)

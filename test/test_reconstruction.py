@@ -119,9 +119,9 @@ def bug1():
     scene = reconstruct(g)
     return scene
 
-def environment():
+def environment(idx=0):
     expes = get_all_expe()
-    d = expes[6]
+    d = expes[idx]
     g=myMTG(d)
     scene = reconstruct(g)
     env = Scene(data.environments()[0])
