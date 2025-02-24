@@ -375,17 +375,8 @@ def flower(points, turtle=None, lSepales=None, diameter=None):
     ## variables
     if lSepales is None:
         lSepales = []
-    Heading = Vector3(0, 0, 1)
-    height = 30
-    Radius = Vector3(0, 1, 0)
-    lSepalAngles = [80, 90]
-    lSepalDims = [20, 30]
-    lPetalAngles = [20, 30]
-    lPetalDims = 20
-
     stade = None
     PcStade = 0
-
     (
         Heading,
         height,
@@ -556,8 +547,6 @@ def revolutionBud(revVol=None):
         budAxis.normalize()  # necessary ?
 
         # prolongation of ped
-        # turtle.oLineTo(points[0])
-        # turtle.push()
         turtle.oLineTo(points[0][0] + budAxis * 4)  # + 4 units (mm)
         turtle.push()  #
         turtle.setColor(4)  # apple green
@@ -566,15 +555,9 @@ def revolutionBud(revVol=None):
         faceTo(turtle, budAxis)
 
         revBud = pgl.Scaled(Vector3(length * 0.2, length * 0.2, length), lRevVol)
-        # revBud=Oriented(upAxis, budAxis, revBud)
         # we are ready to draw the rev'bud
         turtle.customGeometry(revBud, 1)
 
-        ## visual control test
-        # turtle.move(topPt)
-        # turtle.setColor(0)
-        # turtle.customGeometry(Sphere(length/12.), 1)
-        ## end test # SUCCESSFUL @ 20111019
 
         turtle.pop()
 
@@ -862,7 +845,6 @@ def computeLeafletFrom4pts(xMesh=None, yMesh=None):  # was : [0.81, 0.92 , 0.94,
         for i in range(len(xMesh)):
             ls_pts.append(Vector3(xMesh[i], 0, 0))
             ls_pts.append(Vector3(xMesh[i], yMesh[i], 0))
-        # ls_pts.append(Vector3(1.,0.,0.))
         # we build triangles C O U N T E R Clockwise
         # jessica's code avec triangulation automatique
         ls_ind = []
@@ -873,7 +855,6 @@ def computeLeafletFrom4pts(xMesh=None, yMesh=None):  # was : [0.81, 0.92 , 0.94,
                 ls_ind.append(pgl.Index3(i - 1, i, i - 2))
             else:  # i==2
                 ls_ind.append(pgl.Index3(i - 2, i - 1, i))
-        # ls_ind=[pgl.Index3(0,2,1),pgl.Index3(1,2,3),pgl.Index3(2,4,3),pgl.Index3(3,4,5),pgl.Index3(4,6,5),pgl.Index3(5,6,7)]
         triangleSet = pgl.TriangleSet(pgl.Point3Array(ls_pts), pgl.Index3Array(ls_ind))
 
         geom = triangleSet
@@ -882,7 +863,6 @@ def computeLeafletFrom4pts(xMesh=None, yMesh=None):  # was : [0.81, 0.92 , 0.94,
         turtle.setHead(normAxis, Axis)
 
         # 4 testing : display normal vector for this half-leaflet
-        # displayNormalVector(turtle,points,0)
 
         # Rightmost half-leaflet
         side = points[1] - points[0]
@@ -893,10 +873,6 @@ def computeLeafletFrom4pts(xMesh=None, yMesh=None):  # was : [0.81, 0.92 , 0.94,
         lateralD = Axis ^ side  # to detect closed leflets
         lateralD.normalize()
 
-        # anglOuverture=np.arccos(dot(lateralG,lateralD))
-        # seuil= deg2rad*90 # was 120 #
-        # if anglOuverture < seuil :
-        #    myColors.setTurtleAnthocyan(turtle)
         # we draw the half-leaflet now that we comuted it's color
         turtle.customGeometry(geom, 1)
 
@@ -925,7 +901,6 @@ def computeLeafletFrom4pts(xMesh=None, yMesh=None):  # was : [0.81, 0.92 , 0.94,
         turtle.customGeometry(geom, 1)
 
         # 4 testing : display normal vector for this half-leaflet
-        # displayNormalVector(turtle,points,0)
 
         turtle.pop()  # against 1st push()
 
@@ -1057,14 +1032,10 @@ def bezierPatchFlower(controlpointmatrix=None, ustride=5, vstride=5, colorFunc=N
             luStride = 5
         if lvStride < 5:
             lvStride = 5
-        # ustride=5
-        # vstride=5
-        # pointsNdiamters is : [[base_pos, base_diam], [None,None], [top_pos, top_diam], [...]]
         basePos = pointsnDiameters[0][
             0
         ]  # TypeError: '_ProxyNode' object does not support indexing
         topPos = pointsnDiameters[2][0]
-        # pedDiam=pointsnDiameters[0][1]
         flowerRay = (
             pointsnDiameters[2][1] if pointsnDiameters[2][1] else pointsnDiameters[0][1]
         )
@@ -1098,7 +1069,6 @@ def bezierPatchFlower(controlpointmatrix=None, ustride=5, vstride=5, colorFunc=N
         #  orient the turtle
         flowerAxis = topPos - basePos
         faceTo(turtle, flowerAxis)
-        # turtle.setColor(4) # kind of yellow-green
         turtle.customGeometry(ovary, 1)  #
 
         myColorFunc(turtle)
@@ -1168,7 +1138,6 @@ def getValuesFromSepals(lSepales, mainAxis):
     angles = []
     lengthes = []
     if lSepales:
-        # testSepales=[]
         # avant-der (pointe) - premier (insertion rachis)
         vein = lSepales[0][-2] - lSepales[0][0]
         side = cross(mainAxis, vein)
@@ -1242,9 +1211,6 @@ def flowerParameters(points, stade=None, PcStade=0, lSepales=None, flowerDiamete
 
     if lSepales is None:
         lSepales = []
-    Heading = Vector4(0, 0, 1, 1)
-    height = 0
-    Radius = Vector4(0, 1, 0, 1)
     lSepalAngles = []
     lSepalDims = []
     lRealSepalsAzimuts = []  # digitized sepals angles
@@ -1280,7 +1246,6 @@ def flowerParameters(points, stade=None, PcStade=0, lSepales=None, flowerDiamete
 
             # we compute the angle(s)
             lPetalAngles.append(np.arctan2(flowerRay, height))
-            # lPetalDims.append(height / np.cos(lPetalAngles[0]))
             lPetalDims.append(np.sqrt(height * height + flowerRay * flowerRay))
 
             lPetalAngles[0] /= deg2rad
@@ -1316,51 +1281,6 @@ def flowerParameters(points, stade=None, PcStade=0, lSepales=None, flowerDiamete
 
 
 # end flowerParameters
-
-
-# def fruitParameters(points, stade=None, PcStade=0, lSepales=[]):
-#    """ returns a serie of parameters to draw fruits
-#        Obsolete ; use flowerParameters instead
-#    """
-#    Heading = Vector4(0,0,1,1)
-#    height=0
-#    Radius = Vector4(0,1,0,1)
-#    lSepalAngles= []
-#    lSepalDims = []
-#    lPetalAngles = []
-#    lPetalDims = []
-#
-#    # we extract the positions of distant points
-#    ped=position(points[0])
-#    top=position(points[-1])
-#
-#    # we compute the heading and size of the bud
-#    (Heading,height) = computeHeading([ped, top])
-#
-#    # we check for sepals and compute their angles if any,
-#    if lSepales :
-#        (lSepalAngles,lSepalDims,Radius) = getValuesFromSepals(lSepales, Heading)
-#    else :
-#        Radius=computeFacingFromUp(Heading)
-#        # if no sepals, we check for "stade" notations
-#
-#        if stade: # may check for only SR, FO and FF here
-#            lSepalAngles,lDummyDims = notation2flowerAngles(stade, PcStade)
-#
-#    # we get the diameter
-#    flowerRay=  mtg.property('Diameter')[top]*0.5 # spyder doesn't know about mtg
-#    # we compute the angle(s)
-#    lPetalAngles[0]= np.arctan2(height,flowerRay)
-#    lPetalDims[0]=height / np.cos(lPetalAngles[0])
-#
-#    lPetalAngles[0] /= deg2rad
-#    lPetalAngles.apend(lPetalAngles[0]*0.8)
-#    lPetalDims.append(lPetalDims[0])
-#
-#    return(Heading, height, Radius, lSepalAngles, lSepalDims,
-#     lPetalAngles, lPetalDims)
-## end fruitParameters
-
 
 def floralOrgan(
     Heading,
@@ -1457,8 +1377,9 @@ def floralOrgan(
     ]
 
     def TransformSepal(sepalMatrix, angleExt, angleInt, numero=0):
-        """this procedure will curve the sepal according to the stage"""
-        """ We assume that sepalMatrix contains a vertical "impulse" profile 
+        """
+        this procedure will curve the sepal according to the stage.
+        We assume that sepalMatrix contains a vertical "impulse" profile
         i.e the  z draw a _||_
         we rotate the 3rd point and followings around the origin and the y axis, 
         by a value of 2pi/3 * stage 
@@ -1544,7 +1465,6 @@ def floralOrgan(
         anglePlus = angle * 1.2
         (sinPlus, cosPlus) = getSiCo(anglePlus)  # to wave the petal
 
-        # facteur = min(max(angle/0.2, 0.2),1)
         facteur = np.sqrt(facteur)
 
         for line in petalMatrix:
@@ -1595,8 +1515,6 @@ def floralOrgan(
     turtle.push()
     myColors.setTurtlePed(turtle)
     turtle.oLineRel(Heading * taille_fruit)
-    # myColors.setTurtleOrange(turtle)
-    # turtle.setColor(4)
 
     ############################ O V A R Y   |   F R U I T
     anglePetExt = anglePetInt = 0
@@ -1610,7 +1528,6 @@ def floralOrgan(
             Vector3(taille_fruit * 1.333, taille_fruit * 1.333, taille_fruit),
             receptacle,
         )
-        # receptacle= pgl.Translated(0, 0, -taille*0.5, receptacle)
 
     else:
         myColors.setTurtleReceptacle(turtle)
@@ -1640,15 +1557,8 @@ def floralOrgan(
         heightInc = (lSepalDims[0] - lSepalDims[-1]) / (numSepals - 1)
     for index in range(0, int(numSepals)):
         rotationAngle = angle72 * index * 2  #
-        # turtle.setColor(index)
         # has this sepal been digitized ?
         Go = True
-        # if lNoSepals:
-        #    for az in lNoSepals:
-        #        if inSector(rotationAngle,az, angle72*.5) :
-        #            Go = False
-        #            lNoSepals.remove(az)
-
         # Digitized sepals will not be drawn ; instead we draw the created ones
         # as they fit better with the created sepals
         if Go:  # we draw "replacement" sepal
@@ -2004,7 +1914,6 @@ def petalMatrix():
 
     :returns: the control points matrix
     """
-    # from openalea.mtg.plantframe import Vector4 as V4
     from openalea.plantgl.math import Vector4 as V4
 
     # code
@@ -2050,7 +1959,6 @@ def position(n):
 
 # endef position(n)
 
-# lSepalStore=[]
 rangFoliole = 0  # pour utiliser l'allometrie par rang
 dicAllometrie = {}
 
@@ -2129,12 +2037,8 @@ def vertexVisitor(
         a function that analyses the code of a vertex then takes decisions about the ways to display it
         """
         global rangFoliole
-        # global dicAllometrie
-
-        # import openalea.rose
         from openalea.rose import data
 
-        # p = re.sub("rose", "share", openalea.rose.__path__[0])
         p = data.mtg_dir()
 
         dicAllometrie = {}
@@ -2208,10 +2112,6 @@ def vertexVisitor(
                 n = list(n.children())[0]
                 points.append(position(n))
             myColors.setTurtleSepal(turtle)
-
-            # lesX, lesY = dicAllometrie['S']
-            # sepal_computer=computeLeafletFrom4pts(lesX,lesY)
-            # sepal_computer(points, turtle)
             lSepalStore.append(points)
 
         elif n.label == "B1":  # flower Button
@@ -2234,12 +2134,10 @@ def vertexVisitor(
             turtle.setColor(4)  # apple green
             while lSepalStore:
                 lSepalStore.pop()
-                # sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "O1":  # flOwer
             turtle.setColor(4)  # apple green
 
-            points = [position(n.parent()), position(n)]
             parent = n.parent()
             pointsnDiameter = [
                 [position(parent), parent.Diameter],
@@ -2249,11 +2147,9 @@ def vertexVisitor(
             flower_computer(pointsnDiameter, turtle, lSepalStore, n.Diameter)
 
             # process digitized sepals (if any)
-            # turtle.setColor(len(lSepalStore)) # apple green
             turtle.setColor(4)  # apple green
             while lSepalStore:
                 lSepalStore.pop()
-            #    sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "C1":  # fruit (Cynorrodon)
             turtle.setColor(4)  # apple green
@@ -2267,11 +2163,9 @@ def vertexVisitor(
                 [position(n), n.Diameter],
             ]
 
-            # fruit_computer(points, turtle, lSepalStore, -1)
             fruit_computer(pointsnDiameter, turtle, lSepalStore, -1)
             while lSepalStore:
                 lSepalStore.pop()
-                # sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "T1":  # Terminator
             # The turtle is supposed to be at the top of the previous vertex
@@ -2339,7 +2233,6 @@ def can02line(dateDigit, typeOrg, numPlante, numOrg):
 # global variables whose values remains unchanged between successive calls of vertexVisitor4CAN02
 numeroPlante = 0  # the plant number, to detect when a new plant is processed
 numApp = 0  # the number of callings within a plant (debug purposes)
-# orgNum = 1     # the organ Id
 sOn = []  # ?? todo : unerstand y # None         # the stack of nodes that carry a branch
 oldOrdre = 0  # did we branch or debranch ?
 
@@ -2392,9 +2285,9 @@ def vertexVisitor4CAN02(
     from openalea.mtg import MTG as omm
     import json
     import re
-    import alinea.rose
+    import openalea.rose
 
-    pkg = alinea.rose.__path__
+    pkg = openalea.rose.__path__
 
     for path in pkg:
         if re.search("rose/rose$", path):
@@ -2476,7 +2369,6 @@ def vertexVisitor4CAN02(
         plantNum = None
         global oldOrdre  # keep the order between 2 calls
         global sOn  # keep the stack of node number between 2 calls
-        # global anglOuverture
 
         orgType = 666
         if symbolOrganIdict:
@@ -2563,7 +2455,6 @@ def vertexVisitor4CAN02(
             orgType = symbolOrganIdict[n.label[0]]
 
         elif n.label == "S1":
-            # orgType=6 # sepal
             points = [position(n.parent()), pt]
             while n.nb_children() == 1:
                 n = list(n.children())[0]
@@ -2575,7 +2466,6 @@ def vertexVisitor4CAN02(
             sepal_computer(points, turtle)
 
         elif n.label == "B1":
-            # orgType=7 # flower button
             myColors.setTurtleButton(maTortue)
             myColors.setTurtleButton(turtle)
             points = [n.parent(), n]
@@ -2586,50 +2476,28 @@ def vertexVisitor4CAN02(
             bud_computer(points, maTortue, lSepalStore)
 
             # process digitized sepals
-            # turtle.setColor(4) # fluo apple green
-            # maTortue.setColor(4)
             while lSepalStore:
                 lSepalStore.pop()
-                # sepal_computer(lSepalStore[-1],maTortue)
-                # sepal_computer(lSepalStore.pop(),turtle)
-
         elif n.label == "O1":
-            # orgType=8 # fleur
-            #            turtle.setColor(4) #fluo apple green
-            #            maTortue.setColor(4)
-
             points = [n.parent(), n]
             flower_computer(points, turtle, lSepalStore, n.Diameter)
             flower_computer(points, maTortue, lSepalStore, n.Diameter)
 
             # process digitized sepals (if any)
-            # turtle.setColor(4) # fluo apple green
-            # maTortue.setColor(4) #
             while lSepalStore:
                 lSepalStore.pop()
-                # sepal_computer(lSepalStore[-1],maTortue)
-                # sepal_computer(lSepalStore.pop(),turtle)
 
         elif n.label == "C1":
-            # orgType=9 # fruit or cynorrhodon
-            # turtle.setColor(4) # fluo apple green
-            # maTortue.setColor(4) #
             points = [n.parent(), n]
             fruit_computer(points, turtle, lSepalStore, -1)
             fruit_computer(points, maTortue, lSepalStore, -1)
-            # turtle.setColor(4) # fluo apple green
-            # maTortue.setColor(4) #
             while lSepalStore:
                 lSepalStore.pop()
-                # sepal_computer(lSepalStore[-1],maTortue)
-                # sepal_computer(lSepalStore.pop(),turtle)
 
             # process terminator
         elif n.label == "T1":
-            # orgType=10 # terminator
             # The turtle is supposed to be at the top of the previous vertex
             turtle.setColor(2)  # green
-            # turtle.startGC()
             turtle.oLineTo(pt)
             turtle.setWidth(0.01)
 
@@ -2660,7 +2528,6 @@ def vertexVisitor4CAN02(
 
         if canFacts:
             numApp += 1
-            # out = []
             # TODO : modifier en laissant orgType vide "%%s"
             debutLigne = can02line(canFacts["dateDigit"], "%s", plantNum, orgNum)
 
@@ -2677,8 +2544,6 @@ def vertexVisitor4CAN02(
                 for ind in index:
                     if symbol in "B O C".split():
                         # compute orgType
-                        # from maScene[obj].appearance.diffuseColor()
-                        # laCouleur=str(maScene[obj].appearance.diffuseColor())
                         laCouleur = re.sub(
                             "Color3", "", str(maScene[obj].appearance.diffuseColor())
                         )
@@ -2837,7 +2702,6 @@ def traverse_with_turtle(g, vid, visitor, turtle=None):
 
     def pop_turtle(v):
         if g.edge_type(v) == "+":
-            # turtle.stopGC()
             turtle.pop()
 
     turtle.push()
@@ -2877,13 +2741,11 @@ def traverse_with_turtle4CAN02(g, vid, visitor, turtle=None, canFacts=None):
     def push_turtle(v):
         if g.edge_type(v) == "+":
             turtle.push()
-            # turtle.startGC()
             turtle.setId(v)
         return True
 
     def pop_turtle(v):
         if g.edge_type(v) == "+":
-            # turtle.stopGC()
             turtle.pop()
 
     turtle.push()
@@ -2920,7 +2782,6 @@ def TurtleFrame(g, visitor):
     turtle = pgl.PglTurtle()
     ## we want to change the default color
     ## let's wait to have scanned some photographs to set this
-    # setTurtleStrand(turtle)
 
     for plant_id in g.vertices(scale=1):
         plant_node = g.node(plant_id)
@@ -2929,7 +2790,6 @@ def TurtleFrame(g, visitor):
         # moved the "position" function away
         origin = pgl.Vector3(plant_node.XX, plant_node.YY, plant_node.ZZ)
         turtle.move(origin)
-        # vid =  g.component_roots_at_scale(plant_id, scale=n).next() # does not run
         tmp = iter(g.component_roots_at_scale(plant_id, scale=n))
         vid = next(tmp)
 
@@ -2947,7 +2807,7 @@ def TurtleFrame4CAN02(g, visitor, plantFacts):
 
     :param g: an MTG object to explore.
     :param visitor: the function to be called at every node of the "g" MTG.
-    :calls: pgl.PglTurtle that makes a brand new turtle.
+    :calls: pgl.PglTurtle that makes a brand-new turtle.
     :calls: the traverse_with_turtle function, with the turtle as an argument
     :return: the scene collected by the turtle during the walkthrough.
     """
@@ -3086,22 +2946,12 @@ def dateDigit(dirName, plantnum):
     Getting the dict (at least it's name) as an input of the node could be an option
 
     """
-    # import time
-    # return time.strftime('%Y%m%d',time.localtime())
     import json
     import re
 
-    #    from openalea.core.pkgmanager import PackageManager
-    #    pm = PackageManager()
-    #    pkg = pm.get_wralea_path()
-    import alinea.rose
+    import openalea.rose
 
-    p = re.sub("rose$", "share", alinea.rose.__path__[0])
-    #    pkg.append(p)
-    #    p=''
-    #    for path in pkg :
-    #        if re.search("rose-master/rose$", path) :
-    #            p=path
+    p = re.sub("rose$", "share", openalea.rose.__path__[0])
     if p:
         with open("%s/CAN/datesPrelevements.json" % p, "r") as f:
             dicoPrel = json.load(f)
@@ -3134,10 +2984,8 @@ def reconstructionsWithTurtle(mtgs, visitor, powerParam, canFilesOutPath):
 
     theScenes = []
     makeCan = False
-    # canPath=''
     fOut = None
     canFacts = {}
-    # dateDigit= None
 
     if not canFilesOutPath == "":
         makeCan = True
