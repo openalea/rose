@@ -36,8 +36,8 @@ doc = [
   "pydata-sphinx-theme",
   "myst-parser",
   "sphinx-favicon",
-  "pgljupyter",
   "nbsphinx",
+  "ipykernel",
 ]
 
 [project.urls]

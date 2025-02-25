@@ -27,7 +27,6 @@ def get_one_set_expe():
     return expes
 
 def get_all_expe():
-    manips_dir = data.manip_dir()
     names = data.manips()
 
     exps = []
