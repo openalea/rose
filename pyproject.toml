@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openalea.rose"
+authors = [
+  { name = "Jessica Bertheloot"},
+  { name = "Hervé Autret"},
+  { name = "Christophe Pradal"},
+]
+description = "3D reconstruction of roses"
+license = {file = "LICENSE.txt"}
+requires-python = ">=3.8"
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: CeCILL-C License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+]
+dynamic = ["version", "readme"]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest"]
+doc = [
+  "pydata-sphinx-theme",
+  "myst-parser",
+  "sphinx-favicon",
+  "pgljupyter",
+  "nbsphinx",
+]
+
+[project.urls]
+Homepage = "https://openalea.readthedocs.io/"
+"Bug Tracker" = "https://github.com/openalea-incubator/rose/issues"
+Discussions = "https://github.com/openalea-incubator/rose/discussions"
+Changelog = "https://github.com/openalea-incubator/rose/releases"
+
+[project.entry-points."wralea"]
+"rose" = "openalea.rose"
+"rose.mockup" = "openalea.rose.mockup"
+
+[tool.setuptools.dynamic]
+version = {attr = "openalea.rose.version.__version__"}
+readme = {file = ["README.md"]}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["openalea.*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.mtg", "*.drf", "*.txt", "*.csv"]
