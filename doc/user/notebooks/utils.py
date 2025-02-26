@@ -1,6 +1,9 @@
-from openalea.plantgl.all import Scene
+from math import pi, radians
+from openalea.plantgl.all import (Scene, Disc, Translated, Shape, Vector3
+, Material, Color3, AxisRotated)
 
 from openalea.rose import data
+from openalea.rose.data import sensors
 from openalea.rose.mockup import rose
 from openalea.rose.mockup.rose_geometry import (
     vertexVisitor, reconstructWithTurtle,
@@ -8,6 +11,8 @@ from openalea.rose.mockup.rose_geometry import (
     bezierPatchFlower, petalMatrix,
     computeKnop4pts, drawStipule3pts
 )
+
+import pandas
 
 
 def grid(dir):
@@ -96,3 +101,21 @@ def experiment(idx=0):
     env = Scene(data.environments()[0])
     scene.add(env)
     return scene
+
+def sensor_exp(idx=0):
+    sen = sensors()[idx]
+    sensor_scene = Scene()
+    df = pandas.read_csv(sen)
+
+    for _, row in df.iterrows():
+        d = Shape(Disc(int(row["rayon_capteur"])))
+        m = Material(Color3(150,0, 0))
+        if "Orientation" in row.keys():
+            if row["Orientation"] == "Sideward":
+                m = Material(Color3(0,0, 150))
+                orient = Vector3(1, 0, 0)
+                d = Shape(AxisRotated(orient, radians(90), d.geometry))
+
+        d = Shape(Translated(Vector3(int(row['X']), int(row['Y']), int(row['Z'])), d.geometry), m)
+        sensor_scene.add(d)
+    return sensor_scene

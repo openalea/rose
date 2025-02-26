@@ -28,6 +28,10 @@ extensions = [
     "myst_parser",  # for parsing .md files
 ]
 
+nbsphinx_thumbnails = {
+    'user/notebooks/manips': '_static/img/notebook_thumb.jpg',
+}
+
 nbsphinx_allow_errors = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
