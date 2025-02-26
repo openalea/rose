@@ -23,7 +23,6 @@ requirements:
 
   run:
     - python x.x
-    - numpy x.x
     - openalea.plantgl
     - openalea.mtg
 
