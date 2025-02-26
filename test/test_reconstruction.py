@@ -119,12 +119,12 @@ def bug1():
     scene = reconstruct(g)
     return scene
 
-def environment():
+def chamber_and_rose():
     expes = get_all_expe()
     d = expes[6]
     g=myMTG(d)
     scene = reconstruct(g)
-    env = Scene(data.environments()[0])
-    scene.add(env)
+    chamber = Scene(str(data.phytotron()))
+    scene.add(chamber)
     return scene
 
