@@ -41,4 +41,4 @@ Double-clic the composite nodes to get them inside OA workspace.
 
 ### Documentation
 
-http://openalea.gforge.inria.fr/doc/alinea/rose/doc/_build/html/contents.html
+https://rose.rtfd.io
