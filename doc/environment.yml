@@ -1,0 +1,11 @@
+name: rose
+channels:
+  - conda-forge
+  - openalea3
+dependencies:
+  - openalea.plantgl
+  - openalea.mtg
+  - oawidgets
+  - pip
+  - pip:
+      - -e ..[doc]

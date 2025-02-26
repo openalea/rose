@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - openalea3
+dependencies:
+  - openalea.plantgl
+  - openalea.mtg
+  - oawidgets

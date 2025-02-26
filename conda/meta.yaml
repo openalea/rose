@@ -1,0 +1,47 @@
+package:
+  name: openalea.rose
+  version: "1.9.5"
+
+source:
+  path: ..
+
+build:
+  number: 0
+  preserve_egg_dir: True
+  string: rose
+  script:
+    - {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  host:
+    - python
+    - setuptools
+
+  build:
+    - python
+    - setuptools
+
+  run:
+    - python x.x
+    - openalea.plantgl
+    - openalea.mtg
+
+test:
+  imports:
+    - openalea.rose
+    - openalea.rose.mockup
+  requires:
+    - pytest
+  source_files:
+    - test/**
+  commands:
+    - pytest
+
+about:
+  home: https://github.com/openalea-incubator/rose
+  license: Cecill-C License
+  license_file: LICENSE.txt
+
+extra:
+  recipe-maintainers:
+    - pradal
