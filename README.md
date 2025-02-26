@@ -1,6 +1,6 @@
-====== Alinea.Rose ======
+#  Openalea.Rose
 
-**Authors** : XXX
+**Authors** : Jessica Bertheloot, Hervé Autret, Christophe Pradal
 
 **Institutes** : INRIA / CIRAD
 
@@ -8,45 +8,37 @@
 
 **License** : Cecill-C
 
-**URL** : http://openalea.gforge.inria.fr
+**URL** : https://github.com/openalea-incubator/rose
 
-===== About =====
+### About
 
-=== Description ===
+### Description
 
-Alinea.Rose is a package for building virtual 3D rosebush trees. It is intended to study the relationship between structure and function.
+Openalea.Rose is a package for building virtual 3D rosebush trees. It is intended to study the relationship between structure and function.
 
-=== Content ===
+# Content 
 
-The Alinea.Rose package contains tools for building virtual populations of rosebush from individual MTG files :
+The Openalea.Rose package contains tools for building virtual populations of rosebush from individual MTG files :
  * DigitReconstruction: a tool for building the population into a 3dscene,
  * DigitReconstructionWthTurtle : a tool for building the population into a global MTG object.
 
-===== Installation =====
+# Installation
 
-=== Download ===
+### Requirements
 
-Go to http://gforge.inria.fr/frs/?group_id=79
+* openalea.plantgl
+* openalea.mtg
 
-=== Requirements ===
+### Installation
 
-* Scons >= 0.96.93
-* SconsX
-* OpenAlea.Deploy
-* Boost.Python
-
-
-=== Installation ===
-
-<code>
+```bash
 python setup.py install
-</code>
+```
 
-=== Utilisation ===
+### Usage
 
 Double-clic the composite nodes to get them inside OA workspace.
 
-===== Documentation =====
+### Documentation
 
-http://openalea.gforge.inria.fr/doc/alinea/rose/doc/_build/html/contents.html
-
+https://rose.rtfd.io

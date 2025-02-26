@@ -17,7 +17,7 @@ reference guide, see :ref:`rose_reference`.
    Many aspects of OpenAlea.Rose are not covered.
 
    More documentation can be found on the
-   `openalea <http://openalea.gforge.inria.fr>`__ wiki.
+   `openalea <https://openalea.readthedocs.io/en/latest/index.html>`__ wiki.
 
 .. toctree::
 
