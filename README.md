@@ -2,7 +2,7 @@
 
 **Authors** : Jessica Bertheloot, Hervé Autret, Christophe Pradal
 
-**Institutes** : INRIA / CIRAD
+**Institutes** : INRAe / CIRAD
 
 **Status** : Python package
 
