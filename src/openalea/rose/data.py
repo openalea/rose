@@ -25,6 +25,12 @@ def environments():
     env_dir = [p for p in geom_d.glob('*') if p.is_file()]
     return [str(geom_d / p.name) for p in env_dir]
 
+def phytotron():
+    """ Return the geometry of the phytotron """
+    geom_d = geom_dir()
+    chamber = next(geom_d.glob('chamber.bgeom'))
+    return chamber
+
 def manip_dir():
     mtg_d = mtg_dir()
     return [p for p in mtg_d.glob('*') if p.is_dir()]
