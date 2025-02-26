@@ -10,15 +10,23 @@ def data():
 
 def mtg_dir():
     p = data()
-
     mtg_dir = next(p.glob('MTG'))
     return mtg_dir
     
 def geom_dir():
     p = data()
-    print(p)
     geom_dir = next(p.glob('GEOM'))
     return geom_dir
+
+def sensors_dir():
+    p = data()
+    sensor_dir = next(p.glob('SENSORS'))
+    return sensor_dir
+
+def sensors():
+    sensor_dir = sensors_dir()
+    env_dir = [p for p in sensor_dir.glob('*') if p.is_file()]
+    return [str(sensor_dir / p.name) for p in env_dir]
 
 def environments():
     geom_d = geom_dir()
@@ -34,5 +42,3 @@ def manips():
 
 def experiments(manip):
     return list((mtg_dir()/manip).glob('*'))
-
-
