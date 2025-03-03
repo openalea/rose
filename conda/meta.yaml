@@ -1,11 +1,11 @@
 {% set pyproject = load_file_data('pyproject.toml') %}
-{% set name = pyproject.get('project').get('name') %}
-{% set description = pyproject.get('project').get('description') %}
+{% set name_pkg = pyproject.get('project').get('name') %}
+{% set description_pkg = pyproject.get('project').get('description') %}
 {% set version = pyproject.get('project').get('version') %}
 {% set home = pyproject.get('project', {}).get('urls').get('Homepage') %}
 
 package:
-  name: {{ name }}
+  name: {{ name_pkg }}
   version: {{ version }}
 
 source:
@@ -45,7 +45,7 @@ test:
 
 about:
   home: {{ home }}
-  description: {{ description }}
+  description: {{ description_pkg }}
   license: Cecill-C License
   license_file: LICENSE.txt
 
