@@ -1,8 +1,7 @@
 {% set pyproject = load_file_data('pyproject.toml') %}
-{% set name = pyproject.get('project', {}).get('name') %}
-{% set description = pyproject.get('project', {}).get('description') %}
-{% set license = pyproject.get('project', {}).get('license') %}
-{% set version = pyproject.get('project', {}).get('version') %}
+{% set name = pyproject.get('project').get('name') %}
+{% set description = pyproject.get('project').get('description') %}
+{% set version = pyproject.get('tool', {}).get('setuptools', {}).get('version') %}
 {% set home = pyproject.get('project', {}).get('urls').get('Homepage') %}
 
 package:
@@ -17,22 +16,19 @@ build:
   preserve_egg_dir: True
   string: rose
   script:
-    - {{ PYTHON }} -m pip install . -vv
+    - python -m pip install . -vv
 
 requirements:
   host:
-    - python
+    - python x.x
     - setuptools
 
   build:
-    - python
+    - python x.x
     - setuptools
 
   run:
     - python x.x
-    - openalea.plantgl
-    - openalea.mtg
-
 test:
   imports:
     - openalea.rose
@@ -47,7 +43,7 @@ test:
 about:
   home: {{ home }}
   description: {{ description }}
-  license: {{ license }}
+  license: CeCILL-C
   license_file: LICENSE.txt
 
 extra:
