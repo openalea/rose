@@ -1,7 +1,7 @@
 {% set pyproject = load_file_data('pyproject.toml') %}
 {% set name = pyproject.get('project').get('name') %}
 {% set description = pyproject.get('project').get('description') %}
-{% set version = pyproject.get('tool', {}).get('setuptools').get('version') %}
+{% set version = pyproject.get('project').get('version') %}
 {% set home = pyproject.get('project', {}).get('urls').get('Homepage') %}
 
 package:
