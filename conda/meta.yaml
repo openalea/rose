@@ -1,6 +1,13 @@
+{% set pyproject = load_file_data('pyproject.toml') %}
+{% set name = pyproject.get('project', {}).get('name') %}
+{% set description = pyproject.get('project', {}).get('description') %}
+{% set license = pyproject.get('project', {}).get('license') %}
+{% set version = pyproject.get('project', {}).get('version') %}
+{% set home = pyproject.get('project', {}).get('urls').get('Homepage') %}
+
 package:
-  name: openalea.rose
-  version: "1.9.5"
+  name: {{ name }}
+  version: {{ version }}
 
 source:
   path: ..
@@ -38,8 +45,9 @@ test:
     - pytest
 
 about:
-  home: https://github.com/openalea-incubator/rose
-  license: Cecill-C License
+  home: {{ home }}
+  description: {{ description }}
+  license: {{ license }}
   license_file: LICENSE.txt
 
 extra:
