@@ -1,12 +1,6 @@
-{% set pyproject = load_file_data('pyproject.toml') %}
-{% set name = pyproject.get('project').get('name') %}
-{% set description = pyproject.get('project').get('description') %}
-{% set version = pyproject.get('tool', {}).get('setuptools', {}).get('version') %}
-{% set home = pyproject.get('project', {}).get('urls').get('Homepage') %}
-
 package:
-  name: {{ name }}
-  version: {{ version }}
+  name: openalea.rose
+  version: "1.9.5"
 
 source:
   path: ..
@@ -16,19 +10,22 @@ build:
   preserve_egg_dir: True
   string: rose
   script:
-    - python -m pip install . -vv
+    - {{ PYTHON }} -m pip install . -vv
 
 requirements:
   host:
-    - python x.x
+    - python
     - setuptools
 
   build:
-    - python x.x
+    - python
     - setuptools
 
   run:
     - python x.x
+    - openalea.plantgl
+    - openalea.mtg
+
 test:
   imports:
     - openalea.rose
@@ -41,9 +38,8 @@ test:
     - pytest
 
 about:
-  home: {{ home }}
-  description: {{ description }}
-  license: CeCILL-C
+  home: https://github.com/openalea-incubator/rose
+  license: Cecill-C License
   license_file: LICENSE.txt
 
 extra:
