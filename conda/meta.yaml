@@ -1,11 +1,10 @@
 {% set pyproject = load_file_data('pyproject.toml') %}
-{% set name_pkg = pyproject.get('project').get('name') %}
 {% set description_pkg = pyproject.get('project').get('description') %}
 {% set version = pyproject.get('project').get('version') %}
 {% set home = pyproject.get('project', {}).get('urls').get('Homepage') %}
 
 package:
-  name: {{ name_pkg }}
+  name: openalea.rose
   version: {{ version }}
 
 source:
@@ -29,8 +28,6 @@ requirements:
 
   run:
     - python x.x
-    - openalea.plantgl
-    - openalea.mtg
 
 test:
   imports:

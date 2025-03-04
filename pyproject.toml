@@ -27,8 +27,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering",
 ]
-version = "1.0.0"
-dynamic = ["readme"]
+dynamic = ["version", "readme"]
 dependencies = []
 
 [project.optional-dependencies]
@@ -52,6 +51,7 @@ Changelog = "https://github.com/openalea-incubator/rose/releases"
 "rose.mockup" = "openalea.rose.mockup"
 
 [tool.setuptools.dynamic]
+version = {attr = "openalea.rose.version.__version__"}
 readme = {file = ["README.md"]}
 
 [tool.setuptools.packages.find]
