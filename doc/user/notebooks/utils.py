@@ -69,8 +69,12 @@ def myMTG(dir, fill=True):
     # print(f'Origins : {_origin}')
 
     plantlist = dictofindices
-    existingmtglist, = rose.localDir2DictOfFiles(
-        [str(fn) for fn in dir.glob('*.mtg')])
+    name_list = [str(fn) for fn in dir.glob('*.mtg')]
+    # existingmtglist, = rose.localDir2DictOfFiles({name_list[int(len(name_list)/2)]}
+    #     )
+
+    existingmtglist, = rose.localDir2DictOfFiles(name_list)
+
     excludelist = []
     gridDef = gridSpecs
     _origin = _origin
@@ -106,6 +110,12 @@ def get_all_expe():
 
 def environment():
     return Scene(data.environments()[0])
+
+def save_gltf(scene, filename):
+    from openalea.scenemanagement.convert import GLTFScene
+    gltf = GLTFScene(scene)
+    gltf.run()
+    gltf.to_gltf(filename)
 
 def experiment(idx=0, fill=True):
     expes = get_all_expe()
