@@ -1,3 +1,4 @@
+import os
 from math import radians
 from openalea.plantgl.all import (Scene, Disc, Translated, Shape, Vector3
 , Material, Color3, AxisRotated, Frustum, Text)
@@ -45,7 +46,7 @@ def reconstruct(g, positions):
     m = Material("brown", Color3(43, 29, 14))
     m2 = Material("substrat", Color3(25, 25, 25))
     for plant, position in positions.items():
-        # plant_name = os.path.basename(plant).split('.')[0]
+        plant_name = os.path.basename(plant).split('.')[0]
         # Adding pot
         f = Shape(Frustum(20,80, 1.5, True, 12))
         pos = position[0][0]
@@ -57,9 +58,9 @@ def reconstruct(g, positions):
         d = Shape(Translated(pos[0], pos[1], pos[2] + 80.5, d.geometry), m2)
         scene.add(d)
 
-        # FIXME: Adding Text convertion with oawidgets not supported for now
-        # t = Text(plant_name, Vector3(pos[0], pos[1], pos[2] + 85))
-        # scene.add(t)
+        # Adding Text
+        t = Text(plant_name, Vector3(pos[0], pos[1], pos[2] + 40))
+        scene.add(t)
     return scene
 
 
