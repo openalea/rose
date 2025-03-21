@@ -129,8 +129,6 @@ def experiment_named(manip_name="", stage="", fill=False):
     d = expes[0]
     g, positions=myMTG(d, fill)
     scene = reconstruct(g, positions)
-    env = Scene(data.environments()[0])
-    scene.add(env)
     return scene
 
 def experiment(idx=0, fill=True):
@@ -138,8 +136,6 @@ def experiment(idx=0, fill=True):
     d = expes[idx]
     g, positions=myMTG(d, fill)
     scene = reconstruct(g, positions)
-    env = Scene(data.environments()[0])
-    scene.add(env)
     return scene
 
 def sensor_exp(idx=0):
