@@ -2004,7 +2004,6 @@ def vertexVisitor(
         # pass
         leaf_factory = rawLeaflet
     # tests
-    # leaf_factory=computeLeafletFrom4pts([0,0.5,1],[0,1,0])
     if bud_factory is None:
         bud_factory = rawBud()
     if sepal_factory is None:

@@ -5,3 +5,4 @@ Notebooks
 
 .. nbgallery::
     notebooks/manips.ipynb
+    notebooks/light.ipynb

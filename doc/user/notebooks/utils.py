@@ -1,6 +1,7 @@
-from math import pi, radians
+import os
+from math import radians
 from openalea.plantgl.all import (Scene, Disc, Translated, Shape, Vector3
-, Material, Color3, AxisRotated)
+, Material, Color3, AxisRotated, Frustum, Text)
 
 from openalea.rose import data
 from openalea.rose.data import sensors
@@ -21,7 +22,7 @@ def grid(dir):
 def origin(dir):
     return dir/'origin.txt'
 
-def reconstruct(g):
+def reconstruct(g, positions):
     lx = [0, 0.2, 0.4, 0.6, 0.8, 1.]
     ly = [0, 0.86, 0.95, 0.81, 0.41, 0]
 
@@ -41,11 +42,30 @@ def reconstruct(g):
                             knop_factory=knop_factory,
                             stipuLe_factory=stipule_factory)
     scene, = reconstructWithTurtle(g, visitor, 2.1)
+
+    m = Material("brown", Color3(43, 29, 14))
+    m2 = Material("substrat", Color3(25, 25, 25))
+    for plant, position in positions.items():
+        plant_name = os.path.basename(plant).split('.')[0]
+        # Adding pot
+        f = Shape(Frustum(20,80, 1.5, True, 12))
+        pos = position[0][0]
+        f = Shape(Translated(pos[0], pos[1], pos[2], f.geometry), m)
+        scene.add(f)
+
+        # Adding dirt
+        d = Shape(Disc(30, 12))
+        d = Shape(Translated(pos[0], pos[1], pos[2] + 80.5, d.geometry), m2)
+        scene.add(d)
+
+        # Adding Text
+        t = Text(plant_name, Vector3(pos[0], pos[1], pos[2] + 40))
+        scene.add(t)
     return scene
 
 
 
-def myMTG(dir):
+def myMTG(dir, fill=True):
     grid_fn = grid(dir)
     origin_fn = origin(dir)
 
@@ -55,15 +75,19 @@ def myMTG(dir):
     # print(f'Origins : {_origin}')
 
     plantlist = dictofindices
-    existingmtglist, = rose.localDir2DictOfFiles(
-        [str(fn) for fn in dir.glob('*.mtg')])
+    name_list = [str(fn) for fn in dir.glob('*.mtg')]
+    # existingmtglist, = rose.localDir2DictOfFiles({name_list[int(len(name_list)/2)]}
+    #     )
+
+    existingmtglist, = rose.localDir2DictOfFiles(name_list)
+
     excludelist = []
     gridDef = gridSpecs
     _origin = _origin
-    DoFill = True
+    DoFill = fill
     DoRotate = True
 
-    dictOfPositions, = rose.cropGeneration_2011(
+    dictOfPositions, positions = rose.cropGeneration_2011(
         plantlist=plantlist,
         existingmtglist=existingmtglist,
         excludelist=excludelist,
@@ -80,7 +104,7 @@ def myMTG(dir):
 
     mtg_union, = rose.mTG_union(listofmtgs)
 
-    return mtg_union
+    return mtg_union, dictOfPositions
 
 def get_all_expe():
     names = data.manips()
@@ -93,13 +117,25 @@ def get_all_expe():
 def environment():
     return Scene(data.environments()[0])
 
-def experiment(idx=0):
+def save_gltf(scene, filename):
+    from openalea.scenemanagement.convert import GLTFScene
+    gltf = GLTFScene(scene)
+    gltf.run()
+    gltf.to_gltf(filename)
+
+def experiment_named(manip_name="", stage="", fill=False):
+    expes = get_all_expe()
+    expes = list(filter(lambda x: manip_name in str(x) and stage in str(x), expes))
+    d = expes[0]
+    g, positions=myMTG(d, fill)
+    scene = reconstruct(g, positions)
+    return scene
+
+def experiment(idx=0, fill=True):
     expes = get_all_expe()
     d = expes[idx]
-    g=myMTG(d)
-    scene = reconstruct(g)
-    env = Scene(data.environments()[0])
-    scene.add(env)
+    g, positions=myMTG(d, fill)
+    scene = reconstruct(g, positions)
     return scene
 
 def sensor_exp(idx=0):

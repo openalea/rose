@@ -95,6 +95,7 @@ def cropGeneration_2011(
     print("len (plantlist) : %d" % len(plantlist))
     dictOfPositions = {}
     mtgFiles = {}
+    positions = []
 
     # We extract plant numbers from filenames,
     # and we build the mtgFiles dict as pairs of {plantNum:fileName}
@@ -109,6 +110,7 @@ def cropGeneration_2011(
             dictOfPositions[mtgFiles[int(plante)]] = [
                 [Index2Coord(plantlist[plante][0]), 0.0]
             ]
+            positions.append(Index2Coord(plantlist[plante][0]))
     # if we want to fill up empty places with a random plant num
     if DoFill:
         listOfNums = []
@@ -152,9 +154,10 @@ def cropGeneration_2011(
                         dictOfPositions[mtgFiles[randPlant]] = [
                             [Index2Coord(coords), randAngle]
                         ]
+                    positions.append(Index2Coord(coords))
 
     # returns output
-    return (dictOfPositions,)
+    return dictOfPositions, positions
 
 
 # end cropGeneration_2011
