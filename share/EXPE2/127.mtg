@@ -36,7 +36,7 @@ BB	REAL
 CC	REAL													
 TopDiameter	INT													
 Length	INT													
-TypeFoliole	REAL													
+TypeFoliole	ALPHA													
 MTG:														
 ENTITY-CODE				XX	YY	ZZ	AA	BB	CC	TopDiameter	Length	TypeFoliole		     
  /N1				7.81	8.12	-0.38	161.54	-21.42	-3.3	300				          
