@@ -27,7 +27,6 @@ def get_one_set_expe():
     return expes
 
 def get_all_expe():
-    manips_dir = data.manip_dir()
     names = data.manips()
 
     exps = []
@@ -124,3 +123,20 @@ def environment(idx=0):
     scene.add(chamber)
     return scene
 
+def save_gltf(scene, filename):
+    from openalea.scenemanagement.convert import GLTFScene
+    gltf = GLTFScene(scene)
+    gltf.run()
+    gltf.to_gltf(filename)
+
+def save_environment():
+    env = Scene(data.environments()[0])
+    scene = Scene(env)
+    save_gltf(scene, "chamber.glb")
+
+def save_expe(index):
+    expes = get_all_expe()
+    d = expes[index]
+    g=myMTG(d)
+    scene = reconstruct(g)
+    save_gltf(scene, f"rose_{index}.glb")
