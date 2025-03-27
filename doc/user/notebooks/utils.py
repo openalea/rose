@@ -1,10 +1,12 @@
 import os
 from math import radians
+
+from openalea.mtg import MTG
 from openalea.plantgl.all import (Scene, Disc, Translated, Shape, Vector3
 , Material, Color3, AxisRotated, Frustum, Text)
 
 from openalea.rose import data
-from openalea.rose.data import sensors
+from openalea.rose.data import sensors, expe2_dir
 from openalea.rose.mockup import rose
 from openalea.rose.mockup.rose_geometry import (
     vertexVisitor, reconstructWithTurtle,
@@ -64,20 +66,37 @@ def reconstruct(g, positions):
     return scene
 
 
+def reconstruct_no_pos(g):
+    lx = [0, 0.2, 0.4, 0.6, 0.8, 1.]
+    ly = [0, 0.86, 0.95, 0.81, 0.41, 0]
+
+    leaf_factory = computeLeafletFrom4pts(lx, ly)
+    sepal_factory = leaf_factory
+    matrix, = petalMatrix()
+    bud_factory = bezierPatchFlower(matrix,0,0)
+    flower_factory = fruit_factory = bud_factory
+    knop_factory = computeKnop4pts()
+    stipule_factory = drawStipule3pts()
+
+    visitor = vertexVisitor(leaf_factory=leaf_factory,
+                            bud_factory=bud_factory,
+                            sepal_factory=sepal_factory,
+                            flower_factory=flower_factory,
+                            fruit_factory=fruit_factory,
+                            knop_factory=knop_factory,
+                            stipuLe_factory=stipule_factory)
+    scene, = reconstructWithTurtle(g, visitor, 2.1)
+    return scene
 
 def myMTG(dir, fill=True):
     grid_fn = grid(dir)
     origin_fn = origin(dir)
 
     dictofindices, gridSpecs = rose.getGrid(grid_fn)
-    # print(f'Grid : {dictofindices}, {gridSpecs}')
     _origin = rose.getOrigin(origin_fn)
-    # print(f'Origins : {_origin}')
 
     plantlist = dictofindices
     name_list = [str(fn) for fn in dir.glob('*.mtg')]
-    # existingmtglist, = rose.localDir2DictOfFiles({name_list[int(len(name_list)/2)]}
-    #     )
 
     existingmtglist, = rose.localDir2DictOfFiles(name_list)
 
@@ -96,17 +115,13 @@ def myMTG(dir, fill=True):
         DoFill=DoFill,
         DoRotate=DoRotate)
 
-    # print(dictOfPositions)
-
     listofmtgs, = rose.files2MTGs(dictOfPositions)
-
-    # print(listofmtgs)
 
     mtg_union, = rose.mTG_union(listofmtgs)
 
     return mtg_union, dictOfPositions
 
-def get_all_expe():
+def get_all_manips():
     names = data.manips()
 
     exps = []
@@ -123,8 +138,8 @@ def save_gltf(scene, filename):
     gltf.run()
     gltf.to_gltf(filename)
 
-def experiment_named(manip_name="", stage="", fill=False):
-    expes = get_all_expe()
+def manip_named(manip_name="", stage="", fill=False):
+    expes = get_all_manips()
     expes = list(filter(lambda x: manip_name in str(x) and stage in str(x), expes))
     d = expes[0]
     g, positions=myMTG(d, fill)
@@ -132,10 +147,23 @@ def experiment_named(manip_name="", stage="", fill=False):
     return scene
 
 def experiment(idx=0, fill=True):
-    expes = get_all_expe()
+    expes = get_all_manips()
     d = expes[idx]
+    print(d)
     g, positions=myMTG(d, fill)
     scene = reconstruct(g, positions)
+    return scene
+
+def experiment2():
+    d = expe2_dir()
+    scene = Scene()
+    for file in os.listdir(d):
+        try:
+            g = MTG(os.path.join(d, file))
+            scene.add(reconstruct_no_pos(g))
+        except:
+            print(file, " failed")
+            pass
     return scene
 
 def sensor_exp(idx=0):
