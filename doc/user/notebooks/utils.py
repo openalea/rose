@@ -154,16 +154,16 @@ def experiment(idx=0, fill=True):
     scene = reconstruct(g, positions)
     return scene
 
-def experiment2():
+def experiment2(disposition=0):
     d = expe2_dir()
     scene = Scene()
     for file in os.listdir(d):
-        try:
-            g = MTG(os.path.join(d, file))
-            scene.add(reconstruct_no_pos(g))
-        except:
-            print(file, " failed")
-            pass
+        if f'-{disposition}.mtg' in file:
+            try:
+                g = MTG(os.path.join(d, file))
+                scene.add(reconstruct_no_pos(g))
+            except:
+                print(file, " failed")
     return scene
 
 def sensor_exp(idx=0):
