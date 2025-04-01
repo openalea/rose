@@ -66,7 +66,7 @@ def reconstruct(g, positions):
     return scene
 
 
-def reconstruct_no_pos(g):
+def reconstruct_to_pos(g, position, plant_id):
     lx = [0, 0.2, 0.4, 0.6, 0.8, 1.]
     ly = [0, 0.86, 0.95, 0.81, 0.41, 0]
 
@@ -86,6 +86,26 @@ def reconstruct_no_pos(g):
                             knop_factory=knop_factory,
                             stipuLe_factory=stipule_factory)
     scene, = reconstructWithTurtle(g, visitor, 2.1)
+
+    for sh in scene:
+        sh.geometry = Translated(Vector3(position["x"],
+                                         position["y"],
+                                         900), sh.geometry)
+
+    m = Material("brown", Color3(43, 29, 14))
+    m2 = Material("substrat", Color3(25, 25, 25))
+    # Adding pot
+    f = Shape(Frustum(20,80, 1.5, True, 12))
+    f = Shape(Translated(position["x"], position["y"], 900, f.geometry), m)
+    scene.add(f)
+
+    # Adding dirt
+    d = Shape(Disc(30, 12))
+    d = Shape(Translated(position["x"], position["y"], 900 + 80.5, d.geometry), m2)
+    scene.add(d)
+    # Adding Text
+    t = Text(plant_id, Vector3(position["x"], position["y"], 900 + 40))
+    scene.add(t)
     return scene
 
 def myMTG(dir, fill=True):
@@ -149,20 +169,49 @@ def manip_named(manip_name="", stage="", fill=False):
 def experiment(idx=0, fill=True):
     expes = get_all_manips()
     d = expes[idx]
-    print(d)
     g, positions=myMTG(d, fill)
     scene = reconstruct(g, positions)
     return scene
 
 def experiment2(disposition=0):
-    d = expe2_dir()
+    d = os.path.join(expe2_dir(), f'conf{disposition}')
+    pos_file = os.path.join(expe2_dir(), "emplacementEtOrientationPlantesExpe2.csv")
     scene = Scene()
+
+    # Create grid here
+    grid = [
+        {"x": 1200, "y": 545},
+        {"x": 1050, "y": 620},
+        {"x": 1350, "y": 620},
+        {"x": 1200, "y": 695},
+        {"x": 1050, "y": 770},
+        {"x": 1350, "y": 770},
+        {"x": 1200, "y": 845},
+        {"x": 1050, "y": 920},
+        {"x": 1350, "y": 920},
+        {"x": 1200, "y": 995},
+        {"x": 1050, "y": 1070},
+        {"x": 1350, "y": 1070},
+        {"x": 1200, "y": 1145},
+        {"x": 1050, "y": 1220},
+        {"x": 1350, "y": 1220},
+        {"x": 1200, "y": 1295},
+    ]
+
+    positions = pandas.read_csv(pos_file)
+    positions = positions[f'conf {int(disposition)+1}'].iloc[1:].to_frame(name='Pl') # get right configuration
+
     for file in os.listdir(d):
         if f'-{disposition}.mtg' in file:
+            plant_id = file.split("-")[0]
             try:
+                pos_plant = positions.loc[positions["Pl"] == plant_id]
+                idx = pos_plant.index[0].astype(int) - 1
                 g = MTG(os.path.join(d, file))
-                scene.add(reconstruct_no_pos(g))
-            except:
+                scene.add(reconstruct_to_pos(g, grid[idx], plant_id))
+            except Exception as e:
+                import traceback
+                traceback.print_exception(e)
                 print(file, " failed")
     return scene
 
