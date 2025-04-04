@@ -220,7 +220,7 @@ def sensor_exp(idx=0):
     sensor_scene = Scene()
     df = pandas.read_csv(sen)
 
-    for _, row in df.iterrows():
+    for i, row in df.iterrows():
         d = Shape(Disc(int(row["rayon_capteur"])))
         m = Material(Color3(150,0, 0))
         if "Orientation" in row.keys():
@@ -230,5 +230,6 @@ def sensor_exp(idx=0):
                 d = Shape(AxisRotated(orient, radians(90), d.geometry))
 
         d = Shape(Translated(Vector3(int(row['X']), int(row['Y']), int(row['Z'])), d.geometry), m)
+        d.name = f"sensor_{i}"
         sensor_scene.add(d)
     return sensor_scene
