@@ -174,12 +174,12 @@ def experiment(idx=0, fill=True):
     return scene
 
 def experiment2(disposition=0):
-    d = os.path.join(expe2_dir(), f'conf{disposition}')
+    d = os.path.join(expe2_dir())
     pos_file = os.path.join(expe2_dir(), "emplacementEtOrientationPlantesExpe2.csv")
     scene = Scene()
 
     # Create grid here
-    grid = [
+    pos_grid = [
         {"x": 1200, "y": 545},
         {"x": 1050, "y": 620},
         {"x": 1350, "y": 620},
@@ -198,21 +198,16 @@ def experiment2(disposition=0):
         {"x": 1200, "y": 1295},
     ]
 
-    positions = pandas.read_csv(pos_file)
-    positions = positions[f'conf {int(disposition)+1}'].iloc[1:].to_frame(name='Pl') # get right configuration
+    df = pandas.read_csv(pos_file)
+    positions = df[f'conf {int(disposition)}'].iloc[1:] # get right configuration
+    directions = df[f'dir {int(disposition)}'].iloc[1:]
 
-    for file in os.listdir(d):
-        if f'-{disposition}.mtg' in file:
-            plant_id = file.split("-")[0]
-            try:
-                pos_plant = positions.loc[positions["Pl"] == plant_id]
-                idx = pos_plant.index[0].astype(int) - 1
-                g = MTG(os.path.join(d, file))
-                scene.add(reconstruct_to_pos(g, grid[idx], plant_id))
-            except Exception as e:
-                import traceback
-                traceback.print_exception(e)
-                print(file, " failed")
+    for idx, plant_id in positions.items():
+        direction = directions[idx]
+        file = os.path.join(d, f"conf{direction}/{plant_id}-{direction}.mtg")
+        g = MTG(file)
+        scene.add(reconstruct_to_pos(g, pos_grid[idx-1], plant_id))
+
     return scene
 
 def sensor_exp(idx=0):
