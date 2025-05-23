@@ -1,6 +1,6 @@
 #  Openalea.Rose
 
-**Authors** : Jessica Bertheloot, Hervé Autret, Christophe Pradal
+**Authors** : Jessica Bertheloot, Hervé Autret, Aurelien Besnier, Christophe Pradal
 
 **Institutes** : INRAe / CIRAD
 
@@ -8,7 +8,7 @@
 
 **License** : Cecill-C
 
-**URL** : https://github.com/openalea-incubator/rose
+**URL** : https://github.com/openalea/rose
 
 ### About
 
@@ -41,4 +41,4 @@ Double-clic the composite nodes to get them inside OA workspace.
 
 ### Documentation
 
-https://rose.rtfd.io
+https://openalea-rose.rtfd.io
