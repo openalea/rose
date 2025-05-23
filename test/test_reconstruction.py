@@ -72,11 +72,7 @@ def myMTG(dir):
         DoFill=DoFill,
         DoRotate=DoRotate)
     
-    #print(dictOfPositions)
-
     listofmtgs, = rose.files2MTGs(dictOfPositions)
-
-    #print(listofmtgs)
 
     mtg_union, = rose.mTG_union(listofmtgs)
 
@@ -118,7 +114,7 @@ def bug1():
     scene = reconstruct(g)
     return scene
 
-def chamber_and_rose():
+def environment(idx=0):
     expes = get_all_expe()
     d = expes[idx]
     g=myMTG(d)

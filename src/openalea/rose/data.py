@@ -23,6 +23,11 @@ def sensors_dir():
     sensor_dir = next(p.glob('SENSORS'))
     return sensor_dir
 
+def expe2_dir():
+    p = data()
+    sensor_dir = next(p.glob('EXPE2'))
+    return sensor_dir
+
 def sensors():
     sensor_dir = sensors_dir()
     env_dir = [p for p in sensor_dir.glob('*') if p.is_file()]
