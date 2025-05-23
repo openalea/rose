@@ -1,7 +1,7 @@
 from openalea.core.path import path
 from openalea.mtg.aml import MTG as myMTG
 from openalea.mtg.plantframe import *
-from alinea.rose import turtle, VertexVisitor, ReconstructionWithTurtle
+from openalea.rose import turtle, VertexVisitor, ReconstructionWithTurtle
 
 position = VertexVisitor.position
 

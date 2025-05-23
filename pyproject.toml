@@ -41,7 +41,8 @@ doc = [
 ]
 
 [project.urls]
-Homepage = "https://openalea.readthedocs.io/"
+Homepage = "https://openalea-rose.readthedocs.io/"
+
 "Bug Tracker" = "https://github.com/openalea/rose/issues"
 Discussions = "https://github.com/openalea/rose/discussions"
 Changelog = "https://github.com/openalea/rose/releases"
