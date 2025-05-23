@@ -1,5 +1,5 @@
 from openalea.core.path import path
-from alinea.rose import turtle
+from openalea.rose import turtle
 from openalea.mtg.aml import MTG
 
 datadir = path(turtle.__file__).dirname()
