@@ -40,6 +40,9 @@ requirements:
 
   run:
     - python x.x
+    - openalea.plantgl
+    - openalea.mtg
+    - openalea.core
 
 test:
   imports:

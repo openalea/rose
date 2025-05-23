@@ -14,7 +14,6 @@ license = {file = "LICENSE.txt"}
 requires-python = ">=3.8"
 classifiers = [
   "Intended Audience :: Science/Research",
-  "Intended Audience :: Developers",
   "License :: OSI Approved :: CeCILL-C License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
@@ -26,6 +25,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Topic :: Scientific/Engineering",
+  "Framework :: OpenAlea",
 ]
 dynamic = ["version", "readme"]
 dependencies = []
@@ -42,6 +42,7 @@ doc = [
 
 [project.urls]
 Homepage = "https://openalea-rose.readthedocs.io/"
+
 "Bug Tracker" = "https://github.com/openalea/rose/issues"
 Discussions = "https://github.com/openalea/rose/discussions"
 Changelog = "https://github.com/openalea/rose/releases"
