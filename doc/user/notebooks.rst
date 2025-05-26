@@ -1,8 +1,8 @@
-.. _rose_notebook:
+.. _rose_gallery:
 
-Notebooks
+Gallery
 ###################################
 
 .. nbgallery::
-    notebooks/manips.ipynb
-    notebooks/light.ipynb
+    ../../examples/manips.ipynb
+    ../../examples/light.ipynb
