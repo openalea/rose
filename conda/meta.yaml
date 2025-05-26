@@ -33,6 +33,7 @@ requirements:
   host:
     - python
     - setuptools
+    - setuptools_scm
 
   build:
     - python
@@ -43,7 +44,7 @@ requirements:
     - openalea.plantgl
     - openalea.mtg
     - openalea.core
-    - openalea.deploy
+    - importlib_resources
 
 test:
   imports:
