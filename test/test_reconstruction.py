@@ -63,7 +63,7 @@ def myMTG(dir):
     DoFill=True 
     DoRotate=True
    
-    dictOfPositions, = rose.cropGeneration_2011(
+    dictOfPositions, _ = rose.cropGeneration_2011(
         plantlist=plantlist,
         existingmtglist=existingmtglist,
         excludelist=excludelist,
