@@ -1,12 +1,11 @@
-from openalea.deploy.shared_data import shared_data
-import openalea.rose
+#from openalea.deploy.shared_data import shared_data
+#import openalea.rose
 from pathlib import Path
+import importlib_resources as resources
 
 
 def data():
-    rose_dir = shared_data(openalea.rose)
-    if rose_dir is None:
-        rose_dir = shared_data(openalea.rose, share_path='../../../share')
+    rose_dir = resources.files(__name__)
 
     return Path(rose_dir)
 

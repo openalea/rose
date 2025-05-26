@@ -1,12 +1,12 @@
-from openalea.core.path import path
+from openalea.rose import data
 from openalea.mtg.aml import MTG as myMTG
 from openalea.mtg.plantframe import *
 from openalea.rose.mockup.rose_geometry import vertexVisitor4CAN02, reconstructionsWithTurtle
 
 #position = VertexVisitor.position
 
-datadir = path('../share/MTG/High_Light_Crop_1/OF')
-datadir_P1 = path('../share/MTG/High_Light_Crop_1/FBV/')
+datadir = data.mtg_dir()/'High_Light_Crop_1'/'OF'
+datadir_P1 = data.mtg_dir()/'High_Light_Crop_1/FBV/'
 
 
 def test1():
