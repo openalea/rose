@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,6 +8,7 @@ authors = [
   { name = "Jessica Bertheloot"},
   { name = "Hervé Autret"},
   { name = "Christophe Pradal"},
+  { name = "Aurelien Besnier"},
 ]
 description = "3D reconstruction of roses"
 license = {file = "LICENSE.txt"}
@@ -39,6 +40,10 @@ doc = [
   "nbsphinx",
   "ipykernel",
 ]
+
+# enable dynamic versioning based on git tags
+[tool.setuptools_scm]
+# can be empty if no extra settings are needed, presence enables setuptools-scm
 
 [project.urls]
 Homepage = "https://openalea-rose.readthedocs.io/"
