@@ -1,12 +1,12 @@
-from openalea.core.path import path
+from openalea.rose import data
 from openalea.mtg.aml import MTG as myMTG
 from openalea.mtg.plantframe import *
-from alinea.rose import turtle, VertexVisitor, ReconstructionWithTurtle
+from openalea.rose.mockup.rose_geometry import vertexVisitor4CAN02, reconstructionsWithTurtle
 
-position = VertexVisitor.position
+#position = VertexVisitor.position
 
-datadir = path('../share/P3')
-datadir_P1 = path('../share/P1')
+datadir = data.mtg_dir()/'High_Light_Crop_1'/'OF'
+datadir_P1 = data.mtg_dir()/'High_Light_Crop_1/FBV/'
 
 
 def test1():
@@ -23,8 +23,8 @@ def test2():
 
     
 def run(g):
-    _visitor, = VertexVisitor.VertexVisitor()
-    scene, = ReconstructionWithTurtle.ReconstructionWithTurtle(g, _visitor, power=3.)
+    _visitor = vertexVisitor4CAN02
+    scene, = reconstructionsWithTurtle([g], _visitor, powerParam=3., canFilesOutPath="")
     return scene
 
 def plant3d(mtg_file='136.mtg'):
