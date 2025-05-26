@@ -1,12 +1,14 @@
 from openalea.deploy.shared_data import shared_data
 import openalea.rose
+from pathlib import Path
+
 
 def data():
     rose_dir = shared_data(openalea.rose)
     if rose_dir is None:
         rose_dir = shared_data(openalea.rose, share_path='../../../share')
 
-    return rose_dir
+    return Path(rose_dir)
 
 def mtg_dir():
     p = data()
@@ -41,7 +43,7 @@ def environments():
 def phytotron():
     """ Return the geometry of the phytotron """
     geom_d = geom_dir()
-    chamber = next(geom_d.glob('chamber.bgeom'))
+    chamber = geom_d.glob('chamber.bgeom')[0]
     return chamber
 
 def manip_dir():
