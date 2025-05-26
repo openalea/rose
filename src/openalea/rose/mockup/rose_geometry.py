@@ -2246,6 +2246,7 @@ def vertexVisitor4CAN02(
     knop_factory=None,
     stipuLe_factory=None,
     pathToOrgIds=None,
+    canFacts=None,
 ):
     """We define here a function (visitor) that is used visit MTG nodes.
 
@@ -2330,7 +2331,7 @@ def vertexVisitor4CAN02(
         fruit_computer=fruit_factory,
         knop_factory=knop_factory,
         stipuLe_factory=stipuLe_factory,
-        canFacts=None,
+        canFacts=canFacts,
         symbolOrganIdict=symbolOrganIdict,
         coulOrganIdict=coulOrganesIdict,
     ):
