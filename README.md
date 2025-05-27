@@ -43,7 +43,7 @@ python setup.py install
 
 ### Usage
 
-Double-clic the composite nodes to get them inside OA workspace.
+Notebooks allow to reproduce the 3D reconstruction of rosebush inside growth chambers.
 
 ### Documentation
 
