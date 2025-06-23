@@ -4,5 +4,5 @@ Gallery
 ###################################
 
 .. nbgallery::
-    ../../examples/manips.ipynb
+    ../../examples/3D_rose_reconstruction.ipynb
     ../../examples/light.ipynb
