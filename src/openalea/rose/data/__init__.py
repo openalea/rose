@@ -1,7 +1,10 @@
 #from openalea.deploy.shared_data import shared_data
 #import openalea.rose
 from pathlib import Path
-import importlib_resources as resources
+try:
+    from importlib import resources
+except ImportError
+    import importlib_resources as resources
 
 
 def data():
