@@ -30,8 +30,8 @@ extensions = [
 
 
 nbsphinx_thumbnails = {
-    'user/notebooks/manips': '_static/img/manips_thumb.jpg',
-    'user/notebooks/light': '_static/img/light_thumb.jpg',
+    'examples/3D_rose_reconstruction': '_static/img/3D_rose_reconstruction_thumb.jpg',
+    'examples/light': '_static/img/light_thumb.jpg',
 }
 nbsphinx_execute = 'always'
 
