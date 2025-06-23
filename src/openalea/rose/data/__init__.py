@@ -3,7 +3,7 @@
 from pathlib import Path
 try:
     from importlib import resources
-except ImportError
+except ImportError, e:
     import importlib_resources as resources
 
 
